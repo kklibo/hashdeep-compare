@@ -1,49 +1,33 @@
-use std::fs::read_to_string;
+mod sort;
 
-fn main() -> std::io::Result<()> {
+fn show_help() {
+    println!("hashdeep tool lite");
+    println!(" arguments");
+    println!("  sort input_file output_file");
+    println!("  nand input_file1 input_file2 output_file");
+}
+
+fn main() {
 
     let args: Vec<String> = std::env::args().collect();
 
     if args.len() < 3 {
-        println!("hashdeep tool lite");
-        println!(" arguments: input_file output_file");
-        return Ok(());
+        show_help();
+        return;
     }
 
-    let filename = &args[1];
-    let out_filename = &args[2];
 
-    //let filename = "tests/test1.txt";
-    //let out_filename = &format!("{}.sorted", filename)[..];
-
-    let contents = read_to_string(filename)?;
-    let mut lines: Vec<&str> = contents.lines().skip(5).collect();
-
-    lines.sort_by_key(|&s| {
-        let a = s.split(",").skip(3).collect::<Vec<&str>>();
-        let b = (&a[..].join(",")).to_owned();
-
-        //println!("{}", b);
-        b
-
-    });
+    match args[1].as_str() {
+        "sort" => {
+            if args.len() < 4 {return;}
+            match sort::sort_log(args[2].as_str(), args[3].as_str()) {
+                Ok(()) => (),
+                Err(e) => println!("{:?}", e),
+            }
+        },
+        "nand" => println!("not yet implemented"),
+        _ => show_help(),
+    }
 
 
-    use std::fs::File;
-    use std::io::Write;
-    let mut file = File::create(out_filename)?;
-
-    //println!();
-    for s in lines {
-        //println!("{}", s);
-
-        file.write(s.as_bytes());
-        file.write("\n".as_bytes());
-    };
-
-
-
-
-
-    Ok(())
 }
