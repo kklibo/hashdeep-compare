@@ -1,5 +1,7 @@
 mod sort;
 mod nand;
+mod common;
+mod log_entry;
 
 fn show_help() {
     println!("hashdeep tool lite");
