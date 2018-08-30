@@ -31,3 +31,18 @@ pub fn sort_log(filename: &str, out_filename: &str) -> ::std::io::Result<()>{
 
     Ok(())
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use common::files_are_equal;
+
+    #[test]
+    fn sort_log_test() {
+        {
+            let test_out = "tests/temp/sort_log_test.txt";
+            sort_log("tests/test1.txt", test_out);
+            assert!(files_are_equal("tests/test1 sorted.txt", test_out));
+        }
+    }
+}
