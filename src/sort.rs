@@ -2,34 +2,21 @@ use std::fs::read_to_string;
 use std::fs::File;
 use std::io::Write;
 
+use common;
+use common::LogFile;
+use log_entry::LogEntry;
+
 pub fn sort_log(filename: &str, out_filename: &str) -> ::std::io::Result<()>{
 
-    //let filename = "tests/test1.txt";
-    //let out_filename = &format!("{}.sorted", filename)[..];
+    let mut log_file = common::read_log_entries_from_file::<Vec<LogEntry>>(filename)?;
+    assert_eq!(0, log_file.invalid_lines.len());
 
-    let contents = read_to_string(filename)?;
-    let mut lines: Vec<&str> = contents.lines().skip(5).collect();
+    log_file.entries.sort_by(|ref v1, ref v2| {
 
-    lines.sort_by_key(|&s| {
-        let a = s.split(",").skip(3).collect::<Vec<&str>>();
-        let b = (&a[..].join(",")).to_owned();
-
-        //println!("{}", b);
-        b
-
+        v1.filename.cmp(&v2.filename)
     });
 
-    let mut file = File::create(out_filename)?;
-
-    //println!();
-    for s in lines {
-        //println!("{}", s);
-
-        file.write(s.as_bytes());
-        file.write("\n".as_bytes());
-    };
-
-    Ok(())
+    common::write_log_entries_to_file(log_file.entries, out_filename)
 }
 
 #[cfg(test)]

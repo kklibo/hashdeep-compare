@@ -1,8 +1,8 @@
-
+use std::fmt;
 
 pub struct LogEntry {
-    hashes: String,
-    filename: String,
+    pub hashes: String,
+    pub filename: String,
 }
 
 impl LogEntry {
@@ -21,5 +21,11 @@ impl LogEntry {
 
         Some(LogEntry{hashes, filename})
     }
+}
 
+impl fmt::Display for LogEntry {
+
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{},{}", self.hashes, self.filename)
+    }
 }

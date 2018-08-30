@@ -1,17 +1,17 @@
-use std::fs::read_to_string;
-use std::io::Error;
+use std::fs::{File,read_to_string};
+use std::io::{Write,Error};
 
 use log_entry::LogEntry;
 
-struct LogFile<T>
-    where T: Extend<LogEntry> + Default
+pub struct LogFile<T>
+    where T: Extend<LogEntry> + Default + IntoIterator
 {
-    entries: T,
-    invalid_lines: Vec<String>,
+    pub entries: T,
+    pub invalid_lines: Vec<String>,
 }
 
-fn read_log_entries_from_file<T>(filename: &str) -> Result<LogFile<T>, Error>
-    where T: Extend<LogEntry> + Default
+pub fn read_log_entries_from_file<T>(filename: &str) -> Result<LogFile<T>, Error>
+    where T: Extend<LogEntry> + Default + IntoIterator
 {
 
     let contents = read_to_string(filename)?;
@@ -29,6 +29,20 @@ fn read_log_entries_from_file<T>(filename: &str) -> Result<LogFile<T>, Error>
 
 
     Ok(LogFile{entries, invalid_lines})
+}
+
+pub fn write_log_entries_to_file<T>(log_entries: T, filename: &str) -> Result<(), Error>
+    where T: IntoIterator, <T as ::std::iter::IntoIterator>::Item : ::std::string::ToString
+{
+
+    let mut file = File::create(filename)?;
+
+    for log_entry in log_entries {
+        file.write(log_entry.to_string().as_bytes());
+        file.write("\n".as_bytes());
+    };
+
+    Ok(())
 }
 
 pub fn files_are_equal(filename1: &str, filename2: &str) -> bool {
