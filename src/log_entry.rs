@@ -1,5 +1,6 @@
 use std::fmt;
 
+#[derive(Eq, PartialEq, Hash)]
 pub struct LogEntry {
     pub hashes: String,
     pub filename: String,
