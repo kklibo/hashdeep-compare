@@ -55,7 +55,32 @@ pub fn nand_log(filename1: &str, filename2: &str, only_in_1_filename: &str, only
     };
 
     Ok(())
+}
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use common::files_are_equal;
 
+    #[test]
+    fn nand_log_test() {
 
+        {
+            let same_file = "tests/test1.txt";
+            let empty_file = "tests/empty file.txt";
+            let only_in_1 = "tests/temp/only in 1";
+            let only_in_2 = "tests/temp/only in 2";
+            nand_log(same_file, same_file, only_in_1, only_in_2).unwrap();
+            assert!(files_are_equal(empty_file, only_in_1));
+            assert!(files_are_equal(empty_file, only_in_2));
+        }
+        {
+            let only_in_test1 = "tests/temp/only in test1";
+            let only_in_test2 = "tests/temp/only in test2";
+            nand_log("tests/test1.txt", "tests/test2.txt", only_in_test1, only_in_test2).unwrap();
+            assert!(files_are_equal("tests/only in test1.txt", only_in_test1));
+            assert!(files_are_equal("tests/only in test2.txt", only_in_test2));
+        }
+
+    }
 }
