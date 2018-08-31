@@ -1,9 +1,10 @@
 use common;
+use common::WhichFile::SingleFile;
 use log_entry::LogEntry;
 
 pub fn sort_log(filename: &str, out_filename: &str) -> ::std::io::Result<()>{
 
-    let mut log_file = common::read_log_entries_from_file::<Vec<LogEntry>>(filename)?;
+    let mut log_file = common::read_log_entries_from_file::<Vec<LogEntry>>(filename, SingleFile)?;
     assert_eq!(0, log_file.invalid_lines.len());
 
     log_file.entries.sort_by(|ref v1, ref v2| {

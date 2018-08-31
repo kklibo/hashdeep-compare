@@ -1,14 +1,15 @@
 use std::collections::HashSet;
 use std::cmp::Ordering;
 use common;
+use common::WhichFile::SingleFile;
 use log_entry::LogEntry;
 
 pub fn nand_log(filename1: &str, filename2: &str, only_in_1_filename: &str, only_in_2_filename: &str) -> ::std::io::Result<()>{
 
-    let log_file1 = common::read_log_entries_from_file::<HashSet<LogEntry>>(filename1)?;
+    let log_file1 = common::read_log_entries_from_file::<HashSet<LogEntry>>(filename1, SingleFile)?;
     assert_eq!(0, log_file1.invalid_lines.len());//todo: remove this
 
-    let log_file2 = common::read_log_entries_from_file::<HashSet<LogEntry>>(filename2)?;
+    let log_file2 = common::read_log_entries_from_file::<HashSet<LogEntry>>(filename2, SingleFile)?;
     assert_eq!(0, log_file2.invalid_lines.len());//todo: remove this
 
     let only_in_1 = log_file1.entries.difference(&log_file2.entries);

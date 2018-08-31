@@ -3,14 +3,22 @@ use std::io::{Write,Error};
 
 use log_entry::LogEntry;
 
+#[derive(Eq, PartialEq, Hash, Copy, Clone)]
+pub enum WhichFile {
+    File1,
+    File2,
+    SingleFile,
+}
+
 pub struct LogFile<T>
     where T: Extend<LogEntry> + Default + IntoIterator
 {
     pub entries: T,
     pub invalid_lines: Vec<String>,
+    pub which_file: WhichFile,
 }
 
-pub fn read_log_entries_from_file<T>(filename: &str) -> Result<LogFile<T>, Error>
+pub fn read_log_entries_from_file<T>(filename: &str, which_file: WhichFile) -> Result<LogFile<T>, Error>
     where T: Extend<LogEntry> + Default + IntoIterator
 {
 
@@ -21,14 +29,14 @@ pub fn read_log_entries_from_file<T>(filename: &str) -> Result<LogFile<T>, Error
 
     entries.extend(contents.lines().skip(5).filter_map(|line| {
 
-        LogEntry::from_str(line).or_else( || {
+        LogEntry::from_str(line, which_file).or_else( || {
             invalid_lines.push(line.to_owned());
             None
         })
     }));
 
 
-    Ok(LogFile{entries, invalid_lines})
+    Ok(LogFile{entries, invalid_lines, which_file})
 }
 
 pub fn write_log_entries_to_file<T>(log_entries: T, filename: &str) -> Result<(), Error>
