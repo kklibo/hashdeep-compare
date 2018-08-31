@@ -38,13 +38,14 @@ pub fn write_log_entries_to_file<T>(log_entries: T, filename: &str) -> Result<()
     let mut file = File::create(filename)?;
 
     for log_entry in log_entries {
-        file.write(log_entry.to_string().as_bytes());
-        file.write("\n".as_bytes());
+        file.write(log_entry.to_string().as_bytes())?;
+        file.write("\n".as_bytes())?;
     };
 
     Ok(())
 }
 
+#[allow(dead_code)]
 pub fn files_are_equal(filename1: &str, filename2: &str) -> bool {
     use std::fs::read_to_string;
 

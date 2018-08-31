@@ -40,8 +40,8 @@ pub fn nand_log(filename1: &str, filename2: &str, only_in_1_filename: &str, only
     for s in only_in_1_lines {
         //println!("{}", s);
 
-        outfile1.write(s.as_bytes());
-        outfile1.write("\n".as_bytes());
+        outfile1.write(s.as_bytes())?;
+        outfile1.write("\n".as_bytes())?;
     };
 
     let mut outfile2 = File::create(only_in_2_filename)?;
@@ -50,8 +50,8 @@ pub fn nand_log(filename1: &str, filename2: &str, only_in_1_filename: &str, only
     for s in only_in_2_lines {
         //println!("{}", s);
 
-        outfile2.write(s.as_bytes());
-        outfile2.write("\n".as_bytes());
+        outfile2.write(s.as_bytes())?;
+        outfile2.write("\n".as_bytes())?;
     };
 
     Ok(())

@@ -1,9 +1,4 @@
-use std::fs::read_to_string;
-use std::fs::File;
-use std::io::Write;
-
 use common;
-use common::LogFile;
 use log_entry::LogEntry;
 
 pub fn sort_log(filename: &str, out_filename: &str) -> ::std::io::Result<()>{
@@ -28,7 +23,7 @@ mod test {
     fn sort_log_test() {
         {
             let test_out = "tests/temp/sort_log_test.txt";
-            sort_log("tests/test1.txt", test_out);
+            sort_log("tests/test1.txt", test_out).unwrap();
             assert!(files_are_equal("tests/test1 sorted.txt", test_out));
         }
     }
