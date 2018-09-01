@@ -2,6 +2,7 @@ mod sort;
 mod nand;
 mod common;
 mod log_entry;
+mod partitioner;
 
 fn show_help() {
     println!("hashdeep tool lite");

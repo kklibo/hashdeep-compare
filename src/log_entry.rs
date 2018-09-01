@@ -24,6 +24,10 @@ impl LogEntry {
 
         Some(LogEntry{hashes, filename, origin})
     }
+
+    pub fn source_text(&self) -> String {
+        format!("{},{}", self.hashes, self.filename)
+    }
 }
 
 impl fmt::Display for LogEntry {
