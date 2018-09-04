@@ -7,23 +7,7 @@ pub mod match_pair {
         pub from_file2: &'a LogEntry,
         _prevent_struct_literal: (),
     }
-/*
-    pub fn new<'a>(a: &'a LogEntry, b: &'a LogEntry) -> Result<MatchPair<'a>, (&'a LogEntry, &'a LogEntry)> {
 
-        match a.origin {
-            File1 => match b.origin {
-                File1 => Err((a,b)),
-                File2 => Ok(MatchPair{from_file1: a, from_file2: b, _prevent_struct_literal: ()}),
-                SingleFile => Err((a,b)),
-            },
-            File2 => match b.origin {
-                File1 => Ok(MatchPair{from_file1: b, from_file2: a, _prevent_struct_literal: ()}),
-                File2 => Err((a,b)),
-                SingleFile => Err((a,b)),
-            },
-            SingleFile => Err((a,b)),
-        }
-    }*/
     impl<'b> MatchPair<'b> {
 
         pub fn maybe_match_pair<'a>(a: &'a LogEntry, b: &'a LogEntry) -> Option<MatchPair<'a>> {
@@ -58,43 +42,45 @@ pub struct MatchPartition<'a> {
     pub hashes_match_groups: Vec<MatchGroup<'a>>,
 
     pub no_match: Vec<&'a LogEntry>,
-
-    /*
-    full match
-		1 in each file: no change
-		anomalies (invalid file)
-	only name match
-		1 in each file: changed file
-		anomalies (invalid file)
-	only content match
-		1 in each file: move/rename
-		match groups (unknown cause)
-	no match (list by origin)
-*/
-
 }
-/*
-fn one_from_each_file(a: &LogEntry, b: &LogEntry) -> bool {
-    (a.origin == File1 && b.origin == File2) ||
-    (a.origin == File2 && b.origin == File1)
-}*/
 
-pub fn match_partition<'b>(log_entries: &Vec<&'b LogEntry>) -> MatchPartition<'b> {
-/*
-    // let mut full_matches = HashMap::<String, Vec<&LogEntry>>::new();
-    let mut full_match_pairs: Vec<MatchPair>;
-    let mut full_match_groups: Vec<MatchGroup>;
+impl<'a> MatchPartition<'a> {
 
-    // let mut name_matches = HashMap::<String, Vec<&LogEntry>>::new();
-    let mut name_match_pairs: Vec<MatchPair>;
-    let mut name_match_groups: Vec<MatchGroup>;
+    fn total_log_entries(&self) -> Option<usize> {
+        use std::iter::once;
 
-    // let mut hashes_matches = HashMap::<String, Vec<&LogEntry>>::new();
-    let mut hashes_match_pairs: Vec<MatchPair>;
-    let mut hashes_match_groups: Vec<MatchGroup>;
+        fn pairs_sum(pairs: &Vec<MatchPair>) -> Option<usize> {
+            pairs.iter().try_fold(0usize, |acc, ref x| acc.checked_add(2))
+        }
+        fn groups_sum(groups: &Vec<MatchGroup>) -> Option<usize> {
+            groups.iter().try_fold(0usize, |acc, ref x| acc.checked_add(x.entries.len()))
+        }
+        fn vec_sum(v: &Vec<&LogEntry>) -> Option<usize> {
+            Some(v.len())
+        }
 
-    let mut no_match: Vec<&LogEntry>;*/
+        (vec!{
+            pairs_sum(&self.full_match_pairs),
+            groups_sum(&self.full_match_groups),
+            pairs_sum(&self.name_match_pairs),
+            groups_sum(&self.name_match_groups),
+            pairs_sum(&self.hashes_match_pairs),
+            groups_sum(&self.hashes_match_groups),
+            vec_sum(&self.no_match),
+        }).iter()
+        .try_fold(0usize, |acc: usize, x: &Option<usize>| {
+            x.and_then(|y| acc.checked_add(y))
+        })
+    }
+}
 
+#[derive(Debug)]
+pub enum MatchPartitionError {
+    ChecksumFailure,
+    ChecksumAdditionOverflow,
+}
+
+pub fn match_partition<'b>(log_entries: &Vec<&'b LogEntry>) -> Result<MatchPartition<'b>, MatchPartitionError> {
 
     struct SortedMatches<'a> {
         match_pairs: Vec<MatchPair<'a>>,
@@ -134,8 +120,8 @@ pub fn match_partition<'b>(log_entries: &Vec<&'b LogEntry>) -> MatchPartition<'b
 
     let hashes_matches = sort_matches(&name_matches.no_match, |ref x| x.hashes.clone());
 
+    let mp = MatchPartition {
 
-    MatchPartition {
         full_match_pairs: full_matches.match_pairs,
         full_match_groups: full_matches.match_groups,
 
@@ -146,9 +132,13 @@ pub fn match_partition<'b>(log_entries: &Vec<&'b LogEntry>) -> MatchPartition<'b
         hashes_match_groups: hashes_matches.match_groups,
 
         no_match: hashes_matches.no_match,
-    }
+    };
 
-    //todo: check totals at end
+    match mp.total_log_entries() {
+        Some(t) if t == log_entries.len() => Ok(mp),
+        Some(t) => Err(MatchPartitionError::ChecksumFailure),
+        None => Err(MatchPartitionError::ChecksumAdditionOverflow),
+    }
 }
 
 #[cfg(test)]
@@ -166,7 +156,7 @@ mod test {
 
         let log_entries = file1.entries.iter().chain(file2.entries.iter()).collect::<Vec<&LogEntry>>();
 
-        let mp = match_partition(&log_entries);
+        let mp = match_partition(&log_entries).unwrap();
 
         assert_eq!(1, mp.full_match_pairs.len());
         assert_eq!(1, mp.full_match_groups.len());
@@ -175,7 +165,5 @@ mod test {
         assert_eq!(1, mp.hashes_match_pairs.len());
         assert_eq!(2, mp.hashes_match_groups.len());
         assert_eq!(2, mp.no_match.len());
-
-
     }
 }
