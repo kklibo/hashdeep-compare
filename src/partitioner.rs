@@ -47,10 +47,9 @@ pub struct MatchPartition<'a> {
 impl<'a> MatchPartition<'a> {
 
     fn total_log_entries(&self) -> Option<usize> {
-        use std::iter::once;
 
         fn pairs_sum(pairs: &Vec<MatchPair>) -> Option<usize> {
-            pairs.iter().try_fold(0usize, |acc, ref x| acc.checked_add(2))
+            pairs.iter().try_fold(0usize, |acc, _| acc.checked_add(2))
         }
         fn groups_sum(groups: &Vec<MatchGroup>) -> Option<usize> {
             groups.iter().try_fold(0usize, |acc, ref x| acc.checked_add(x.entries.len()))
@@ -136,7 +135,7 @@ pub fn match_partition<'b>(log_entries: &Vec<&'b LogEntry>) -> Result<MatchParti
 
     match mp.total_log_entries() {
         Some(t) if t == log_entries.len() => Ok(mp),
-        Some(t) => Err(MatchPartitionError::ChecksumFailure),
+        Some(_) => Err(MatchPartitionError::ChecksumFailure),
         None => Err(MatchPartitionError::ChecksumAdditionOverflow),
     }
 }

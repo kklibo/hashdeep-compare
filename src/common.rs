@@ -2,6 +2,7 @@ use std::fs::{File,read_to_string};
 use std::io::{Write,Error};
 
 use log_entry::LogEntry;
+use partitioner::{MatchPair,MatchGroup};
 
 #[derive(Eq, PartialEq, Hash, Copy, Clone)]
 pub enum WhichFile {
@@ -47,6 +48,38 @@ pub fn write_log_entries_to_file<T>(log_entries: T, filename: &str) -> Result<()
 
     for log_entry in log_entries {
         file.write(log_entry.to_string().as_bytes())?;
+        file.write("\n".as_bytes())?;
+    };
+
+    Ok(())
+}
+
+pub fn write_match_pairs_to_file(match_pairs: &Vec<MatchPair>, filename: &str) -> Result<(), Error>
+{
+
+    let mut file = File::create(filename)?;
+
+    for match_pair in match_pairs {
+        file.write(match_pair.from_file1.to_string().as_bytes())?;
+        file.write("\n".as_bytes())?;
+        file.write(match_pair.from_file2.to_string().as_bytes())?;
+        file.write("\n\n".as_bytes())?;
+    };
+
+    Ok(())
+}
+
+pub fn write_match_groups_to_file(match_groups: &Vec<MatchGroup>, filename: &str) -> Result<(), Error>
+{
+
+    let mut file = File::create(filename)?;
+
+    for match_group in match_groups {
+
+        for &log_entry in &match_group.entries {
+            file.write(log_entry.to_string().as_bytes())?;
+            file.write("\n".as_bytes())?;
+        };
         file.write("\n".as_bytes())?;
     };
 
