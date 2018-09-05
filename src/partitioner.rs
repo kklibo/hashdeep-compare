@@ -30,18 +30,73 @@ pub struct MatchGroup<'a> {
     pub entries: Vec<&'a LogEntry>, //todo: can this be replaced with a set?
 }
 
+use common::WhichFile::{File1, File2};
+pub struct MatchGroupsByOrigin<'d> {
+    pub file1_only: Vec<MatchGroup<'d>>,
+    pub file2_only: Vec<MatchGroup<'d>>,
+    pub file1_and_file2: Vec<MatchGroup<'d>>,
+}
+
+fn match_groups_by_origin(match_groups: Vec<MatchGroup>) -> MatchGroupsByOrigin {
+
+    let mut file1_only: Vec<MatchGroup> = Vec::new();
+    let mut file2_only: Vec<MatchGroup> = Vec::new();
+    let mut file1_and_file2: Vec<MatchGroup> = Vec::new();
+
+    for match_group in match_groups {
+
+        let f1 = match_group.entries.iter().any(|&x| x.origin == File1);
+        let f2 = match_group.entries.iter().any(|&x| x.origin == File2);
+
+        match f1 {
+            true => match f2 {
+                true => &mut file1_and_file2,
+                false => &mut file1_only,
+            },
+            false => match f2 {
+                true => &mut file2_only,
+                false => panic!("match_groups_by_origin invalid file origin"),    //todo: remove this
+            },
+        }.push(match_group);
+    }
+
+    MatchGroupsByOrigin{file1_only, file2_only, file1_and_file2}
+}
+
+pub struct LogEntriesByOrigin<'a> {
+    pub file1: Vec<&'a LogEntry>,
+    pub file2: Vec<&'a LogEntry>,
+}
+
+fn log_entries_by_origin(log_entries: Vec<&LogEntry>) -> LogEntriesByOrigin {
+
+    let mut file1: Vec<&LogEntry> = Vec::new();
+    let mut file2: Vec<&LogEntry> = Vec::new();
+
+    for log_entry in log_entries {
+
+        match log_entry.origin {
+            File1 => file1.push(log_entry),
+            File2 => file2.push(log_entry),
+            _ => panic!("log_entries_by_origin invalid file origin"),
+        }
+    }
+
+    LogEntriesByOrigin{file1, file2}
+}
+
 pub struct MatchPartition<'a> {
 
     pub full_match_pairs: Vec<MatchPair<'a>>,
-    pub full_match_groups: Vec<MatchGroup<'a>>,
+    pub full_match_groups: MatchGroupsByOrigin<'a>,
 
     pub name_match_pairs: Vec<MatchPair<'a>>,
-    pub name_match_groups: Vec<MatchGroup<'a>>,
+    pub name_match_groups: MatchGroupsByOrigin<'a>,
 
     pub hashes_match_pairs: Vec<MatchPair<'a>>,
-    pub hashes_match_groups: Vec<MatchGroup<'a>>,
+    pub hashes_match_groups: MatchGroupsByOrigin<'a>,
 
-    pub no_match: Vec<&'a LogEntry>,
+    pub no_match: LogEntriesByOrigin<'a>
 }
 
 impl<'a> MatchPartition<'a> {
@@ -60,12 +115,19 @@ impl<'a> MatchPartition<'a> {
 
         (vec!{
             pairs_sum(&self.full_match_pairs),
-            groups_sum(&self.full_match_groups),
+            groups_sum(&self.full_match_groups.file1_only),
+            groups_sum(&self.full_match_groups.file2_only),
+            groups_sum(&self.full_match_groups.file1_and_file2),
             pairs_sum(&self.name_match_pairs),
-            groups_sum(&self.name_match_groups),
+            groups_sum(&self.name_match_groups.file1_only),
+            groups_sum(&self.name_match_groups.file2_only),
+            groups_sum(&self.name_match_groups.file1_and_file2),
             pairs_sum(&self.hashes_match_pairs),
-            groups_sum(&self.hashes_match_groups),
-            vec_sum(&self.no_match),
+            groups_sum(&self.hashes_match_groups.file1_only),
+            groups_sum(&self.hashes_match_groups.file2_only),
+            groups_sum(&self.hashes_match_groups.file1_and_file2),
+            vec_sum(&self.no_match.file1),
+            vec_sum(&self.no_match.file2),
         }).iter()
         .try_fold(0usize, |acc: usize, x: &Option<usize>| {
             x.and_then(|y| acc.checked_add(y))
@@ -122,15 +184,15 @@ pub fn match_partition<'b>(log_entries: &Vec<&'b LogEntry>) -> Result<MatchParti
     let mp = MatchPartition {
 
         full_match_pairs: full_matches.match_pairs,
-        full_match_groups: full_matches.match_groups,
+        full_match_groups: match_groups_by_origin(full_matches.match_groups),
 
         name_match_pairs: name_matches.match_pairs,
-        name_match_groups: name_matches.match_groups,
+        name_match_groups: match_groups_by_origin(name_matches.match_groups),
 
         hashes_match_pairs: hashes_matches.match_pairs,
-        hashes_match_groups: hashes_matches.match_groups,
+        hashes_match_groups: match_groups_by_origin(hashes_matches.match_groups),
 
-        no_match: hashes_matches.no_match,
+        no_match: log_entries_by_origin(hashes_matches.no_match),
     };
 
     match mp.total_log_entries() {
@@ -158,11 +220,18 @@ mod test {
         let mp = match_partition(&log_entries).unwrap();
 
         assert_eq!(1, mp.full_match_pairs.len());
-        assert_eq!(1, mp.full_match_groups.len());
+        assert_eq!(0, mp.full_match_groups.file1_only.len());
+        assert_eq!(0, mp.full_match_groups.file2_only.len());
+        assert_eq!(1, mp.full_match_groups.file1_and_file2.len());
         assert_eq!(1, mp.name_match_pairs.len());
-        assert_eq!(1, mp.name_match_groups.len());
+        assert_eq!(0, mp.name_match_groups.file1_only.len());
+        assert_eq!(0, mp.name_match_groups.file2_only.len());
+        assert_eq!(1, mp.name_match_groups.file1_and_file2.len());
         assert_eq!(1, mp.hashes_match_pairs.len());
-        assert_eq!(2, mp.hashes_match_groups.len());
-        assert_eq!(2, mp.no_match.len());
+        assert_eq!(1, mp.hashes_match_groups.file1_only.len());
+        assert_eq!(0, mp.hashes_match_groups.file2_only.len());
+        assert_eq!(1, mp.hashes_match_groups.file1_and_file2.len());
+        assert_eq!(1, mp.no_match.file1.len());
+        assert_eq!(1, mp.no_match.file2.len());
     }
 }
