@@ -181,7 +181,7 @@ pub fn match_partition<'b>(log_entries: &Vec<&'b LogEntry>) -> Result<MatchParti
 
     let hashes_matches = sort_matches(&name_matches.no_match, |ref x| x.hashes.clone());
 
-    let mp = MatchPartition {
+    let mut mp = MatchPartition {
 
         full_match_pairs: full_matches.match_pairs,
         full_match_groups: match_groups_by_origin(full_matches.match_groups),
@@ -194,6 +194,40 @@ pub fn match_partition<'b>(log_entries: &Vec<&'b LogEntry>) -> Result<MatchParti
 
         no_match: log_entries_by_origin(hashes_matches.no_match),
     };
+
+    fn sort_match_pairs_by_filename(x: &mut Vec<MatchPair>) {
+        x.sort_by(|a, b| a.from_file1.filename.cmp(&b.from_file1.filename));
+    }
+
+    fn sort_match_groups_by_filename(x: &mut Vec<MatchGroup>) {
+        x.sort_by(|a, b| {
+            if a.entries.len() > 0 && b.entries.len() > 0 {
+                a.entries[0].filename.cmp(&b.entries[0].filename)
+            }
+            else {
+                panic!("sort_match_groups_by_filename: empty MatchGroup") //todo: replace this
+            }
+        });
+    }
+
+    fn sort_log_entries_by_filename(x: &mut Vec<&LogEntry>) {
+        x.sort_by(|a, b| a.filename.cmp(&b.filename));
+    }
+
+    sort_match_pairs_by_filename(&mut mp.full_match_pairs);
+    sort_match_groups_by_filename(&mut mp.full_match_groups.file1_only);
+    sort_match_groups_by_filename(&mut mp.full_match_groups.file2_only);
+    sort_match_groups_by_filename(&mut mp.full_match_groups.file1_and_file2);
+    sort_match_pairs_by_filename(&mut mp.name_match_pairs);
+    sort_match_groups_by_filename(&mut mp.name_match_groups.file1_only);
+    sort_match_groups_by_filename(&mut mp.name_match_groups.file2_only);
+    sort_match_groups_by_filename(&mut mp.name_match_groups.file1_and_file2);
+    sort_match_pairs_by_filename(&mut mp.hashes_match_pairs);
+    sort_match_groups_by_filename(&mut mp.hashes_match_groups.file1_only);
+    sort_match_groups_by_filename(&mut mp.hashes_match_groups.file2_only);
+    sort_match_groups_by_filename(&mut mp.hashes_match_groups.file1_and_file2);
+    sort_log_entries_by_filename(&mut mp.no_match.file1);
+    sort_log_entries_by_filename(&mut mp.no_match.file2);
 
     match mp.total_log_entries() {
         Some(t) if t == log_entries.len() => Ok(mp),
