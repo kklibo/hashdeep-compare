@@ -60,8 +60,10 @@ pub fn write_match_pairs_to_file(match_pairs: &Vec<MatchPair>, filename: &str) -
     let mut file = File::create(filename)?;
 
     for match_pair in match_pairs {
+        file.write("file1: ".as_bytes())?;
         file.write(match_pair.from_file1.to_string().as_bytes())?;
         file.write("\n".as_bytes())?;
+        file.write("file2: ".as_bytes())?;
         file.write(match_pair.from_file2.to_string().as_bytes())?;
         file.write("\n\n".as_bytes())?;
     };
@@ -77,6 +79,14 @@ pub fn write_match_groups_to_file(match_groups: &Vec<MatchGroup>, filename: &str
     for match_group in match_groups {
 
         for &log_entry in &match_group.entries {
+
+            let label = match log_entry.origin {
+                WhichFile::File1 => "file1: ",
+                WhichFile::File2 => "file2: ",
+                WhichFile::SingleFile => "",    //todo: should this ever happen?
+            };
+
+            file.write(label.as_bytes())?;
             file.write(log_entry.to_string().as_bytes())?;
             file.write("\n".as_bytes())?;
         };
