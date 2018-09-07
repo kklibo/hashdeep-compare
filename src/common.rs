@@ -4,7 +4,7 @@ use std::io::{Write,Error};
 use log_entry::LogEntry;
 use partitioner::{MatchPair,MatchGroup};
 
-#[derive(Eq, PartialEq, Hash, Copy, Clone)]
+#[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
 pub enum WhichFile {
     File1,
     File2,
@@ -96,7 +96,7 @@ pub fn write_match_groups_to_file(match_groups: &Vec<MatchGroup>, filename: &str
     Ok(())
 }
 
-#[allow(dead_code)]
+#[cfg(test)]
 pub fn files_are_equal(filename1: &str, filename2: &str) -> bool {
     use std::fs::read_to_string;
 
