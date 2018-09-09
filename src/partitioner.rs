@@ -229,6 +229,9 @@ pub fn match_partition<'b>(log_entries: &Vec<&'b LogEntry>) -> Result<MatchParti
     }
 
     fn sort_match_groups_by_filename(x: &mut Vec<MatchGroup>) {
+
+        x.into_iter().for_each(|x| sort_log_entries_by_filename(&mut x.entries));
+
         x.sort_by(|a, b| {
             if a.entries.len() > 0 && b.entries.len() > 0 {
                 a.entries[0].filename.cmp(&b.entries[0].filename)
