@@ -1,9 +1,5 @@
-mod sort;
-mod nand;
-mod common;
-mod log_entry;
-mod partitioner;
-mod partition;
+extern crate hashdeep_tool_lite;
+use hashdeep_tool_lite::*;
 
 fn show_help() {
     println!("hashdeep tool lite");
