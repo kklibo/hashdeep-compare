@@ -1,6 +1,9 @@
+//! hashdeep_tool_lite
+//!
+
 pub mod sort;
 pub mod nand;
-pub mod common;
-pub mod log_entry;
-pub mod partitioner;
+mod common;
+mod log_entry;
+mod partitioner;
 pub mod partition;

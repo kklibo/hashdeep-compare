@@ -3,6 +3,25 @@ use common::WhichFile::{File1,File2};
 use log_entry::LogEntry;
 use partitioner;
 
+
+/// Partition entries from two hashdeep logs by content and name matches
+///
+/// Loads hashdeep logs from filename1 and filename2.
+/// Entries in the loaded logs will be grouped in this order:
+///
+///	1. full match
+///		1 in each file: no change
+///		anomalies (invalid file)
+///	2. only name match
+///		1 in each file: changed file
+///		anomalies (invalid file)
+///	3. only content match
+///		1 in each file: move/rename
+///		match groups (unknown cause)
+///	4. no match (list by origin)
+///
+/// Each log entry is guaranteed to be represented in exactly one group.
+///
 pub fn partition_log(filename1: &str, filename2: &str, output_filename_base: &str) -> ::std::io::Result<()> {
 
     let log_file1 = common::read_log_entries_from_file::<Vec<LogEntry>>(filename1, File1)?;
