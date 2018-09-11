@@ -1,4 +1,6 @@
-use match_pair::MatchPair;
+pub mod match_pair;
+
+use self::match_pair::MatchPair;
 use std::collections::HashMap;
 use log_entry::LogEntry;
 
@@ -105,9 +107,9 @@ impl<'a> MatchPartition<'a> {
             vec_sum(&self.no_match.file1),
             vec_sum(&self.no_match.file2),
         }).iter()
-        .try_fold(0usize, |acc: usize, x: &Option<usize>| {
-            x.and_then(|y| acc.checked_add(y))
-        })
+            .try_fold(0usize, |acc: usize, x: &Option<usize>| {
+                x.and_then(|y| acc.checked_add(y))
+            })
     }
 }
 
@@ -183,9 +185,9 @@ pub fn match_partition<'b>(log_entries: &Vec<&'b LogEntry>) -> Result<MatchParti
             if a.entries.len() > 0 && b.entries.len() > 0 {
                 a.entries[0].filename.cmp(&b.entries[0].filename)
             }
-            else {
-                panic!("sort_match_groups_by_filename: empty MatchGroup") //todo: replace this
-            }
+                else {
+                    panic!("sort_match_groups_by_filename: empty MatchGroup") //todo: replace this
+                }
         });
     }
 
