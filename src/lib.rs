@@ -2,7 +2,6 @@
 //!
 
 pub mod sort;
-pub mod nand;
 mod common;
 mod log_entry;
 mod partitioner;

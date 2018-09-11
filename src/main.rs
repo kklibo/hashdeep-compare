@@ -5,7 +5,6 @@ fn show_help() {
     println!("hashdeep tool lite");
     println!(" arguments");
     println!("  sort input_file output_file");
-    println!("  nand input_file1 input_file2 output_file1 output_file2");
     println!("  part input_file1 input_file2 output_file_base");
 }
 
@@ -23,13 +22,6 @@ fn main() {
         "sort" => {
             if args.len() < 4 {return;}
             match sort::sort_log(args[2].as_str(), args[3].as_str()) {
-                Ok(()) => (),
-                Err(e) => println!("{:?}", e),
-            }
-        },
-        "nand" => {
-            if args.len() < 6 {return;}
-            match nand::nand_log(args[2].as_str(), args[3].as_str(), args[4].as_str(), args[5].as_str()) {
                 Ok(()) => (),
                 Err(e) => println!("{:?}", e),
             }
