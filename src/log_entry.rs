@@ -15,12 +15,14 @@ impl LogEntry {
     pub fn from_str(s: &str, origin: WhichFile) -> Option<LogEntry> {
 
         let sections: Vec<&str> = s.split(",").collect();
-
         if sections.len() < LogEntry::HASHCOUNT + 1 {return None;}
 
-        //todo: replace with split?
-        let hashes = sections[..LogEntry::HASHCOUNT].join(",");
-        let filename = sections[LogEntry::HASHCOUNT..].join(",");
+        let (hashes_sections, filename_sections) = sections.split_at(LogEntry::HASHCOUNT);
+        if hashes_sections.contains(&"") {return None;}
+
+        let hashes = hashes_sections.join(",");
+        let filename = filename_sections.join(",");
+        if filename.len() == 0 {return None;}
 
         Some(LogEntry{hashes, filename, origin})
     }
@@ -59,6 +61,15 @@ mod test {
         let not_enough_commas = "4692d489b0638e49682df4f46dacd3c3,0c47cda934d53d7ca29d822a59531dcf6d36cbd9740a4fd0b867a0343910a715,hashdeepComp/345.txt";
         assert_eq!(LogEntry::from_str(not_enough_commas, WhichFile::SingleFile), None);
 
+        let no_size = ",4692d489b0638e49682df4f46dacd3c3,0c47cda934d53d7ca29d822a59531dcf6d36cbd9740a4fd0b867a0343910a715,hashdeepComp/345.txt";
+        assert_eq!(LogEntry::from_str(no_size, WhichFile::SingleFile), None);
+
+        let empty_filename = "4,4692d489b0638e49682df4f46dacd3c3,0c47cda934d53d7ca29d822a59531dcf6d36cbd9740a4fd0b867a0343910a715,";
+        assert_eq!(LogEntry::from_str(empty_filename, WhichFile::SingleFile), None);
+
+        let just_commas = ",,,";
+        assert_eq!(LogEntry::from_str(just_commas, WhichFile::SingleFile), None);
+
         let hashes_str = "4,4692d489b0638e49682df4f46dacd3c3,0c47cda934d53d7ca29d822a59531dcf6d36cbd9740a4fd0b867a0343910a715";
 
         let normal_entry = "4,4692d489b0638e49682df4f46dacd3c3,0c47cda934d53d7ca29d822a59531dcf6d36cbd9740a4fd0b867a0343910a715,hashdeepComp/345.txt";
@@ -69,8 +80,8 @@ mod test {
         assert_eq!(LogEntry::from_str( non_ascii_filename, WhichFile::File1),
                    Some(LogEntry{hashes: hashes_str.to_owned(), filename: "hashdeepComp/Γεια σου.txt".to_owned(), origin: WhichFile::File1}));
 
-        let commas_in_filename = "4,4692d489b0638e49682df4f46dacd3c3,0c47cda934d53d7ca29d822a59531dcf6d36cbd9740a4fd0b867a0343910a715,hashdeepComp/3,4,,5.txt";
+        let commas_in_filename = "4,4692d489b0638e49682df4f46dacd3c3,0c47cda934d53d7ca29d822a59531dcf6d36cbd9740a4fd0b867a0343910a715,hashdeepComp/3,4,,5.txt,";
         assert_eq!(LogEntry::from_str(commas_in_filename, WhichFile::File2),
-                   Some(LogEntry{hashes: hashes_str.to_owned(), filename: "hashdeepComp/3,4,,5.txt".to_owned(), origin: WhichFile::File2}));
+                   Some(LogEntry{hashes: hashes_str.to_owned(), filename: "hashdeepComp/3,4,,5.txt,".to_owned(), origin: WhichFile::File2}));
     }
 }

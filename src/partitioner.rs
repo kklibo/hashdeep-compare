@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use log_entry::LogEntry;
 
 pub struct MatchGroup<'a> {
-    pub entries: Vec<&'a LogEntry>, //todo: can this be replaced with a set?
+    pub entries: Vec<&'a LogEntry>,
 }
 
 use common::WhichFile::{File1, File2};
