@@ -22,7 +22,6 @@ fn log_entries_by_origin(log_entries: Vec<&LogEntry>) -> LogEntriesByOrigin {
         match log_entry.origin {
             File1 => file1.push(log_entry),
             File2 => file2.push(log_entry),
-            _ => panic!("log_entries_by_origin invalid file origin"),
         }
     }
 

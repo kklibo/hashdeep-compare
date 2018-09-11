@@ -9,7 +9,6 @@ use partitioner::match_group::MatchGroup;
 pub enum WhichFile {
     File1,
     File2,
-    SingleFile,
 }
 
 pub struct LogFile<T>
@@ -84,7 +83,6 @@ pub fn write_match_groups_to_file(match_groups: &Vec<MatchGroup>, filename: &str
             let label = match log_entry.origin {
                 WhichFile::File1 => "file1: ",
                 WhichFile::File2 => "file2: ",
-                WhichFile::SingleFile => "",    //todo: should this ever happen?
             };
 
             file.write(label.as_bytes())?;
