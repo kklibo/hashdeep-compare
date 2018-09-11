@@ -3,7 +3,7 @@ use std::io::{Write,Error};
 
 use log_entry::LogEntry;
 use partitioner::match_pair::MatchPair;
-use partitioner::MatchGroup;
+use partitioner::match_group::MatchGroup;
 
 #[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
 pub enum WhichFile {
