@@ -199,17 +199,17 @@ mod test {
 
         let mp = match_partition(&log_entries).unwrap();
 
-        assert_eq!(1, mp.full_match_pairs.len());
-        assert_eq!(0, mp.full_match_groups.file1_only.len());
-        assert_eq!(0, mp.full_match_groups.file2_only.len());
+        assert_eq!(2, mp.full_match_pairs.len());
+        assert_eq!(1, mp.full_match_groups.file1_only.len());
+        assert_eq!(1, mp.full_match_groups.file2_only.len());
         assert_eq!(1, mp.full_match_groups.file1_and_file2.len());
         assert_eq!(1, mp.name_match_pairs.len());
-        assert_eq!(0, mp.name_match_groups.file1_only.len());
-        assert_eq!(0, mp.name_match_groups.file2_only.len());
+        assert_eq!(1, mp.name_match_groups.file1_only.len());
+        assert_eq!(1, mp.name_match_groups.file2_only.len());
         assert_eq!(1, mp.name_match_groups.file1_and_file2.len());
         assert_eq!(1, mp.hashes_match_pairs.len());
         assert_eq!(1, mp.hashes_match_groups.file1_only.len());
-        assert_eq!(0, mp.hashes_match_groups.file2_only.len());
+        assert_eq!(1, mp.hashes_match_groups.file2_only.len());
         assert_eq!(1, mp.hashes_match_groups.file1_and_file2.len());
         assert_eq!(1, mp.no_match.file1.len());
         assert_eq!(1, mp.no_match.file2.len());
