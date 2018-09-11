@@ -2,7 +2,8 @@ use std::fs::{File,read_to_string};
 use std::io::{Write,Error};
 
 use log_entry::LogEntry;
-use partitioner::{MatchPair,MatchGroup};
+use match_pair::MatchPair;
+use partitioner::MatchGroup;
 
 #[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
 pub enum WhichFile {
