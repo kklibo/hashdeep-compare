@@ -33,15 +33,21 @@ pub fn read_log_entries_from_file<T>(filename: &str) -> Result<LogFile<T>, Error
     Ok(LogFile{entries, invalid_lines})
 }
 
+fn write_log_entry_to_file(label: &str, log_entry_str: &str, file: &mut File) -> Result<(), Error>
+{
+    let line = format!("{}{}\n", label, log_entry_str);
+
+    file.write(line.as_bytes())?;
+    Ok(())
+}
+
 pub fn write_log_entries_to_file<T>(log_entries: T, filename: &str) -> Result<(), Error>
     where T: IntoIterator, <T as ::std::iter::IntoIterator>::Item : ::std::string::ToString
 {
-
     let mut file = File::create(filename)?;
 
     for log_entry in log_entries {
-        file.write(log_entry.to_string().as_bytes())?;
-        file.write("\n".as_bytes())?;
+        write_log_entry_to_file("", &log_entry.to_string(), &mut file)?;
     };
 
     Ok(())
@@ -49,16 +55,12 @@ pub fn write_log_entries_to_file<T>(log_entries: T, filename: &str) -> Result<()
 
 pub fn write_match_pairs_to_file(match_pairs: &Vec<MatchPair>, filename: &str) -> Result<(), Error>
 {
-
     let mut file = File::create(filename)?;
 
     for match_pair in match_pairs {
-        file.write("file1: ".as_bytes())?;
-        file.write(match_pair.from_file1.to_string().as_bytes())?;
+        write_log_entry_to_file("file1: ", &match_pair.from_file1.to_string(), &mut file)?;
+        write_log_entry_to_file("file2: ", &match_pair.from_file2.to_string(), &mut file)?;
         file.write("\n".as_bytes())?;
-        file.write("file2: ".as_bytes())?;
-        file.write(match_pair.from_file2.to_string().as_bytes())?;
-        file.write("\n\n".as_bytes())?;
     };
 
     Ok(())
@@ -66,7 +68,6 @@ pub fn write_match_pairs_to_file(match_pairs: &Vec<MatchPair>, filename: &str) -
 
 pub fn write_match_groups_to_file(match_groups: &Vec<MatchGroup>, filename: &str) -> Result<(), Error>
 {
-//todo b: refactor/test this
     let mut file = File::create(filename)?;
 
     for match_group in match_groups {
@@ -74,9 +75,7 @@ pub fn write_match_groups_to_file(match_groups: &Vec<MatchGroup>, filename: &str
         fn write_entries(entries: &Vec<&LogEntry>, label: &str, file: &mut File) -> Result<(), Error>
         {
             for &log_entry in entries {
-                file.write(label.as_bytes())?;
-                file.write(log_entry.to_string().as_bytes())?;
-                file.write("\n".as_bytes())?;
+                write_log_entry_to_file(label, &log_entry.to_string(), file)?;
             };
             Ok(())
         };
