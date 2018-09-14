@@ -4,7 +4,7 @@ use log_entry::LogEntry;
 
 pub fn sort_log(filename: &str, out_filename: &str) -> ::std::io::Result<()>{
 
-    let mut log_file = common::read_log_entries_from_file::<Vec<LogEntry>>(filename, File1)?;
+    let mut log_file = common::read_log_entries_from_file::<Vec<LogEntry>>(filename)?;
     assert_eq!(0, log_file.invalid_lines.len());//todo: remove this
 
     log_file.entries.sort_by(|ref v1, ref v2| {

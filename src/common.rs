@@ -16,10 +16,9 @@ pub struct LogFile<T>
 {
     pub entries: T,
     pub invalid_lines: Vec<String>,
-    pub which_file: WhichFile,
 }
 
-pub fn read_log_entries_from_file<T>(filename: &str, which_file: WhichFile) -> Result<LogFile<T>, Error>
+pub fn read_log_entries_from_file<T>(filename: &str) -> Result<LogFile<T>, Error>
     where T: Extend<LogEntry> + Default + IntoIterator
 {
 
@@ -37,7 +36,7 @@ pub fn read_log_entries_from_file<T>(filename: &str, which_file: WhichFile) -> R
     }));
 
 
-    Ok(LogFile{entries, invalid_lines, which_file})
+    Ok(LogFile{entries, invalid_lines})
 }
 
 pub fn write_log_entries_to_file<T>(log_entries: T, filename: &str) -> Result<(), Error>

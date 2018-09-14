@@ -218,8 +218,8 @@ mod test {
     #[test]
     fn match_partition_test() {
 
-        let file1 = read_log_entries_from_file::<Vec<LogEntry>>("tests/partition_test1.txt", WhichFile::File1).unwrap();
-        let file2 = read_log_entries_from_file::<Vec<LogEntry>>("tests/partition_test2.txt", WhichFile::File2).unwrap();
+        let file1 = read_log_entries_from_file::<Vec<LogEntry>>("tests/partition_test1.txt").unwrap();
+        let file2 = read_log_entries_from_file::<Vec<LogEntry>>("tests/partition_test2.txt").unwrap();
         assert_eq!(0, file1.invalid_lines.len());
         assert_eq!(0, file2.invalid_lines.len());
 

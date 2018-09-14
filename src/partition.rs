@@ -24,10 +24,10 @@ use partitioner;
 ///
 pub fn partition_log(filename1: &str, filename2: &str, output_filename_base: &str) -> ::std::io::Result<()> {
 
-    let log_file1 = common::read_log_entries_from_file::<Vec<LogEntry>>(filename1, File1)?;
+    let log_file1 = common::read_log_entries_from_file::<Vec<LogEntry>>(filename1)?;
     assert_eq!(0, log_file1.invalid_lines.len());//todo: remove this
 
-    let log_file2 = common::read_log_entries_from_file::<Vec<LogEntry>>(filename2, File2)?;
+    let log_file2 = common::read_log_entries_from_file::<Vec<LogEntry>>(filename2)?;
     assert_eq!(0, log_file2.invalid_lines.len());//todo: remove this
 
     let mut from_file1: Vec<&LogEntry> = log_file1.entries.iter().collect::<Vec<&LogEntry>>();
