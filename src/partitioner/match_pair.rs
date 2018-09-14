@@ -5,9 +5,9 @@ use common::WhichFile::*;
 pub struct MatchPair<'a> {
     pub from_file1: &'a LogEntry,
     pub from_file2: &'a LogEntry,
-    _prevent_struct_literal: (),
+//    _prevent_struct_literal: (),
 }
-
+/*
 impl<'b> MatchPair<'b> {
 
     pub fn maybe_match_pair<'a>(a: &'a LogEntry, b: &'a LogEntry) -> Option<MatchPair<'a>> {
@@ -19,8 +19,8 @@ impl<'b> MatchPair<'b> {
             None
         }
     }
-}
-
+}*/ //todo b: should this be removed?
+/*
 #[cfg(test)]
 mod test {
     use super::*;
@@ -46,3 +46,4 @@ mod test {
                    Some(MatchPair{from_file1: &from_file1_2, from_file2: &from_file2_2, _prevent_struct_literal: ()}));
     }
 }
+*/

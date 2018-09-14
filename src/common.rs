@@ -73,22 +73,23 @@ pub fn write_match_pairs_to_file(match_pairs: &Vec<MatchPair>, filename: &str) -
 
 pub fn write_match_groups_to_file(match_groups: &Vec<MatchGroup>, filename: &str) -> Result<(), Error>
 {
-
+//todo b: refactor/test this
     let mut file = File::create(filename)?;
 
     for match_group in match_groups {
 
-        for &log_entry in &match_group.entries {
-
-            let label = match log_entry.origin {
-                WhichFile::File1 => "file1: ",
-                WhichFile::File2 => "file2: ",
+        fn write_entries(entries: &Vec<&LogEntry>, label: &str, file: &mut File) -> Result<(), Error>
+        {
+            for &log_entry in entries {
+                file.write(label.as_bytes())?;
+                file.write(log_entry.to_string().as_bytes())?;
+                file.write("\n".as_bytes())?;
             };
-
-            file.write(label.as_bytes())?;
-            file.write(log_entry.to_string().as_bytes())?;
-            file.write("\n".as_bytes())?;
+            Ok(())
         };
+        write_entries(&match_group.from_file1, "file1: ", &mut file)?;
+        write_entries(&match_group.from_file2, "file2: ", &mut file)?;
+
         file.write("\n".as_bytes())?;
     };
 
