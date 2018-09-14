@@ -139,7 +139,7 @@ pub fn match_partition<'b>(from_file1: &Vec<&'b LogEntry>, from_file2: &Vec<&'b 
         SortedMatches { match_pairs, match_groups, no_match_file1, no_match_file2 }
     }
 
-    let full_matches = sort_matches(from_file1, from_file2, |x| x.source_text());
+    let full_matches = sort_matches(from_file1, from_file2, |x| x.to_string());
 
     let name_matches = sort_matches(&full_matches.no_match_file1, &full_matches.no_match_file2, |ref x| x.filename.clone());
 

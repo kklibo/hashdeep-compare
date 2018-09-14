@@ -24,10 +24,6 @@ impl LogEntry {
 
         Some(LogEntry{hashes, filename})
     }
-
-    pub fn source_text(&self) -> String {   //todo b: remove this?
-        format!("{},{}", self.hashes, self.filename)
-    }
 }
 
 impl fmt::Display for LogEntry {
@@ -43,11 +39,11 @@ mod test {
     use super::*;
 
     #[test]
-    fn source_text_test() {
+    fn to_string_test() {
         let hashes = "1,aaaaa,bbbbbbb".to_owned();
         let filename = "theDir/theFile.ext".to_owned();
         let le = LogEntry{hashes, filename};
-        assert_eq!(le.source_text(), "1,aaaaa,bbbbbbb,theDir/theFile.ext".to_owned());
+        assert_eq!(le.to_string(), "1,aaaaa,bbbbbbb,theDir/theFile.ext".to_owned());
     }
 
     #[test]
