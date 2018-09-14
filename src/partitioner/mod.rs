@@ -5,28 +5,6 @@ use self::match_pair::MatchPair;
 use self::match_group::{MatchGroup,MatchGroupsByOrigin, match_groups_by_origin};
 use std::collections::HashMap;
 use log_entry::LogEntry;
-//use common::WhichFile::{File1,File2};
-/*
-pub struct LogEntriesByOrigin<'a> {
-    pub file1: Vec<&'a LogEntry>,
-    pub file2: Vec<&'a LogEntry>,
-}
-
-fn log_entries_by_origin(log_entries: Vec<&LogEntry>) -> LogEntriesByOrigin {
-
-    let mut file1: Vec<&LogEntry> = Vec::new();
-    let mut file2: Vec<&LogEntry> = Vec::new();
-
-    for log_entry in log_entries {
-
-        match log_entry.origin {
-            File1 => file1.push(log_entry),
-            File2 => file2.push(log_entry),
-        }
-    }
-
-    LogEntriesByOrigin{file1, file2}
-}*/
 
 pub struct MatchPartition<'a> {
 
