@@ -213,7 +213,7 @@ pub fn match_partition<'b>(from_file1: &Vec<&'b LogEntry>, from_file2: &Vec<&'b 
 #[cfg(test)]
 mod test {
     use super::*;
-    use common::{read_log_entries_from_file,WhichFile};
+    use common::read_log_entries_from_file;
 
     #[test]
     fn match_partition_test() {

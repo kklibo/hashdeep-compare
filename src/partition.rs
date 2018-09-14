@@ -1,5 +1,4 @@
 use common;
-use common::WhichFile::{File1,File2};
 use log_entry::LogEntry;
 use partitioner;
 
@@ -30,8 +29,8 @@ pub fn partition_log(filename1: &str, filename2: &str, output_filename_base: &st
     let log_file2 = common::read_log_entries_from_file::<Vec<LogEntry>>(filename2)?;
     assert_eq!(0, log_file2.invalid_lines.len());//todo: remove this
 
-    let mut from_file1: Vec<&LogEntry> = log_file1.entries.iter().collect::<Vec<&LogEntry>>();
-    let mut from_file2: Vec<&LogEntry> = log_file2.entries.iter().collect::<Vec<&LogEntry>>();
+    let from_file1: Vec<&LogEntry> = log_file1.entries.iter().collect::<Vec<&LogEntry>>();
+    let from_file2: Vec<&LogEntry> = log_file2.entries.iter().collect::<Vec<&LogEntry>>();
 
     let mp = partitioner::match_partition(&from_file1, &from_file2).unwrap(); //todo: remove unwrap
 

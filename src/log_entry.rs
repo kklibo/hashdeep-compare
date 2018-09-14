@@ -1,5 +1,4 @@
 use std::fmt;
-use common::WhichFile;
 
 #[derive(Eq, PartialEq, Hash, Debug)]
 pub struct LogEntry {

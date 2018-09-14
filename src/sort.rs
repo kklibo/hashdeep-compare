@@ -1,5 +1,4 @@
 use common;
-use common::WhichFile::File1;
 use log_entry::LogEntry;
 
 pub fn sort_log(filename: &str, out_filename: &str) -> ::std::io::Result<()>{

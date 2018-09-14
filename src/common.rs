@@ -5,12 +5,6 @@ use log_entry::LogEntry;
 use partitioner::match_pair::MatchPair;
 use partitioner::match_group::MatchGroup;
 
-#[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
-pub enum WhichFile {
-    File1,
-    File2,
-}
-
 pub struct LogFile<T>
     where T: Extend<LogEntry> + Default + IntoIterator
 {
