@@ -30,7 +30,7 @@ pub fn read_log_entries_from_file<T>(filename: &str, which_file: WhichFile) -> R
 
     entries.extend(contents.lines().skip(5).filter_map(|line| {
 
-        LogEntry::from_str(line, which_file).or_else( || {
+        LogEntry::from_str(line).or_else( || {
             invalid_lines.push(line.to_owned());
             None
         })
