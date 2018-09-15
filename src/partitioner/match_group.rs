@@ -1,8 +1,8 @@
 use log_entry::LogEntry;
-use common::WhichFile::{File1,File2};
 
-pub struct MatchGroup<'a> {
-    pub entries: Vec<&'a LogEntry>,
+pub struct MatchGroup<'a> { //todo: add private/necessary constructor?
+    pub from_file1: Vec<&'a LogEntry>,
+    pub from_file2: Vec<&'a LogEntry>,
 }
 
 pub struct MatchGroupsByOrigin<'d> {
@@ -20,8 +20,8 @@ pub fn match_groups_by_origin(match_groups: Vec<MatchGroup>) -> MatchGroupsByOri
 
     for match_group in match_groups {
 
-        let f1 = match_group.entries.iter().any(|&x| x.origin == File1);
-        let f2 = match_group.entries.iter().any(|&x| x.origin == File2);
+        let f1 = !match_group.from_file1.is_empty();
+        let f2 = !match_group.from_file2.is_empty();
 
         match f1 {
             true => match f2 {

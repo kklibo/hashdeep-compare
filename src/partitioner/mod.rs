@@ -5,28 +5,6 @@ use self::match_pair::MatchPair;
 use self::match_group::{MatchGroup,MatchGroupsByOrigin, match_groups_by_origin};
 use std::collections::HashMap;
 use log_entry::LogEntry;
-use common::WhichFile::{File1,File2};
-
-pub struct LogEntriesByOrigin<'a> {
-    pub file1: Vec<&'a LogEntry>,
-    pub file2: Vec<&'a LogEntry>,
-}
-
-fn log_entries_by_origin(log_entries: Vec<&LogEntry>) -> LogEntriesByOrigin {
-
-    let mut file1: Vec<&LogEntry> = Vec::new();
-    let mut file2: Vec<&LogEntry> = Vec::new();
-
-    for log_entry in log_entries {
-
-        match log_entry.origin {
-            File1 => file1.push(log_entry),
-            File2 => file2.push(log_entry),
-        }
-    }
-
-    LogEntriesByOrigin{file1, file2}
-}
 
 pub struct MatchPartition<'a> {
 
@@ -39,7 +17,8 @@ pub struct MatchPartition<'a> {
     pub hashes_match_pairs: Vec<MatchPair<'a>>,
     pub hashes_match_groups: MatchGroupsByOrigin<'a>,
 
-    pub no_match: LogEntriesByOrigin<'a>
+    pub no_match_file1: Vec<&'a LogEntry>,
+    pub no_match_file2: Vec<&'a LogEntry>,
 }
 
 impl<'a> MatchPartition<'a> {
@@ -48,9 +27,13 @@ impl<'a> MatchPartition<'a> {
 
         fn pairs_sum(pairs: &Vec<MatchPair>) -> Option<usize> {
             pairs.iter().try_fold(0usize, |acc, _| acc.checked_add(2))
+            //todo: replace this with checked add of checked multiplication of len()?
         }
         fn groups_sum(groups: &Vec<MatchGroup>) -> Option<usize> {
-            groups.iter().try_fold(0usize, |acc, ref x| acc.checked_add(x.entries.len()))
+            groups.iter().try_fold(0usize, |acc, ref x| {
+                x.from_file1.len().checked_add(x.from_file2.len())
+                    .and_then(|x| acc.checked_add(x))
+            })
         }
         fn vec_sum(v: &Vec<&LogEntry>) -> Option<usize> {
             Some(v.len())
@@ -69,8 +52,8 @@ impl<'a> MatchPartition<'a> {
             groups_sum(&self.hashes_match_groups.file1_only),
             groups_sum(&self.hashes_match_groups.file2_only),
             groups_sum(&self.hashes_match_groups.file1_and_file2),
-            vec_sum(&self.no_match.file1),
-            vec_sum(&self.no_match.file2),
+            vec_sum(&self.no_match_file1),
+            vec_sum(&self.no_match_file2),
         }).iter()
             .try_fold(0usize, |acc: usize, x: &Option<usize>| {
                 x.and_then(|y| acc.checked_add(y))
@@ -84,45 +67,75 @@ pub enum MatchPartitionError {
     ChecksumAdditionOverflow,
 }
 
-pub fn match_partition<'b>(log_entries: &Vec<&'b LogEntry>) -> Result<MatchPartition<'b>, MatchPartitionError> {
+pub fn match_partition<'b>(from_file1: &Vec<&'b LogEntry>, from_file2: &Vec<&'b LogEntry>) -> Result<MatchPartition<'b>, MatchPartitionError> {
 
     struct SortedMatches<'a> {
         match_pairs: Vec<MatchPair<'a>>,
         match_groups: Vec<MatchGroup<'a>>,
-        no_match: Vec<&'a LogEntry>,
+        no_match_file1: Vec<&'a LogEntry>,
+        no_match_file2: Vec<&'a LogEntry>,
     }
 
-    fn sort_matches<'c, F>(log_entries: &Vec<&'c LogEntry>, f: F) -> SortedMatches<'c>
+    fn sort_matches<'c, F>(from_file1: &Vec<&'c LogEntry>, from_file2: &Vec<&'c LogEntry>, f: F) -> SortedMatches<'c>
         where F: Fn(&LogEntry) -> String
     {
-        let mut matches = HashMap::<String, Vec<&LogEntry>>::new();
+        enum LogEntryFrom<'a> {
+            File1(&'a LogEntry),
+            File2(&'a LogEntry),
+        }
+
+        let mut matches = HashMap::<String, Vec<LogEntryFrom>>::new();
+
+        for &i in from_file1 {
+            matches.entry(f(i)).or_insert(Vec::<LogEntryFrom>::new()).push(LogEntryFrom::File1(i));
+        }
+
+        for &i in from_file2 {
+            matches.entry(f(i)).or_insert(Vec::<LogEntryFrom>::new()).push(LogEntryFrom::File2(i));
+        }
+
+
         let mut match_pairs = Vec::<MatchPair>::new();
         let mut match_groups = Vec::<MatchGroup>::new();
-        let mut no_match = Vec::<&LogEntry>::new();
-
-        for &i in log_entries {
-            matches.entry(f(i)).or_insert(Vec::<&LogEntry>::new()).push(i);
-        }
+        let mut no_match_file1 = Vec::<&LogEntry>::new();
+        let mut no_match_file2 = Vec::<&LogEntry>::new();
 
         for (_, v) in matches {
             match v.len() {
-                1 => no_match.push(v[0]),
-                2 => match MatchPair::maybe_match_pair(v[0], v[1]) {
-                    Some(mp) => match_pairs.push(mp),
-                    None => match_groups.push(MatchGroup { entries: v })
+                //a 0-length value vector should never occur (todo (optional): confirm this with type(s)?)
+                1 => match v[0] {
+                    LogEntryFrom::File1(x) => no_match_file1.push(x),
+                    LogEntryFrom::File2(x) => no_match_file2.push(x),
+                },
+                2 => match (&v[0], &v[1]) {
+                    (LogEntryFrom::File1(x),LogEntryFrom::File1(y)) => match_groups.push(MatchGroup{from_file1: vec![x,y], from_file2: vec![]}),
+                    (LogEntryFrom::File1(x),LogEntryFrom::File2(y)) => match_pairs.push(MatchPair{from_file1: x, from_file2: y}),
+                    (LogEntryFrom::File2(x),LogEntryFrom::File1(y)) => match_pairs.push(MatchPair{from_file1: y, from_file2: x}),
+                    (LogEntryFrom::File2(x),LogEntryFrom::File2(y)) => match_groups.push(MatchGroup{from_file1: vec![], from_file2: vec![x,y]}),
+                },
+                _ => {
+                    let mut from_file1 = Vec::<&LogEntry>::new();
+                    let mut from_file2 = Vec::<&LogEntry>::new();
+
+                    for i in v {
+                        match i {
+                            LogEntryFrom::File1(x) => from_file1.push(x),
+                            LogEntryFrom::File2(x) => from_file2.push(x),
+                        }
+                    }
+                    match_groups.push(MatchGroup{from_file1, from_file2});
                 }
-                _ => match_groups.push(MatchGroup { entries: v })
             }
         }
 
-        SortedMatches { match_pairs, match_groups, no_match }
+        SortedMatches { match_pairs, match_groups, no_match_file1, no_match_file2 }
     }
 
-    let full_matches = sort_matches(log_entries, |x| x.source_text());
+    let full_matches = sort_matches(from_file1, from_file2, |x| x.to_string());
 
-    let name_matches = sort_matches(&full_matches.no_match, |ref x| x.filename.clone());
+    let name_matches = sort_matches(&full_matches.no_match_file1, &full_matches.no_match_file2, |ref x| x.filename.clone());
 
-    let hashes_matches = sort_matches(&name_matches.no_match, |ref x| x.hashes.clone());
+    let hashes_matches = sort_matches(&name_matches.no_match_file1, &name_matches.no_match_file2, |ref x| x.hashes.clone());
 
     let mut mp = MatchPartition {
 
@@ -135,7 +148,8 @@ pub fn match_partition<'b>(log_entries: &Vec<&'b LogEntry>) -> Result<MatchParti
         hashes_match_pairs: hashes_matches.match_pairs,
         hashes_match_groups: match_groups_by_origin(hashes_matches.match_groups),
 
-        no_match: log_entries_by_origin(hashes_matches.no_match),
+        no_match_file1: hashes_matches.no_match_file1,
+        no_match_file2: hashes_matches.no_match_file2,
     };
 
     fn sort_match_pairs_by_filename(x: &mut Vec<MatchPair>) {
@@ -144,15 +158,21 @@ pub fn match_partition<'b>(log_entries: &Vec<&'b LogEntry>) -> Result<MatchParti
 
     fn sort_match_groups_by_filename(x: &mut Vec<MatchGroup>) {
 
-        x.into_iter().for_each(|x| sort_log_entries_by_filename(&mut x.entries));
+        x.into_iter().for_each(|x| {
+            sort_log_entries_by_filename(&mut x.from_file1);
+            sort_log_entries_by_filename(&mut x.from_file2);
+        });
 
         x.sort_by(|a, b| {
-            if a.entries.len() > 0 && b.entries.len() > 0 {
-                a.entries[0].filename.cmp(&b.entries[0].filename)
+
+            fn get_first<'a>(mg: &'a MatchGroup) -> Option<&'a&'a LogEntry> {
+                mg.from_file1.first().or(mg.from_file2.first())
             }
-                else {
-                    panic!("sort_match_groups_by_filename: empty MatchGroup") //todo: replace this
-                }
+
+            match (get_first(a), get_first(b)) {
+                (Some(x), Some(y)) => x.filename.cmp(&y.filename),
+                _ => panic!("sort_match_groups_by_filename: empty MatchGroup") //todo b: replace this
+            }
         });
     }
 
@@ -172,11 +192,11 @@ pub fn match_partition<'b>(log_entries: &Vec<&'b LogEntry>) -> Result<MatchParti
     sort_match_groups_by_filename(&mut mp.hashes_match_groups.file1_only);
     sort_match_groups_by_filename(&mut mp.hashes_match_groups.file2_only);
     sort_match_groups_by_filename(&mut mp.hashes_match_groups.file1_and_file2);
-    sort_log_entries_by_filename(&mut mp.no_match.file1);
-    sort_log_entries_by_filename(&mut mp.no_match.file2);
+    sort_log_entries_by_filename(&mut mp.no_match_file1);
+    sort_log_entries_by_filename(&mut mp.no_match_file2);
 
     match mp.total_log_entries() {
-        Some(t) if t == log_entries.len() => Ok(mp),
+        Some(t) if t == from_file1.len() + from_file2.len() => Ok(mp), //todo b: check for addition overflow
         Some(_) => Err(MatchPartitionError::ChecksumFailure),
         None => Err(MatchPartitionError::ChecksumAdditionOverflow),
     }
@@ -185,19 +205,20 @@ pub fn match_partition<'b>(log_entries: &Vec<&'b LogEntry>) -> Result<MatchParti
 #[cfg(test)]
 mod test {
     use super::*;
-    use common::{read_log_entries_from_file,WhichFile};
+    use common::read_log_entries_from_file;
 
     #[test]
     fn match_partition_test() {
 
-        let file1 = read_log_entries_from_file::<Vec<LogEntry>>("tests/partition_test1.txt", WhichFile::File1).unwrap();
-        let file2 = read_log_entries_from_file::<Vec<LogEntry>>("tests/partition_test2.txt", WhichFile::File2).unwrap();
+        let file1 = read_log_entries_from_file::<Vec<LogEntry>>("tests/partition_test1.txt").unwrap();
+        let file2 = read_log_entries_from_file::<Vec<LogEntry>>("tests/partition_test2.txt").unwrap();
         assert_eq!(0, file1.invalid_lines.len());
         assert_eq!(0, file2.invalid_lines.len());
 
-        let log_entries = file1.entries.iter().chain(file2.entries.iter()).collect::<Vec<&LogEntry>>();
+        let from_file1 = file1.entries.iter().collect::<Vec<&LogEntry>>();
+        let from_file2 = file2.entries.iter().collect::<Vec<&LogEntry>>();
 
-        let mp = match_partition(&log_entries).unwrap();
+        let mp = match_partition(&from_file1, &from_file2).unwrap();
 
         assert_eq!(2, mp.full_match_pairs.len());
         assert_eq!(1, mp.full_match_groups.file1_only.len());
@@ -211,7 +232,7 @@ mod test {
         assert_eq!(1, mp.hashes_match_groups.file1_only.len());
         assert_eq!(1, mp.hashes_match_groups.file2_only.len());
         assert_eq!(1, mp.hashes_match_groups.file1_and_file2.len());
-        assert_eq!(1, mp.no_match.file1.len());
-        assert_eq!(1, mp.no_match.file2.len());
+        assert_eq!(1, mp.no_match_file1.len());
+        assert_eq!(1, mp.no_match_file2.len());
     }
 }
