@@ -85,10 +85,6 @@ pub fn match_partition<'b>(from_file1: &Vec<&'b LogEntry>, from_file2: &Vec<&'b 
         }
 
         let mut matches = HashMap::<String, Vec<LogEntryFrom>>::new();
-        let mut match_pairs = Vec::<MatchPair>::new();
-        let mut match_groups = Vec::<MatchGroup>::new();
-        let mut no_match_file1 = Vec::<&LogEntry>::new();
-        let mut no_match_file2 = Vec::<&LogEntry>::new();
 
         for &i in from_file1 {
             matches.entry(f(i)).or_insert(Vec::<LogEntryFrom>::new()).push(LogEntryFrom::File1(i));
@@ -98,28 +94,24 @@ pub fn match_partition<'b>(from_file1: &Vec<&'b LogEntry>, from_file2: &Vec<&'b 
             matches.entry(f(i)).or_insert(Vec::<LogEntryFrom>::new()).push(LogEntryFrom::File2(i));
         }
 
+
+        let mut match_pairs = Vec::<MatchPair>::new();
+        let mut match_groups = Vec::<MatchGroup>::new();
+        let mut no_match_file1 = Vec::<&LogEntry>::new();
+        let mut no_match_file2 = Vec::<&LogEntry>::new();
+
         for (_, v) in matches {
             match v.len() {
-                //todo b: check for 0 here?
+                //a 0-length value vector should never occur (todo (optional): confirm this with type(s)?)
                 1 => match v[0] {
                     LogEntryFrom::File1(x) => no_match_file1.push(x),
                     LogEntryFrom::File2(x) => no_match_file2.push(x),
                 },
-                2 => {  //todo b: do better match patterns here?
-                    match v[0] {
-                        LogEntryFrom::File1(x) => {
-                            match v[1] {
-                                LogEntryFrom::File1(y) => match_groups.push(MatchGroup{from_file1: vec![x,y], from_file2: vec![]}),
-                                LogEntryFrom::File2(y) => match_pairs.push(MatchPair{from_file1: x, from_file2: y}),
-                            }
-                        },
-                        LogEntryFrom::File2(x) => {
-                            match v[1] {
-                                LogEntryFrom::File1(y) => match_pairs.push(MatchPair{from_file1: y, from_file2: x}),
-                                LogEntryFrom::File2(y) => match_groups.push(MatchGroup{from_file1: vec![], from_file2: vec![x,y]}),
-                            }
-                        },
-                    }
+                2 => match (&v[0], &v[1]) {
+                    (LogEntryFrom::File1(x),LogEntryFrom::File1(y)) => match_groups.push(MatchGroup{from_file1: vec![x,y], from_file2: vec![]}),
+                    (LogEntryFrom::File1(x),LogEntryFrom::File2(y)) => match_pairs.push(MatchPair{from_file1: x, from_file2: y}),
+                    (LogEntryFrom::File2(x),LogEntryFrom::File1(y)) => match_pairs.push(MatchPair{from_file1: y, from_file2: x}),
+                    (LogEntryFrom::File2(x),LogEntryFrom::File2(y)) => match_groups.push(MatchGroup{from_file1: vec![], from_file2: vec![x,y]}),
                 },
                 _ => {
                     let mut from_file1 = Vec::<&LogEntry>::new();
