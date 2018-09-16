@@ -6,3 +6,4 @@ mod common;
 mod log_entry;
 mod partitioner;
 pub mod partition;
+mod some_vec;

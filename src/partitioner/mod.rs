@@ -5,6 +5,7 @@ use self::match_pair::MatchPair;
 use self::match_group::{MatchGroup,MatchGroupsByOrigin, match_groups_by_origin};
 use std::collections::HashMap;
 use log_entry::LogEntry;
+use some_vec::SomeVec;
 
 pub struct MatchPartition<'a> {
 
@@ -84,14 +85,18 @@ pub fn match_partition<'b>(from_file1: &Vec<&'b LogEntry>, from_file2: &Vec<&'b 
             File2(&'a LogEntry),
         }
 
-        let mut matches = HashMap::<String, Vec<LogEntryFrom>>::new();
+        let mut matches = HashMap::<String, SomeVec<LogEntryFrom>>::new();
 
         for &i in from_file1 {
-            matches.entry(f(i)).or_insert(Vec::<LogEntryFrom>::new()).push(LogEntryFrom::File1(i));
+            matches.entry(f(i))
+                .and_modify(|x| x.push(LogEntryFrom::File1(i)))
+                .or_insert(SomeVec::<LogEntryFrom>::from_first_value(LogEntryFrom::File1(i)));
         }
 
         for &i in from_file2 {
-            matches.entry(f(i)).or_insert(Vec::<LogEntryFrom>::new()).push(LogEntryFrom::File2(i));
+            matches.entry(f(i))
+                .and_modify(|x| x.push(LogEntryFrom::File2(i)))
+                .or_insert(SomeVec::<LogEntryFrom>::from_first_value(LogEntryFrom::File2(i)));
         }
 
 
@@ -102,12 +107,12 @@ pub fn match_partition<'b>(from_file1: &Vec<&'b LogEntry>, from_file2: &Vec<&'b 
 
         for (_, v) in matches {
             match v.len() {
-                //a 0-length value vector should never occur (todo (optional): confirm this with type(s)?)
-                1 => match v[0] {
+                //no check for 0 needed: SomeVec.len() is always positive (todo (optional): add non-zero usize type for len() return value?)
+                1 => match v.at(0) {
                     LogEntryFrom::File1(x) => no_match_file1.push(x),
                     LogEntryFrom::File2(x) => no_match_file2.push(x),
                 },
-                2 => match (&v[0], &v[1]) {
+                2 => match (&v.at(0), &v.at(1)) {
                     (LogEntryFrom::File1(x),LogEntryFrom::File1(y)) => match_groups.push(MatchGroup{from_file1: vec![x,y], from_file2: vec![]}),
                     (LogEntryFrom::File1(x),LogEntryFrom::File2(y)) => match_pairs.push(MatchPair{from_file1: x, from_file2: y}),
                     (LogEntryFrom::File2(x),LogEntryFrom::File1(y)) => match_pairs.push(MatchPair{from_file1: y, from_file2: x}),
@@ -117,7 +122,7 @@ pub fn match_partition<'b>(from_file1: &Vec<&'b LogEntry>, from_file2: &Vec<&'b 
                     let mut from_file1 = Vec::<&LogEntry>::new();
                     let mut from_file2 = Vec::<&LogEntry>::new();
 
-                    for i in v {
+                    for i in v.inner_ref() {
                         match i {
                             LogEntryFrom::File1(x) => from_file1.push(x),
                             LogEntryFrom::File2(x) => from_file2.push(x),
