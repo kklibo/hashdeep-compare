@@ -22,6 +22,10 @@ impl<T> SomeVec<T> {
         self.v.len()
     }
 
+    pub fn first(&self) -> &T {
+        &self.v[0]
+    }
+
     //todo: implement [], replace these calls
     pub fn at(&self, index: usize) -> &T {
         &self.v[index]
@@ -47,11 +51,13 @@ mod test {
             let v = SomeVec::<i32>::from_vec(vec![1]).unwrap();
             assert_eq!(v.len(), 1);
             assert_eq!(*v.inner_ref(), vec![1]);
+            assert_eq!(*v.first(), 1);
         }
         {
             let v = SomeVec::<i32>::from_vec(vec![1,2,3]).unwrap();
             assert_eq!(v.len(), 3);
             assert_eq!(*v.inner_ref(), vec![1,2,3]);
+            assert_eq!(*v.first(), 1);
         }
     }
 
@@ -61,16 +67,19 @@ mod test {
             let v = SomeVec::<i32>::from_first_value(1);
             assert_eq!(v.len(), 1);
             assert_eq!(*v.inner_ref(), vec![1]);
+            assert_eq!(*v.first(), 1);
         }
         {
             let v = SomeVec::<()>::from_first_value(());
             assert_eq!(v.len(), 1);
             assert_eq!(*v.inner_ref(), vec![()]);
+            assert_eq!(*v.first(), ());
         }
         {
             let v = SomeVec::<String>::from_first_value("1".to_owned());
             assert_eq!(v.len(), 1);
             assert_eq!(*v.inner_ref(), vec!["1".to_owned()]);
+            assert_eq!(*v.first(), "1".to_owned());
         }
     }
 
@@ -92,10 +101,12 @@ mod test {
     fn push_test() {
         let mut v = SomeVec::<String>::from_vec(vec!["1".to_owned()]).unwrap();
         assert_eq!(v.len(), 1);
+        assert_eq!(*v.first(), "1".to_owned());
         assert_eq!(*v.at(0), "1");
 
         v.push("2".to_owned());
         assert_eq!(v.len(), 2);
+        assert_eq!(*v.first(), "1".to_owned());
         assert_eq!(*v.at(0), "1");
         assert_eq!(*v.at(1), "2");
     }
