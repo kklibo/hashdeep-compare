@@ -38,6 +38,8 @@ impl<T> SomeVec<T> {
     pub fn inner_ref(&self) -> &Vec<T> {
         &self.v
     }
+
+    //todo: add sort_by
 }
 
 #[cfg(test)]
