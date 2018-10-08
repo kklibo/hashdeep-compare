@@ -147,7 +147,7 @@ pub fn match_partition<'b>(from_file1: &Vec<&'b LogEntry>, from_file2: &Vec<&'b 
                     match (SomeVec::from_vec(from_file1), SomeVec::from_vec(from_file2)) {
                         (Some(log_entries), None) => match_groups_file1.push(SingleFileMatchGroup{log_entries}),
                         (None, Some(log_entries)) => match_groups_file2.push(SingleFileMatchGroup{log_entries}),
-                        (Some(x), Some(y)) => match_groups.push(MatchGroup{from_file1: x.inner_ref().clone(), from_file2: y.inner_ref().clone()}), //todo: remove these clone() calls
+                        (Some(from_file1), Some(from_file2)) => match_groups.push(MatchGroup{from_file1, from_file2}),
                         (None, None) => panic!("empty SomeVec in sort_matches"), //todo: remove this
                     }
                 }
@@ -191,20 +191,13 @@ pub fn match_partition<'b>(from_file1: &Vec<&'b LogEntry>, from_file2: &Vec<&'b 
     fn sort_match_groups_by_filename(x: &mut Vec<MatchGroup>) {
 
         x.into_iter().for_each(|x| {
-            sort_log_entries_by_filename(&mut x.from_file1);
-            sort_log_entries_by_filename(&mut x.from_file2);
+            sort_log_entries_somevec_by_filename(&mut x.from_file1);
+            sort_log_entries_somevec_by_filename(&mut x.from_file2);
         });
 
         x.sort_by(|a, b| {
-
-            fn get_first<'a>(mg: &'a MatchGroup) -> Option<&'a&'a LogEntry> {
-                mg.from_file1.first().or(mg.from_file2.first())
-            }
-
-            match (get_first(a), get_first(b)) {
-                (Some(x), Some(y)) => x.filename.cmp(&y.filename),
-                _ => panic!("sort_match_groups_by_filename: empty MatchGroup") //todo b: replace this
-            }
+            //todo (optional): make this sorting decision user-controllable (could also sort by from_file2)
+            a.from_file1.first().filename.cmp(&b.from_file1.first().filename)
         });
     }
 

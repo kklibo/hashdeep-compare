@@ -4,6 +4,7 @@ use std::io::{Write,Error};
 use log_entry::LogEntry;
 use partitioner::match_pair::MatchPair;
 use partitioner::match_group::{SingleFileMatchGroup,MatchGroup};
+use some_vec::SomeVec;
 
 pub struct LogFile<T>
     where T: Extend<LogEntry> + Default + IntoIterator
@@ -72,9 +73,9 @@ pub fn write_match_groups_to_file(match_groups: &Vec<MatchGroup>, filename: &str
 
     for match_group in match_groups {
 
-        fn write_entries(entries: &Vec<&LogEntry>, label: &str, file: &mut File) -> Result<(), Error>
+        fn write_entries(entries: &SomeVec<&LogEntry>, label: &str, file: &mut File) -> Result<(), Error>
         {
-            for &log_entry in entries {
+            for &log_entry in entries.inner_ref() {
                 write_log_entry_to_file(label, &log_entry.to_string(), file)?;
             };
             Ok(())
