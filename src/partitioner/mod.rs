@@ -122,16 +122,16 @@ pub fn match_partition<'b>(from_file1: &Vec<&'b LogEntry>, from_file2: &Vec<&'b 
 
         for (_, v) in matches {
             match v.len() {
-                //no check for 0 needed: SomeVec.len() is always positive (todo (optional): add non-zero usize type for len() return value?)
+                //no check for 0 needed: SomeVec.len() is always positive (todo (optional): add non-zero usize type for len() return value? std::num::NonZeroUsize?)
                 1 => match v.at(0) {
                     LogEntryFrom::File1(x) => no_match_file1.push(x),
                     LogEntryFrom::File2(x) => no_match_file2.push(x),
                 },
                 2 => match (&v.at(0), &v.at(1)) {
-                    (LogEntryFrom::File1(x),LogEntryFrom::File1(y)) => match_groups_file1.push(SingleFileMatchGroup{log_entries: vec![*x,*y]}),
+                    (LogEntryFrom::File1(x),LogEntryFrom::File1(y)) => match_groups_file1.push(SingleFileMatchGroup{log_entries: SomeVec::from_values(*x,*y)}),
                     (LogEntryFrom::File1(x),LogEntryFrom::File2(y)) => match_pairs.push(MatchPair{from_file1: x, from_file2: y}),
                     (LogEntryFrom::File2(x),LogEntryFrom::File1(y)) => match_pairs.push(MatchPair{from_file1: y, from_file2: x}),
-                    (LogEntryFrom::File2(x),LogEntryFrom::File2(y)) => match_groups_file2.push(SingleFileMatchGroup{log_entries: vec![*x,*y]}),
+                    (LogEntryFrom::File2(x),LogEntryFrom::File2(y)) => match_groups_file2.push(SingleFileMatchGroup{log_entries: SomeVec::from_values(*x,*y)}),
                 },
                 _ => {
                     let mut from_file1 = Vec::<&LogEntry>::new();
@@ -144,11 +144,11 @@ pub fn match_partition<'b>(from_file1: &Vec<&'b LogEntry>, from_file2: &Vec<&'b 
                         }
                     }
 
-                    match (from_file1.is_empty(), from_file2.is_empty()) {
-                        (false, true) => match_groups_file1.push(SingleFileMatchGroup{log_entries: from_file1}),
-                        (true, false) => match_groups_file2.push(SingleFileMatchGroup{log_entries: from_file2}),
-                        (false, false) => match_groups.push(MatchGroup{from_file1, from_file2}),
-                        (true, true) => panic!("empty SomeVec in sort_matches"), //todo: remove this
+                    match (SomeVec::from_vec(from_file1), SomeVec::from_vec(from_file2)) {
+                        (Some(log_entries), None) => match_groups_file1.push(SingleFileMatchGroup{log_entries}),
+                        (None, Some(log_entries)) => match_groups_file2.push(SingleFileMatchGroup{log_entries}),
+                        (Some(x), Some(y)) => match_groups.push(MatchGroup{from_file1: x.inner_ref().clone(), from_file2: y.inner_ref().clone()}), //todo: remove these clone() calls
+                        (None, None) => panic!("empty SomeVec in sort_matches"), //todo: remove this
                     }
                 }
             }
@@ -211,19 +211,19 @@ pub fn match_partition<'b>(from_file1: &Vec<&'b LogEntry>, from_file2: &Vec<&'b 
     fn sort_single_file_match_groups_by_filename(x: &mut Vec<SingleFileMatchGroup>) {
 
         x.into_iter().for_each(|x| {
-            sort_log_entries_by_filename(&mut x.log_entries);
+            sort_log_entries_somevec_by_filename(&mut x.log_entries);
         });
 
         x.sort_by(|a, b| {
-
-            match (a.log_entries.first(), b.log_entries.first()) {
-                (Some(x), Some(y)) => x.filename.cmp(&y.filename),
-                _ => panic!("sort_match_groups_by_filename: empty MatchGroup") //todo b: replace this
-            }
+            a.log_entries.first().filename.cmp(&b.log_entries.first().filename)
         });
     }
 
+    //todo b: deduplicate these
     fn sort_log_entries_by_filename(x: &mut Vec<&LogEntry>) {
+        x.sort_by(|a, b| a.filename.cmp(&b.filename));
+    }
+    fn sort_log_entries_somevec_by_filename(x: &mut SomeVec<&LogEntry>) {
         x.sort_by(|a, b| a.filename.cmp(&b.filename));
     }
 

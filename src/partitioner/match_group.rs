@@ -1,8 +1,9 @@
 use log_entry::LogEntry;
+use some_vec::SomeVec;
 
 //todo: define as newtype?
 pub struct SingleFileMatchGroup<'a> {
-    pub log_entries: Vec<&'a LogEntry>,
+    pub log_entries: SomeVec<&'a LogEntry>,
 }
 
 pub struct MatchGroup<'a> {

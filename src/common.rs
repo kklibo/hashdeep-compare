@@ -94,7 +94,7 @@ pub fn write_single_file_match_groups_to_file(single_file_match_groups: &Vec<Sin
 
     for single_file_match_group in single_file_match_groups {
 
-        for log_entry in &single_file_match_group.log_entries {
+        for log_entry in single_file_match_group.log_entries.inner_ref() {
             write_log_entry_to_file("", &log_entry.to_string(), &mut file)?;
         };
         file.write("\n".as_bytes())?;
