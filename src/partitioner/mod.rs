@@ -212,7 +212,6 @@ pub fn match_partition<'b>(from_file1: &Vec<&'b LogEntry>, from_file2: &Vec<&'b 
         });
     }
 
-    //todo b: deduplicate these
     fn sort_log_entries_by_filename(x: &mut Vec<&LogEntry>) {
         x.sort_by(|a, b| a.filename.cmp(&b.filename));
     }

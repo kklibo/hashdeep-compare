@@ -32,7 +32,6 @@ impl<T> SomeVec<T> {
         &self.v[0]
     }
 
-    //todo: implement [], replace these calls
     pub fn at(&self, index: usize) -> &T {
         &self.v[index]
     }
