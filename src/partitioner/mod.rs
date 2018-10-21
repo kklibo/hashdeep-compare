@@ -33,8 +33,7 @@ impl<'a> MatchPartition<'a> {
     fn total_log_entries(&self) -> Option<usize> {
 
         fn pairs_sum(pairs: &Vec<MatchPair>) -> Option<usize> {
-            pairs.iter().try_fold(0usize, |acc, _| acc.checked_add(2))
-            //todo: replace this with checked add of checked multiplication of len()?
+            pairs.len().checked_mul(2)
         }
         fn groups_sum(groups: &Vec<MatchGroup>) -> Option<usize> {
             groups.iter().try_fold(0usize, |acc, ref x| {
@@ -234,10 +233,12 @@ pub fn match_partition<'b>(from_file1: &Vec<&'b LogEntry>, from_file2: &Vec<&'b 
     sort_log_entries_by_filename(&mut mp.no_match_file1);
     sort_log_entries_by_filename(&mut mp.no_match_file2);
 
-    match mp.total_log_entries() {
-        Some(t) if t == from_file1.len() + from_file2.len() => Ok(mp), //todo b: check for addition overflow
-        Some(_) => Err(MatchPartitionError::ChecksumFailure),
-        None => Err(MatchPartitionError::ChecksumAdditionOverflow),
+    let total_from_both_files = from_file1.len().checked_add(from_file2.len());
+
+    match (mp.total_log_entries(), total_from_both_files) {
+        (Some(x), Some(y)) if x == y => Ok(mp),
+        (Some(_), Some(_)) => Err(MatchPartitionError::ChecksumFailure),
+        _ => Err(MatchPartitionError::ChecksumAdditionOverflow),
     }
 }
 
