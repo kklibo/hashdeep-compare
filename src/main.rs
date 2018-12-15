@@ -1,18 +1,21 @@
 extern crate hashdeep_tool_lite;
 use hashdeep_tool_lite::*;
 
-fn show_help() {
-    println!("hashdeep tool lite");
-    println!(" arguments");
-    println!("  sort input_file output_file");
-    println!("  part input_file1 input_file2 output_file_base");
-}
-
 fn main() {
+
+    const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+
+    fn show_help() {
+        println!("hashdeep tool lite version {}", VERSION);
+        println!(" arguments");
+        println!("  version");
+        println!("  sort input_file output_file");
+        println!("  part input_file1 input_file2 output_file_base");
+    }
 
     let args: Vec<String> = std::env::args().collect();
 
-    if args.len() < 3 {
+    if args.len() < 2 {
         show_help();
         return;
     }
@@ -32,6 +35,9 @@ fn main() {
                 Ok(()) => (),
                 Err(e) => println!("{:?}", e),
             }
+        },
+        "version" => {
+            println!("hashdeep tool lite version {}", VERSION);
         },
 
         _ => show_help(),
