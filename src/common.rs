@@ -16,7 +16,6 @@ pub struct LogFile<T>
 pub fn read_log_entries_from_file<T>(filename: &str) -> Result<LogFile<T>, Error>
     where T: Extend<LogEntry> + Default + IntoIterator
 {
-
     let contents = read_to_string(filename)?;
 
     let mut entries = T::default();
@@ -106,7 +105,6 @@ pub fn write_single_file_match_groups_to_file(single_file_match_groups: &Vec<Sin
 
 #[cfg(test)]
 pub fn files_are_equal(filename1: &str, filename2: &str) -> bool {
-    use std::fs::read_to_string;
 
     let str1 = match read_to_string(filename1) {
         Ok(s) => s,
