@@ -2,8 +2,7 @@ use std::cmp::Ordering;
 
 #[derive(Debug, PartialEq)]
 pub struct SomeVec<T> {
-    v: Vec<T>,
-    _prevent_struct_literals: (),
+    v: Vec<T>
 }
 
 impl<T> SomeVec<T> {
@@ -12,16 +11,16 @@ impl<T> SomeVec<T> {
 
         match v.is_empty() {
             true => None,
-            false => Some(SomeVec{v, _prevent_struct_literals: ()}),
+            false => Some(SomeVec{v}),
         }
     }
 
     pub fn from_first_value(value: T) -> SomeVec<T> {
-        SomeVec{v: vec!{value}, _prevent_struct_literals: ()}
+        SomeVec{v: vec!{value}}
     }
 
     pub fn from_values(value1: T, value2: T) -> SomeVec<T> {
-        SomeVec{v: vec!{value1, value2}, _prevent_struct_literals: ()}
+        SomeVec{v: vec!{value1, value2}}
     }
 
     pub fn len(&self) -> usize {
