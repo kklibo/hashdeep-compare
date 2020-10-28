@@ -9,6 +9,7 @@ fn main() {
         println!("hashdeep tool lite version {}", VERSION);
         println!(" arguments");
         println!("  version");
+        println!("  hash target_directory output_path_base");
         println!("  sort input_file output_file");
         println!("  part input_file1 input_file2 output_file_base");
     }
@@ -22,6 +23,17 @@ fn main() {
 
 
     match args[1].as_str() {
+        "hash" => {
+            if args.len() < 4 {return;}
+
+            match command::run_hashdeep_command(
+                args[2].as_str(),
+                args[3].as_str())
+            {
+                Ok(_) => (),
+                Err(e) => println!("{:?}", e),
+            }
+        },
         "sort" => {
             if args.len() < 4 {return;}
             match sort::sort_log(args[2].as_str(), args[3].as_str()) {

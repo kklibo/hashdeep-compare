@@ -61,3 +61,28 @@ fn sort_success() -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
+
+
+#[test]
+fn hash_success() -> Result<(), Box<dyn std::error::Error>> {
+
+    let expected_result_path = "tests/hashdeep_result.txt";
+    let target_path = "tests/hashdeep_target";
+
+    let temp_dir = tempfile::TempDir::new()?;
+    let temp_file_path = temp_dir.path().join("test1");
+
+
+    Command::cargo_bin(BIN_NAME)?
+        .arg("hash")
+        .arg(target_path)
+        .arg(&temp_file_path)
+        .assert().success();
+
+    let p = predicates::path::eq_file(Path::new(expected_result_path));
+    assert!(p.eval(temp_file_path.as_path()));
+
+    temp_dir.close()?;
+
+    Ok(())
+}

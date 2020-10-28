@@ -1,0 +1,6 @@
+%%%% HASHDEEP-1.0
+%%%% size,md5,sha256,filename
+## Invoked from: /media/sf_RustDevVM_Shared/projects/hashdeep_tool_lite
+## $ hashdeep -l -r -o f tests/hashdeep_target
+## 
+4,ba1f2511fc30423bdbb183fe33f3dd0f,181210f8f9c779c26da1d9b2075bde0127302ee0e3fca38c9a83f5b1dd8e5d3b,tests/hashdeep_target/subfolder/123.txt
