@@ -17,7 +17,6 @@ pub fn sort_log(filename: &str, out_filename: &str) -> ::std::io::Result<()>{
 #[cfg(test)]
 mod test {
     use super::*;
-    use common::files_are_equal;
 
     extern crate tempfile;
     extern crate predicates;
@@ -32,7 +31,6 @@ mod test {
             let temp_file_path_str = temp_file.path().to_str().unwrap();
 
             sort_log("tests/test1.txt", temp_file_path_str).unwrap();
-            assert!(files_are_equal("tests/test1 sorted.txt", temp_file_path_str));
 
             let p = predicates::path::eq_file("tests/test1 sorted.txt");
             assert!(p.eval(temp_file.path()));

@@ -102,33 +102,3 @@ pub fn write_single_file_match_groups_to_file(single_file_match_groups: &Vec<Sin
 
     Ok(())
 }
-
-#[cfg(test)]
-pub fn files_are_equal(filename1: &str, filename2: &str) -> bool {
-
-    let str1 = match read_to_string(filename1) {
-        Ok(s) => s,
-        Err(_) => return false,
-    };
-    let str2 = match read_to_string(filename2) {
-        Ok(s) => s,
-        Err(_) => return false,
-    };
-
-    str1 == str2
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[test]
-    fn files_are_equal_test() {
-        assert!(files_are_equal("tests/empty file.txt", "tests/empty file.txt"));
-        assert!(!files_are_equal("tests/empty file.txt", "tests/one newline.txt"));
-        assert!(files_are_equal("tests/one newline.txt", "tests/one newline.txt"));
-        assert!(files_are_equal("tests/test1.txt", "tests/test1.txt"));
-        assert!(files_are_equal("tests/test1.txt", "tests/test1 copy.txt"));
-        assert!(!files_are_equal("tests/test1.txt", "tests/test2.txt"));
-    }
-}
