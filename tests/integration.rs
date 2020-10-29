@@ -31,7 +31,9 @@ fn no_parameters() -> Result<(), Box<dyn std::error::Error>> {
 #[test]
 fn invalid_parameters() -> Result<(), Box<dyn std::error::Error>> {
 
-    prints_help_message_fn(&["nonexistent_command"])?;
+    Command::cargo_bin(BIN_NAME)?
+        .arg("nonexistent_command")
+        .assert().stderr(predicates::str::contains("invalid command"));
 
     Ok(())
 }
