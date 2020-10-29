@@ -19,12 +19,23 @@ mod test {
     use super::*;
     use common::files_are_equal;
 
+    extern crate tempfile;
+    extern crate predicates;
+
+    use self::tempfile::NamedTempFile;
+    use self::predicates::prelude::*;
+
     #[test]
     fn sort_log_test() {
         {
-            let test_out = "tests/temp/sort_log_test.txt";
-            sort_log("tests/test1.txt", test_out).unwrap();
-            assert!(files_are_equal("tests/test1 sorted.txt", test_out));
+            let temp_file = NamedTempFile::new().unwrap();
+            let temp_file_path_str = temp_file.path().to_str().unwrap();
+
+            sort_log("tests/test1.txt", temp_file_path_str).unwrap();
+            assert!(files_are_equal("tests/test1 sorted.txt", temp_file_path_str));
+
+            let p = predicates::path::eq_file("tests/test1 sorted.txt");
+            assert!(p.eval(temp_file.path()));
         }
     }
 }
