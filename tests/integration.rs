@@ -68,7 +68,7 @@ fn sort_success() -> Result<(), Box<dyn std::error::Error>> {
 #[test]
 fn hash_success() -> Result<(), Box<dyn std::error::Error>> {
 
-    let expected_result_path = "tests/hashdeep_result.txt";
+    let expected_result_path = Path::new("tests/hashdeep_result.txt");
     let target_path = "tests/hashdeep_target";
 
     let temp_dir = tempfile::TempDir::new()?;
@@ -81,8 +81,20 @@ fn hash_success() -> Result<(), Box<dyn std::error::Error>> {
         .arg(&temp_file_path)
         .assert().success();
 
-    let p = predicates::path::eq_file(Path::new(expected_result_path));
-    assert!(p.eval(temp_file_path.as_path()));
+    //special comparison:
+    // skip the third line of the header: it contains the invocation directory
+    // and will be (correctly) inconsistent between runs
+
+    let     test_file_string = std::fs::read_to_string(&      temp_file_path)?;
+    let expected_file_string = std::fs::read_to_string(&expected_result_path)?;
+
+    let test_lines =
+        test_file_string    .lines().take(2).chain(test_file_string    .lines().skip(3));
+
+    let expected_lines =
+        expected_file_string.lines().take(2).chain(expected_file_string.lines().skip(3));
+
+    assert!(test_lines.zip(expected_lines).all(|(a,b)| a == b));
 
     temp_dir.close()?;
 
