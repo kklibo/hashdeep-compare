@@ -1,5 +1,5 @@
 /.idea
 /.cargo
-hashdeep_tool_lite.iml
+*.iml
 /target
 **/*.rs.bk

@@ -1,5 +1,5 @@
-extern crate hashdeep_tool_lite;
-use hashdeep_tool_lite::*;
+extern crate hashdeep_compare;
+use hashdeep_compare::*;
 
 use std::error::Error;
 
@@ -8,7 +8,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
     fn show_help() {
-        println!("hashdeep tool lite version {}", VERSION);
+        println!("hashdeep-compare version {}", VERSION);
         println!(" arguments");
         println!("  version");
         println!("  hash target_directory output_path_base");
@@ -43,7 +43,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             partition::partition_log(args[2].as_str(), args[3].as_str(), args[4].as_str())?;
         },
         "version" => {
-            println!("hashdeep tool lite version {}", VERSION);
+            println!("hashdeep-compare version {}", VERSION);
         },
 
         x => Err(format!("invalid command: {}", x))?

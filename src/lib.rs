@@ -1,4 +1,4 @@
-//! hashdeep_tool_lite
+//! hashdeep-compare
 //!
 
 pub mod sort;

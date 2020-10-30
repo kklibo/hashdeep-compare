@@ -16,7 +16,7 @@ fn prints_help_message_fn(args: &[&str]) -> Result<(), Box<dyn std::error::Error
 
     Command::cargo_bin(BIN_NAME)?
         .args(args)
-        .assert().stdout(predicates::str::contains("hashdeep tool lite version"));
+        .assert().stdout(predicates::str::contains("hashdeep-compare version"));
 
     Ok(())
 }
