@@ -32,21 +32,21 @@ impl<'a> MatchPartition<'a> {
 
     fn total_log_entries(&self) -> Option<usize> {
 
-        fn pairs_sum(pairs: &Vec<MatchPair>) -> Option<usize> {
+        fn pairs_sum(pairs: &[MatchPair]) -> Option<usize> {
             pairs.len().checked_mul(2)
         }
-        fn groups_sum(groups: &Vec<MatchGroup>) -> Option<usize> {
+        fn groups_sum(groups: &[MatchGroup]) -> Option<usize> {
             groups.iter().try_fold(0usize, |acc, ref x| {
                 x.from_file1.len().checked_add(x.from_file2.len())
                     .and_then(|x| acc.checked_add(x))
             })
         }
-        fn single_file_groups_sum(groups: &Vec<SingleFileMatchGroup>) -> Option<usize> {
+        fn single_file_groups_sum(groups: &[SingleFileMatchGroup]) -> Option<usize> {
             groups.iter().try_fold(0usize, |acc, ref x| {
                 acc.checked_add(x.log_entries.len())
             })
         }
-        fn vec_sum(v: &Vec<&LogEntry>) -> Option<usize> {
+        fn vec_sum(v: &[&LogEntry]) -> Option<usize> {
             Some(v.len())
         }
 
@@ -78,7 +78,7 @@ pub enum MatchPartitionError {
     ChecksumAdditionOverflow,
 }
 
-pub fn match_partition<'b>(from_file1: &Vec<&'b LogEntry>, from_file2: &Vec<&'b LogEntry>) -> Result<MatchPartition<'b>, MatchPartitionError> {
+pub fn match_partition<'b>(from_file1: &[&'b LogEntry], from_file2: &[&'b LogEntry]) -> Result<MatchPartition<'b>, MatchPartitionError> {
 
     struct SortedMatches<'a> {
         match_pairs: Vec<MatchPair<'a>>,
@@ -89,7 +89,7 @@ pub fn match_partition<'b>(from_file1: &Vec<&'b LogEntry>, from_file2: &Vec<&'b 
         no_match_file2: Vec<&'a LogEntry>,
     }
 
-    fn sort_matches<'c, F>(from_file1: &Vec<&'c LogEntry>, from_file2: &Vec<&'c LogEntry>, f: F) -> SortedMatches<'c>
+    fn sort_matches<'c, F>(from_file1: &[&'c LogEntry], from_file2: &[&'c LogEntry], f: F) -> SortedMatches<'c>
         where F: Fn(&LogEntry) -> String
     {
         enum LogEntryFrom<'a> {
@@ -102,13 +102,13 @@ pub fn match_partition<'b>(from_file1: &Vec<&'b LogEntry>, from_file2: &Vec<&'b 
         for &i in from_file1 {
             matches.entry(f(i))
                 .and_modify(|x| x.push(LogEntryFrom::File1(i)))
-                .or_insert(SomeVec::<LogEntryFrom>::from_first_value(LogEntryFrom::File1(i)));
+                .or_insert_with(|| SomeVec::<LogEntryFrom>::from_first_value(LogEntryFrom::File1(i)));
         }
 
         for &i in from_file2 {
             matches.entry(f(i))
                 .and_modify(|x| x.push(LogEntryFrom::File2(i)))
-                .or_insert(SomeVec::<LogEntryFrom>::from_first_value(LogEntryFrom::File2(i)));
+                .or_insert_with(|| SomeVec::<LogEntryFrom>::from_first_value(LogEntryFrom::File2(i)));
         }
 
 
@@ -189,7 +189,7 @@ pub fn match_partition<'b>(from_file1: &Vec<&'b LogEntry>, from_file2: &Vec<&'b 
 
     fn sort_match_groups_by_filename(x: &mut Vec<MatchGroup>) {
 
-        x.into_iter().for_each(|x| {
+        x.iter_mut().for_each(|x| {
             sort_log_entries_somevec_by_filename(&mut x.from_file1);
             sort_log_entries_somevec_by_filename(&mut x.from_file2);
         });
@@ -202,7 +202,7 @@ pub fn match_partition<'b>(from_file1: &Vec<&'b LogEntry>, from_file2: &Vec<&'b 
 
     fn sort_single_file_match_groups_by_filename(x: &mut Vec<SingleFileMatchGroup>) {
 
-        x.into_iter().for_each(|x| {
+        x.iter_mut().for_each(|x| {
             sort_log_entries_somevec_by_filename(&mut x.log_entries);
         });
 

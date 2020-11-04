@@ -37,7 +37,7 @@ fn write_log_entry_to_file(label: &str, log_entry_str: &str, file: &mut File) ->
 {
     let line = format!("{}{}\n", label, log_entry_str);
 
-    file.write(line.as_bytes())?;
+    file.write_all(line.as_bytes())?;
     Ok(())
 }
 
@@ -53,20 +53,20 @@ pub fn write_log_entries_to_file<T>(log_entries: T, filename: &str) -> Result<()
     Ok(())
 }
 
-pub fn write_match_pairs_to_file(match_pairs: &Vec<MatchPair>, filename: &str) -> Result<(), Error>
+pub fn write_match_pairs_to_file(match_pairs: &[MatchPair], filename: &str) -> Result<(), Error>
 {
     let mut file = File::create(filename)?;
 
     for match_pair in match_pairs {
         write_log_entry_to_file("file1: ", &match_pair.from_file1.to_string(), &mut file)?;
         write_log_entry_to_file("file2: ", &match_pair.from_file2.to_string(), &mut file)?;
-        file.write("\n".as_bytes())?;
+        file.write_all(b"\n")?;
     };
 
     Ok(())
 }
 
-pub fn write_match_groups_to_file(match_groups: &Vec<MatchGroup>, filename: &str) -> Result<(), Error>
+pub fn write_match_groups_to_file(match_groups: &[MatchGroup], filename: &str) -> Result<(), Error>
 {
     let mut file = File::create(filename)?;
 
@@ -82,13 +82,13 @@ pub fn write_match_groups_to_file(match_groups: &Vec<MatchGroup>, filename: &str
         write_entries(&match_group.from_file1, "file1: ", &mut file)?;
         write_entries(&match_group.from_file2, "file2: ", &mut file)?;
 
-        file.write("\n".as_bytes())?;
+        file.write_all(b"\n")?;
     };
 
     Ok(())
 }
 
-pub fn write_single_file_match_groups_to_file(single_file_match_groups: &Vec<SingleFileMatchGroup>, filename: &str) -> Result<(), Error>
+pub fn write_single_file_match_groups_to_file(single_file_match_groups: &[SingleFileMatchGroup], filename: &str) -> Result<(), Error>
 {
     let mut file = File::create(filename)?;
 
@@ -97,7 +97,7 @@ pub fn write_single_file_match_groups_to_file(single_file_match_groups: &Vec<Sin
         for log_entry in single_file_match_group.log_entries.inner_ref() {
             write_log_entry_to_file("", &log_entry.to_string(), &mut file)?;
         };
-        file.write("\n".as_bytes())?;
+        file.write_all(b"\n")?;
     };
 
     Ok(())

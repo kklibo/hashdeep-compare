@@ -12,7 +12,7 @@ impl LogEntry {
 
     pub fn from_str(s: &str) -> Option<LogEntry> {
 
-        let sections: Vec<&str> = s.split(",").collect();
+        let sections: Vec<&str> = s.split(',').collect();
         if sections.len() < LogEntry::HASHCOUNT + 1 {return None;}
 
         let (hashes_sections, filename_sections) = sections.split_at(LogEntry::HASHCOUNT);
@@ -20,7 +20,7 @@ impl LogEntry {
 
         let hashes = hashes_sections.join(",");
         let filename = filename_sections.join(",");
-        if filename.len() == 0 {return None;}
+        if filename.is_empty() {return None;}
 
         Some(LogEntry{hashes, filename})
     }

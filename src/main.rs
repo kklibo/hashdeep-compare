@@ -5,7 +5,7 @@ use std::error::Error;
 
 fn main() -> Result<(), Box<dyn Error>> {
 
-    const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+    const VERSION: &str = env!("CARGO_PKG_VERSION");
 
     fn show_help() {
         println!("hashdeep-compare version {}", VERSION);
@@ -26,19 +26,19 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     match args[1].as_str() {
         "hash" => {
-            if args.len() < 4 {Err("hash: not enough arguments")?}
+            if args.len() < 4 {return Err("hash: not enough arguments".into());}
 
             command::run_hashdeep_command(
                 args[2].as_str(),
                 args[3].as_str())?;
         },
         "sort" => {
-            if args.len() < 4 {Err("sort: not enough arguments")?}
+            if args.len() < 4 {return Err("sort: not enough arguments".into());}
 
             sort::sort_log(args[2].as_str(), args[3].as_str())?;
         },
         "part" => {
-            if args.len() < 5 {Err("part: not enough arguments")?}
+            if args.len() < 5 {return Err("part: not enough arguments".into());}
 
             partition::partition_log(args[2].as_str(), args[3].as_str(), args[4].as_str())?;
         },
@@ -46,7 +46,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             println!("hashdeep-compare version {}", VERSION);
         },
 
-        x => Err(format!("invalid command: {}", x))?
+        x => return Err(format!("invalid command: {}", x).into())
     }
 
     Ok(())

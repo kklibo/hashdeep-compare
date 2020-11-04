@@ -8,16 +8,16 @@ use partitioner;
 /// Loads hashdeep logs from filename1 and filename2.
 /// Entries in the loaded logs will be grouped in this order:
 ///
-///	1. full match
-///		1 in each file: no change
-///		anomalies (invalid file)
-///	2. only name match
-///		1 in each file: changed file
-///		anomalies (invalid file)
-///	3. only content match
-///		1 in each file: move/rename
-///		match groups (unknown cause)
-///	4. no match (list by origin)
+/// 1. full match
+///     1 in each file: no change
+///     anomalies (invalid file)
+/// 2. only name match
+///     1 in each file: changed file
+///     anomalies (invalid file)
+/// 3. only content match
+///     1 in each file: move/rename
+///     match groups (unknown cause)
+/// 4. no match (list by origin)
 ///
 /// Each log entry is guaranteed to be represented in exactly one group.
 ///
