@@ -109,11 +109,12 @@ fn hash_success() -> Result<(), Box<dyn std::error::Error>> {
 fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
 
 
-    run_test("hash", "0_arguments")?;
+    run_test("hash", "0_arguments", &[])?;
+    run_test("hash", "1_argument", &["arg1"])?;
 
 
 
-    fn run_test (subcommand: &str, testname: &str) -> Result<(), Box<dyn std::error::Error>> {
+    fn run_test (subcommand: &str, testname: &str, args: &[&str]) -> Result<(), Box<dyn std::error::Error>> {
         let expected_files =
             Path::new("tests/expected")
                 .join(subcommand)
@@ -131,6 +132,7 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
             Command::cargo_bin(BIN_NAME)?
                 .current_dir(outfiles.as_path())
                 .arg(subcommand)
+                .args(args)
                 .output()?;
 
         let mut stdout_file = File::create(stdout_path.as_path())?;
