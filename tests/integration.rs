@@ -8,6 +8,8 @@ use tempfile::NamedTempFile;
 
 use std::process::Command;
 use std::path::Path;
+use std::fs::File;
+use std::io::Write;
 
 
 const BIN_NAME: &str = env!("CARGO_PKG_NAME");
@@ -97,6 +99,60 @@ fn hash_success() -> Result<(), Box<dyn std::error::Error>> {
     assert!(test_lines.zip(expected_lines).all(|(a,b)| a == b));
 
     temp_dir.close()?;
+
+    Ok(())
+}
+
+
+#[test]
+//todo: rename this function?
+fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
+
+    //tests/expected/hash/0_arguments
+
+    let subcommand = "hash";
+    let testname = "0_arguments";
+
+    let expected_files =
+        Path::new("tests/expected")
+            .join(subcommand)
+            .join(testname);
+
+    let outfiles = expected_files.join("outfiles");
+    let stdout_path = expected_files.join("stdout");
+    let stderr_path = expected_files.join("stderr");
+    let exitcode_path = expected_files.join("exitcode");
+
+
+    std::fs::create_dir_all(&outfiles)?;
+
+    let output =
+    Command::cargo_bin(BIN_NAME)?
+        .current_dir(outfiles.as_path())
+        .arg(subcommand)
+        .output()?;
+
+    let mut stdout_file = File::create(stdout_path.as_path())?;
+    stdout_file.write_all(&output.stdout)?;
+
+    let mut stderr_file = File::create(stderr_path.as_path())?;
+    stderr_file.write_all(&output.stderr)?;
+
+
+    //remove empty outputs
+    std::fs::remove_dir(outfiles.as_path()); //will fail if not empty
+
+    if std::fs::metadata(&stdout_path)?.len() == 0 {
+        std::fs::remove_file(&stdout_path)?;
+    }
+    if std::fs::metadata(&stderr_path)?.len() == 0 {
+        std::fs::remove_file(&stderr_path)?;
+    }
+
+
+    let mut exitcode_file = File::create(exitcode_path.as_path())?;
+    write!(exitcode_file, "{:?}", output.status.code())?;
+
 
     Ok(())
 }
