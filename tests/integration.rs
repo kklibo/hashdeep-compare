@@ -108,51 +108,54 @@ fn hash_success() -> Result<(), Box<dyn std::error::Error>> {
 //todo: rename this function?
 fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
 
-    //tests/expected/hash/0_arguments
 
-    let subcommand = "hash";
-    let testname = "0_arguments";
-
-    let expected_files =
-        Path::new("tests/expected")
-            .join(subcommand)
-            .join(testname);
-
-    let outfiles = expected_files.join("outfiles");
-    let stdout_path = expected_files.join("stdout");
-    let stderr_path = expected_files.join("stderr");
-    let exitcode_path = expected_files.join("exitcode");
+    run_test("hash", "0_arguments")?;
 
 
-    std::fs::create_dir_all(&outfiles)?;
 
-    let output =
-    Command::cargo_bin(BIN_NAME)?
-        .current_dir(outfiles.as_path())
-        .arg(subcommand)
-        .output()?;
+    fn run_test (subcommand: &str, testname: &str) -> Result<(), Box<dyn std::error::Error>> {
+        let expected_files =
+            Path::new("tests/expected")
+                .join(subcommand)
+                .join(testname);
 
-    let mut stdout_file = File::create(stdout_path.as_path())?;
-    stdout_file.write_all(&output.stdout)?;
-
-    let mut stderr_file = File::create(stderr_path.as_path())?;
-    stderr_file.write_all(&output.stderr)?;
+        let outfiles = expected_files.join("outfiles");
+        let stdout_path = expected_files.join("stdout");
+        let stderr_path = expected_files.join("stderr");
+        let exitcode_path = expected_files.join("exitcode");
 
 
-    //remove empty outputs
-    std::fs::remove_dir(outfiles.as_path()); //will fail if not empty
+        std::fs::create_dir_all(&outfiles)?;
 
-    if std::fs::metadata(&stdout_path)?.len() == 0 {
-        std::fs::remove_file(&stdout_path)?;
+        let output =
+            Command::cargo_bin(BIN_NAME)?
+                .current_dir(outfiles.as_path())
+                .arg(subcommand)
+                .output()?;
+
+        let mut stdout_file = File::create(stdout_path.as_path())?;
+        stdout_file.write_all(&output.stdout)?;
+
+        let mut stderr_file = File::create(stderr_path.as_path())?;
+        stderr_file.write_all(&output.stderr)?;
+
+
+        //remove empty outputs
+        let _ = std::fs::remove_dir(outfiles.as_path()); //will fail if not empty
+
+        if std::fs::metadata(&stdout_path)?.len() == 0 {
+            std::fs::remove_file(&stdout_path)?;
+        }
+        if std::fs::metadata(&stderr_path)?.len() == 0 {
+            std::fs::remove_file(&stderr_path)?;
+        }
+
+
+        let mut exitcode_file = File::create(exitcode_path.as_path())?;
+        write!(exitcode_file, "{:?}", output.status.code())?;
+
+        Ok(())
     }
-    if std::fs::metadata(&stderr_path)?.len() == 0 {
-        std::fs::remove_file(&stderr_path)?;
-    }
-
-
-    let mut exitcode_file = File::create(exitcode_path.as_path())?;
-    write!(exitcode_file, "{:?}", output.status.code())?;
-
 
     Ok(())
 }
