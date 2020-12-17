@@ -131,7 +131,7 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("sort/input_file/invalid",     &["sort", "/dev/null",      "sorted"])?;
     run_test("sort/input_file/nonexistent", &["sort", "does_not_exist", "sorted"])?;
 
-
+    run_test("sort/success", &["sort", "../../../../test1.txt", "test1_sorted.txt"])?;
 
 
     fn run_test (subdir: &str, args: &[&str]) -> Result<(), Box<dyn std::error::Error>> {
