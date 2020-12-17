@@ -134,6 +134,13 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("sort/success", &["sort", "../../../../test1.txt", "test1_sorted.txt"])?;
 
 
+    //part subcommand tests
+    run_test("part/1_full_match_pair", &["part",
+        "../../../../part_files/1_full_match_pair_file1",
+        "../../../../part_files/1_full_match_pair_file2",
+        "part"
+    ])?;
+
     fn run_test (subdir: &str, args: &[&str]) -> Result<(), Box<dyn std::error::Error>> {
         let expected_files =
             Path::new("tests/expected")
