@@ -112,11 +112,26 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     std::fs::remove_dir_all("tests/expected")?;
 
 
+    //hash subcommand tests
     run_test("hash/0_arguments",    &["hash"])?;
     run_test("hash/1_argument",     &["hash", "arg1"])?;
-    run_test("hash/target_dir/empty",   &["hash", "",          "./hashlog"])?;
-    run_test("hash/target_dir/invalid", &["hash", "/dev/null", "./hashlog"])?;
-    run_test("hash/target_dir/nonexistent", &["hash", "does_not_exist/", "./hashlog"])?;
+
+    run_test("hash/target_dir/empty",       &["hash", "",               "./hashlog"])?;
+    run_test("hash/target_dir/invalid",     &["hash", "/dev/null",      "./hashlog"])?;
+    run_test("hash/target_dir/nonexistent", &["hash", "does_not_exist/","./hashlog"])?;
+
+    run_test("hash/output_path_base/invalid", &["hash", ".", "/dev/null"])?;
+
+
+    //sort subcommand tests
+    run_test("sort/0_arguments",    &["sort"])?;
+    run_test("sort/1_argument",     &["sort", "arg1"])?;
+
+    run_test("sort/input_file/empty",       &["sort", "",               "sorted"])?;
+    run_test("sort/input_file/invalid",     &["sort", "/dev/null",      "sorted"])?;
+    run_test("sort/input_file/nonexistent", &["sort", "does_not_exist", "sorted"])?;
+
+
 
 
     fn run_test (subdir: &str, args: &[&str]) -> Result<(), Box<dyn std::error::Error>> {
