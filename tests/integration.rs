@@ -135,16 +135,17 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
 
 
     //part subcommand tests
-    run_test("part/1_full_match_pair", &["part",
-        "../../../../part_files/1_full_match_pair_file1",
-        "../../../../part_files/1_full_match_pair_file2",
-        "part"
-    ])?;
-    run_test("part/1_full_match_group_in_file1_only", &["part",
-        "../../../../part_files/1_full_match_group_in_file1_only_file1",
-        "../../../../part_files/1_full_match_group_in_file1_only_file2",
-        "part"
-    ])?;
+    fn part_test(testname: &str) -> Result<(), Box<dyn std::error::Error>> {
+        run_test(format!("part/{}", testname).as_str(), &["part",
+            format!("../../../../part_files/{}_file1", testname).as_str(),
+            format!("../../../../part_files/{}_file2", testname).as_str(),
+            "part"
+        ])
+    }
+
+    part_test("1_full_match_pair")?;
+    part_test("1_full_match_group_in_file1_only")?;
+
 
 
     fn run_test (subdir: &str, args: &[&str]) -> Result<(), Box<dyn std::error::Error>> {
