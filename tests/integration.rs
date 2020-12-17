@@ -140,6 +140,12 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
         "../../../../part_files/1_full_match_pair_file2",
         "part"
     ])?;
+    run_test("part/1_full_match_group_in_file1_only", &["part",
+        "../../../../part_files/1_full_match_group_in_file1_only_file1",
+        "../../../../part_files/1_full_match_group_in_file1_only_file2",
+        "part"
+    ])?;
+
 
     fn run_test (subdir: &str, args: &[&str]) -> Result<(), Box<dyn std::error::Error>> {
         let expected_files =
