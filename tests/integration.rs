@@ -108,10 +108,15 @@ fn hash_success() -> Result<(), Box<dyn std::error::Error>> {
 //todo: rename this function?
 fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
 
+    //remove existing test results
+    std::fs::remove_dir_all("tests/expected")?;
+
 
     run_test("hash/0_arguments",    &["hash"])?;
     run_test("hash/1_argument",     &["hash", "arg1"])?;
-
+    run_test("hash/target_dir/empty",   &["hash", "",          "./hashlog"])?;
+    run_test("hash/target_dir/invalid", &["hash", "/dev/null", "./hashlog"])?;
+    run_test("hash/target_dir/nonexistent", &["hash", "does_not_exist/", "./hashlog"])?;
 
 
     fn run_test (subdir: &str, args: &[&str]) -> Result<(), Box<dyn std::error::Error>> {
