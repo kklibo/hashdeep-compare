@@ -145,6 +145,7 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
 
     part_test("1_full_match_pair")?;
     part_test("1_full_match_group_in_file1_only")?;
+    part_test("1_full_match_group_in_file2_only")?;
 
 
 
