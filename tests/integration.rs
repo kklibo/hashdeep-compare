@@ -153,6 +153,8 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     part_test("1_name_match_group_in_file2_only")?;
     part_test("1_name_match_group_in_both_files")?;
 
+    part_test("1_hashes_match_pair")?;
+
 
     fn run_test (subdir: &str, args: &[&str]) -> Result<(), Box<dyn std::error::Error>> {
         let expected_files =
