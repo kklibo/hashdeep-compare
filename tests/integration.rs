@@ -112,6 +112,15 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     std::fs::remove_dir_all("tests/expected")?;
 
 
+    /*
+    each test writes its results to its own named folder under tests/expected/:
+        [name]/stdout :     stdout (exists IFF non-empty)
+        [name]/stderr :     stderr (exists IFF non-empty)
+        [name]/outfiles/ :  contains output files (exists IFF non-empty)
+        [name]/exitcode :   contains exit code (as text)
+    */
+
+
     //hash subcommand tests
     run_test("hash/0_arguments",    &["hash"])?;
     run_test("hash/1_argument",     &["hash", "arg1"])?;
@@ -160,6 +169,7 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
 
     part_test("1_entry_in_file1_with_no_match")?;
     part_test("1_entry_in_file2_with_no_match")?;
+
 
 
     fn run_test (subdir: &str, args: &[&str]) -> Result<(), Box<dyn std::error::Error>> {
