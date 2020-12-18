@@ -175,6 +175,7 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     part_test("file_move")?;
     part_test("file_rename")?;
     part_test("dir_move")?;
+    part_test("dir_rename")?;
 
 
     fn run_test (subdir: &str, args: &[&str]) -> Result<(), Box<dyn std::error::Error>> {
