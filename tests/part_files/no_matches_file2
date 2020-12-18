@@ -1,0 +1,9 @@
+%%%% HASHDEEP-1.0
+%%%% size,md5,sha256,filename
+## Invoked from: /media/sf_RustDevVM_Shared/projects/hashdeep-compare_tester
+## $ hashdeep -l -r -o f targetdir
+## 
+25,df5077d4ef8a89afb8b2b5a2ece2992f,e15b2ceb94e6b521bb27cb0e0a3f254725304c5d0323c22fafee20fbce2d6e48,targetdir/b_dir/g_file
+21,0e08eec93232f458fd251025ce12e107,39eb06efbad92cec8d863703ee58056f466bfe66e838c115097a5a5a99374c04,targetdir/b_dir/f_file
+17,a79f9cd73020325b201af168ab40f464,0ff4834af67fd7e47da36cee47a27cb348b6a0feea35315ed11a3ee6da041837,targetdir/b_file
+17,bb78399e55c161e88c4293687c6c33da,2804fae5ee25c87a546b290f7a686088ebc7b41f2887c1f6e01fa986281e5597,targetdir/c_file

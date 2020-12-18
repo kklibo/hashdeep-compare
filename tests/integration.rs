@@ -171,6 +171,8 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     part_test("1_entry_in_file2_with_no_match")?;
 
     part_test("no_entries")?;
+    part_test("no_matches")?;
+
 
 
     fn run_test (subdir: &str, args: &[&str]) -> Result<(), Box<dyn std::error::Error>> {
