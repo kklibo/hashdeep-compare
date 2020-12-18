@@ -177,6 +177,7 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     part_test("dir_move")?;
     part_test("dir_rename")?;
     part_test("file_edit")?;
+    part_test("file_create")?;
 
 
 
