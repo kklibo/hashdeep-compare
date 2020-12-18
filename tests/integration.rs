@@ -156,6 +156,7 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     part_test("1_hashes_match_pair")?;
     part_test("1_hashes_match_group_in_file1_only")?;
     part_test("1_hashes_match_group_in_file2_only")?;
+    part_test("1_hashes_match_group_in_both_files")?;
 
 
     fn run_test (subdir: &str, args: &[&str]) -> Result<(), Box<dyn std::error::Error>> {
