@@ -3,7 +3,7 @@ pub mod match_group;
 
 use self::match_pair::MatchPair;
 use self::match_group::{MatchGroup,SingleFileMatchGroup};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use log_entry::LogEntry;
 use some_vec::SomeVec;
 
@@ -97,7 +97,7 @@ pub fn match_partition<'b>(from_file1: &[&'b LogEntry], from_file2: &[&'b LogEnt
             File2(&'a LogEntry),
         }
 
-        let mut matches = HashMap::<String, SomeVec<LogEntryFrom>>::new();
+        let mut matches = BTreeMap::<String, SomeVec<LogEntryFrom>>::new();
 
         for &i in from_file1 {
             matches.entry(f(i))
