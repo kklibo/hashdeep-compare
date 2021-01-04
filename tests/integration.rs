@@ -129,7 +129,8 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("hash/target_dir/invalid",     &["hash", "/dev/null",      "./hashlog"])?;
     run_test("hash/target_dir/nonexistent", &["hash", "does_not_exist/","./hashlog"])?;
 
-    run_test("hash/output_path_base/invalid", &["hash", ".", "/dev/null"])?;
+    run_test("hash/output_path_base/invalid",         &["hash", ".", "/dev/null"])?;
+    run_test("hash/output_path_base/nonexistent_dir", &["hash", ".", "does_not_exist/hash"])?;
 
 
     //sort subcommand tests
