@@ -144,6 +144,10 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
 
 
     //part subcommand tests
+    run_test("part/0_arguments",    &["part"])?;
+    run_test("part/1_argument",     &["part", "arg1"])?;
+    run_test("part/2_arguments",    &["part", "arg1", "arg2"])?;
+
     fn part_test(testname: &str) -> Result<(), Box<dyn std::error::Error>> {
         run_test(format!("part/{}", testname).as_str(), &["part",
             format!("../../../../part_files/{}_file1", testname).as_str(),
