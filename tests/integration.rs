@@ -121,6 +121,14 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     */
 
 
+    run_test("version", &["version"])?;
+
+
+    //invalid subcommand tests
+    run_test("invalid/0_arguments",             &[""])?;
+    run_test("invalid/nonexistent_subcommand",  &["nonexistent_subcommand"])?;
+
+
     //hash subcommand tests
     run_test("hash/0_arguments",    &["hash"])?;
     run_test("hash/1_argument",     &["hash", "arg1"])?;
