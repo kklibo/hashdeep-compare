@@ -210,6 +210,14 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     part_test("file_delete")?;
 
 
+    //multiple-command tests
+    //hash then sort (guarantees ordering stability for nontrivial hash target)
+    run_test("multi/hash_then_sort/success",       &["hash", "../../../../../hashdeep_target_nontrivial", "hashlog"])?;
+    run_test("multi/hash_then_sort/success",       &["sort", "hashlog", "hashlog_sorted"])?;
+    //remove nondeterministic intermediate result
+    std::fs::remove_file("tests/expected/multi/hash_then_sort/success/outfiles/hashlog")?;
+
+
 
     fn run_test (subdir: &str, args: &[&str]) -> Result<(), Box<dyn std::error::Error>> {
         let expected_files =
