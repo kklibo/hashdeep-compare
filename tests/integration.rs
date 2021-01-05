@@ -149,11 +149,11 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("sort/input_file/invalid",     &["sort", "/dev/null",      "sorted"])?;
     run_test("sort/input_file/nonexistent", &["sort", "does_not_exist", "sorted"])?;
 
-    run_test("sort/output_file/empty",       &["sort", "../../../../../test1.txt", ""                     ])?;
-    run_test("sort/output_file/invalid",     &["sort", "../../../../../test1.txt", "/dev/null/invalid"    ])?;
-    run_test("sort/output_file/nonexistent", &["sort", "../../../../../test1.txt", "does_not_exist/sorted"])?;
+    run_test("sort/output_file/empty",       &["sort", &path_in_tests("test1.txt"), ""                     ])?;
+    run_test("sort/output_file/invalid",     &["sort", &path_in_tests("test1.txt"), "/dev/null/invalid"    ])?;
+    run_test("sort/output_file/nonexistent", &["sort", &path_in_tests("test1.txt"), "does_not_exist/sorted"])?;
 
-    run_test("sort/success", &["sort", "../../../../test1.txt", "test1_sorted.txt"])?;
+    run_test("sort/success", &["sort", &path_in_tests("test1.txt"), "test1_sorted.txt"])?;
 
 
     //part subcommand tests
@@ -161,22 +161,22 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("part/1_argument",     &["part", "arg1"])?;
     run_test("part/2_arguments",    &["part", "arg1", "arg2"])?;
 
-    run_test("part/input_file1/empty",       &["part", "",                  "../../../../../partition_test2.txt", "part"])?;
-    run_test("part/input_file1/invalid",     &["part", "/dev/null/invalid", "../../../../../partition_test2.txt", "part"])?;
-    run_test("part/input_file1/nonexistent", &["part", "does_not_exist",    "../../../../../partition_test2.txt", "part"])?;
+    run_test("part/input_file1/empty",       &["part", "",                  &path_in_tests("partition_test2.txt"), "part"])?;
+    run_test("part/input_file1/invalid",     &["part", "/dev/null/invalid", &path_in_tests("partition_test2.txt"), "part"])?;
+    run_test("part/input_file1/nonexistent", &["part", "does_not_exist",    &path_in_tests("partition_test2.txt"), "part"])?;
 
-    run_test("part/input_file2/empty",       &["part", "../../../../../partition_test1.txt", "",                  "part"])?;
-    run_test("part/input_file2/invalid",     &["part", "../../../../../partition_test1.txt", "/dev/null/invalid", "part"])?;
-    run_test("part/input_file2/nonexistent", &["part", "../../../../../partition_test1.txt", "does_not_exist",    "part"])?;
+    run_test("part/input_file2/empty",       &["part", &path_in_tests("partition_test1.txt"), "",                  "part"])?;
+    run_test("part/input_file2/invalid",     &["part", &path_in_tests("partition_test1.txt"), "/dev/null/invalid", "part"])?;
+    run_test("part/input_file2/nonexistent", &["part", &path_in_tests("partition_test1.txt"), "does_not_exist",    "part"])?;
 
-    run_test("part/output_file_base/empty",       &["part", "../../../../../partition_test1.txt", "../../../../../partition_test2.txt", ""])?;
-    run_test("part/output_file_base/invalid",     &["part", "../../../../../partition_test1.txt", "../../../../../partition_test2.txt", "/dev/null"])?;
-    run_test("part/output_file_base/nonexistent", &["part", "../../../../../partition_test1.txt", "../../../../../partition_test2.txt", "does_not_exist/part"])?;
+    run_test("part/output_file_base/empty",       &["part", &path_in_tests("partition_test1.txt"), &path_in_tests("partition_test2.txt"), ""])?;
+    run_test("part/output_file_base/invalid",     &["part", &path_in_tests("partition_test1.txt"), &path_in_tests("partition_test2.txt"), "/dev/null"])?;
+    run_test("part/output_file_base/nonexistent", &["part", &path_in_tests("partition_test1.txt"), &path_in_tests("partition_test2.txt"), "does_not_exist/part"])?;
 
     fn part_test(testname: &str) -> Result<(), Box<dyn std::error::Error>> {
         run_test(format!("part/{}", testname).as_str(), &["part",
-            format!("../../../../part_files/{}_file1", testname).as_str(),
-            format!("../../../../part_files/{}_file2", testname).as_str(),
+            &path_in_tests(&format!("part_files/{}_file1", testname)),
+            &path_in_tests(&format!("part_files/{}_file2", testname)),
             "part"
         ])
     }
@@ -218,6 +218,13 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     std::fs::remove_file("tests/expected/multi/hash_then_sort/success/outfiles/hashlog")?;
 
 
+
+    //utility functions
+
+    fn path_in_tests(relative: &str) -> String{
+        let tests_path = std::fs::canonicalize("tests/").unwrap();
+        tests_path.join(relative).into_os_string().into_string().unwrap()
+    }
 
     fn run_test (subdir: &str, args: &[&str]) -> Result<(), Box<dyn std::error::Error>> {
         let expected_files =
