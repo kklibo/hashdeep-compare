@@ -1,6 +1,6 @@
 %%%% HASHDEEP-1.0
 %%%% size,md5,sha256,filename
-## Invoked from: /media/sf_RustDevVM_Shared/projects/hashdeep-compare/tests/expected/hash/target_dir/is_file/outfiles
+## Invoked from: [path removed by hashdeep-compare test]
 ## $ hashdeep -l -r -o f ../../../../../test1.txt
 ## 
 945,f1cb3c75843ebc36c2157e5a3a06fac9,8d3e3d5bacd6176bb7fc22872fc0d48c643ed407c354666c293e365634aab854,../../../../../test1.txt

@@ -145,6 +145,8 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
             &path_in_tests("expected/hash/target_dir/is_file/outfiles")
         );
         run_test("hash/target_dir/is_file", &["hash", &rel_path, "hashlog"])?;
+
+        remove_hashdeep_log_header_invocation_path("tests/expected/hash/target_dir/is_file/outfiles/hashlog");
     }
 
     run_test("hash/output_path_base/invalid",         &["hash", ".", "/dev/null"])?;
@@ -240,6 +242,22 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     fn relative_path(target: &str, base: &str) -> String{
         let path = diff_paths(target, base).unwrap();
         path.into_os_string().into_string().unwrap()
+    }
+
+    //removes environment-specific invocation path information from a hashdeep log header
+    // this allows consistent file contents regardless of where tests are run from
+    fn remove_hashdeep_log_header_invocation_path(target_path: &str) {
+
+        let file_string= std::fs::read_to_string(target_path).unwrap();
+        let mut lines: Vec<_> = file_string.split("\n").collect();
+
+        let invocation_path_line = lines.get_mut(2).unwrap();
+
+        assert!( invocation_path_line.starts_with("## Invoked from: ") );
+
+        *invocation_path_line = "## Invoked from: [path removed by hashdeep-compare test]";
+
+        std::fs::write(target_path, lines.join("\n")).unwrap();
     }
 
     fn run_test (subdir: &str, args: &[&str]) -> Result<(), Box<dyn std::error::Error>> {
