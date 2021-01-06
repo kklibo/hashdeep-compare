@@ -1,6 +1,7 @@
 extern crate assert_cmd;
 extern crate predicates;
 extern crate tempfile;
+extern crate pathdiff;
 
 use assert_cmd::prelude::*;
 use predicates::prelude::*;
@@ -10,6 +11,7 @@ use std::process::Command;
 use std::path::Path;
 use std::fs::File;
 use std::io::Write;
+use pathdiff::diff_paths;
 
 
 const BIN_NAME: &str = env!("CARGO_PKG_NAME");
@@ -137,6 +139,14 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("hash/target_dir/invalid",     &["hash", "/dev/null",      "./hashlog"])?;
     run_test("hash/target_dir/nonexistent", &["hash", "does_not_exist/","./hashlog"])?;
 
+    {
+        let rel_path = relative_path(
+            &path_in_tests("test1.txt"),
+            &path_in_tests("expected/hash/target_dir/is_file/outfiles")
+        );
+        run_test("hash/target_dir/is_file", &["hash", &rel_path, "hashlog"])?;
+    }
+
     run_test("hash/output_path_base/invalid",         &["hash", ".", "/dev/null"])?;
     run_test("hash/output_path_base/nonexistent_dir", &["hash", ".", "does_not_exist/hash"])?;
 
@@ -224,6 +234,12 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     fn path_in_tests(relative: &str) -> String{
         let tests_path = std::fs::canonicalize("tests/").unwrap();
         tests_path.join(relative).into_os_string().into_string().unwrap()
+    }
+
+    //relative paths can be used to avoid writing environment-specific paths in hashdeep logs in repo
+    fn relative_path(target: &str, base: &str) -> String{
+        let path = diff_paths(target, base).unwrap();
+        path.into_os_string().into_string().unwrap()
     }
 
     fn run_test (subdir: &str, args: &[&str]) -> Result<(), Box<dyn std::error::Error>> {
