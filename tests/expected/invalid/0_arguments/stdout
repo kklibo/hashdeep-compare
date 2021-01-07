@@ -1,0 +1,6 @@
+hashdeep-compare version 0.2.0
+ arguments
+  version
+  hash target_directory output_path_base
+  sort input_file output_file
+  part input_file1 input_file2 output_file_base
