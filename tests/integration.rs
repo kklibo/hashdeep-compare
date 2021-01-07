@@ -155,6 +155,14 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     create_path_and_file("tests/expected/hash/output_path_base/log_file_exists/outfiles/hashlog", "");
     run_test("hash/output_path_base/log_file_exists", &["hash", ".", "hashlog"])?;
 
+    create_path_and_file("tests/expected/hash/output_path_base/log_error_file_exists/outfiles/hashlog.errors", "");
+    run_test("hash/output_path_base/log_error_file_exists", &["hash", ".", "hashlog"])?;
+
+    create_path_and_file("tests/expected/hash/output_path_base/log_file_and_error_file_exist/outfiles/hashlog", "");
+    create_path_and_file("tests/expected/hash/output_path_base/log_file_and_error_file_exist/outfiles/hashlog.errors", "");
+    run_test("hash/output_path_base/log_file_and_error_file_exist", &["hash", ".", "hashlog"])?;
+
+
     //sort subcommand tests
     run_test("sort/0_arguments",    &["sort"])?;
     run_test("sort/1_argument",     &["sort", "arg1"])?;
