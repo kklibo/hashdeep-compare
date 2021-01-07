@@ -59,13 +59,13 @@ Error: "hash: not enough arguments"
 Error: Os { code: 2, kind: NotFound, message: "No such file or directory" }
 [ return ]: exit code: 1
 
-[ arguments ]: hash tests/hashdeep_target/ /dev/null
+[ arguments ]: hash tests/hashdeep_target/ /dev/null/invalid
 [ stdout ]
 [ stderr ]
-Error: Os { code: 13, kind: PermissionDenied, message: "Permission denied" }
+Error: Os { code: 20, kind: Other, message: "Not a directory" }
 [ return ]: exit code: 1
 
-[ arguments ]: hash tests/hashdeep_target/ tests/temp/
+[ arguments ]: hash tests/hashdeep_target/ tests/temp/nonexistent/
 [ stdout ]
 [ stderr ]
 Error: Os { code: 21, kind: Other, message: "Is a directory" }
@@ -111,25 +111,25 @@ Error: Os { code: 2, kind: NotFound, message: "No such file or directory" }
 Error: Os { code: 2, kind: NotFound, message: "No such file or directory" }
 [ return ]: exit code: 1
 
-[ arguments ]: hash tests/test1/ 
+[ arguments ]: sort tests/test1.txt 
 [ stdout ]
 [ stderr ]
 Error: Os { code: 2, kind: NotFound, message: "No such file or directory" }
 [ return ]: exit code: 1
 
-[ arguments ]: hash tests/test1/ /dev/null
+[ arguments ]: sort tests/test1.txt /dev/null/invalid
 [ stdout ]
 [ stderr ]
-Error: Os { code: 13, kind: PermissionDenied, message: "Permission denied" }
+Error: Os { code: 20, kind: Other, message: "Not a directory" }
 [ return ]: exit code: 1
 
-[ arguments ]: hash tests/test1/ tests/temp/
+[ arguments ]: sort tests/test1.txt tests/temp/
 [ stdout ]
 [ stderr ]
 Error: Os { code: 21, kind: Other, message: "Is a directory" }
 [ return ]: exit code: 1
 
-[ arguments ]: hash tests/test1/ tests/temp/temp_file
+[ arguments ]: sort tests/test1.txt tests/temp/temp_file
 [ stdout ]
 [ stderr ]
 [ return ]: exit code: 0

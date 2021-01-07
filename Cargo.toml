@@ -9,3 +9,4 @@ authors = ["user"]
 assert_cmd = "1.0.1"
 predicates = "1.0.5"
 tempfile = "3.1.0"
+pathdiff = "0.2.0"

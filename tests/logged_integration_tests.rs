@@ -56,6 +56,7 @@ fn logged_integration_tests() {
     // (inconsistent temp file and folder names would change the test output log)
     let temp_dir  = "tests/temp/";
     let temp_file = "tests/temp/temp_file";
+    let temp_error_log = "tests/temp/temp_file.errors";
     std::fs::create_dir_all(temp_dir).unwrap();
 
 
@@ -78,18 +79,26 @@ fn logged_integration_tests() {
         run_command(&["hash"]);
         run_command(&["hash", "arg2"]);
         run_command(&["hash", "", temp_file]);
+        std::fs::remove_file(temp_file).unwrap();
+        std::fs::remove_file(temp_error_log).unwrap();
         run_command(&["hash", "/dev/null", temp_file]);
+        std::fs::remove_file(temp_file).unwrap();
+        std::fs::remove_file(temp_error_log).unwrap();
         run_command(&["hash", "non-existent_file", temp_file]);
+        std::fs::remove_file(temp_file).unwrap();
+        std::fs::remove_file(temp_error_log).unwrap();
         run_command(&["hash", "non-existent_dir/", temp_file]);
         run_command(&["hash", valid_hashdeep_target, ""]);
-        run_command(&["hash", valid_hashdeep_target, "/dev/null"]);
-        run_command(&["hash", valid_hashdeep_target, temp_dir]);
+        run_command(&["hash", valid_hashdeep_target, "/dev/null/invalid"]);
+        run_command(&["hash", valid_hashdeep_target, "tests/temp/nonexistent/"]);
+        std::fs::remove_file(temp_file).unwrap();
+        std::fs::remove_file(temp_error_log).unwrap();
         run_command(&["hash", valid_hashdeep_target, temp_file]);
     }
 
     //sort subcommand
     {
-        let valid_hashdeep_logfile = "tests/test1/";
+        let valid_hashdeep_logfile = "tests/test1.txt";
 
         run_command(&["sort"]);
         run_command(&["sort", "arg2"]);
@@ -97,10 +106,10 @@ fn logged_integration_tests() {
         run_command(&["sort", "/dev/null", temp_file]);
         run_command(&["sort", "non-existent_file", temp_file]);
         run_command(&["sort", "non-existent_dir/", temp_file]);
-        run_command(&["hash", valid_hashdeep_logfile, ""]);
-        run_command(&["hash", valid_hashdeep_logfile, "/dev/null"]);
-        run_command(&["hash", valid_hashdeep_logfile, temp_dir]);
-        run_command(&["hash", valid_hashdeep_logfile, temp_file]);
+        run_command(&["sort", valid_hashdeep_logfile, ""]);
+        run_command(&["sort", valid_hashdeep_logfile, "/dev/null/invalid"]);
+        run_command(&["sort", valid_hashdeep_logfile, temp_dir]);
+        run_command(&["sort", valid_hashdeep_logfile, temp_file]);
     }
 
     //part subcommand
