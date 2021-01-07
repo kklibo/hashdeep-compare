@@ -43,9 +43,10 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("hash/0_arguments",    &["hash"])?;
     run_test("hash/1_argument",     &["hash", "arg1"])?;
 
-    run_test("hash/target_dir/empty",       &["hash", "",               "./hashlog"])?;
-    run_test("hash/target_dir/invalid",     &["hash", "/dev/null",      "./hashlog"])?;
-    run_test("hash/target_dir/nonexistent", &["hash", "does_not_exist/","./hashlog"])?;
+    run_test("hash/target_dir/empty",           &["hash", "",               "./hashlog"])?;
+    run_test("hash/target_dir/invalid",         &["hash", "/dev/null",      "./hashlog"])?;
+    run_test("hash/target_dir/nonexistent_file",&["hash", "does_not_exist ","./hashlog"])?;
+    run_test("hash/target_dir/nonexistent_dir", &["hash", "does_not_exist/","./hashlog"])?;
 
     {
         let rel_path = relative_path(

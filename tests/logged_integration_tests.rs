@@ -56,43 +56,18 @@ fn logged_integration_tests() {
     // (inconsistent temp file and folder names would change the test output log)
     let temp_dir  = "tests/temp/";
     let temp_file = "tests/temp/temp_file";
-    let temp_error_log = "tests/temp/temp_file.errors";
     std::fs::create_dir_all(temp_dir).unwrap();
 
-
-    //absurd parameters
-    {
-        run_command(&[]);
-        run_command(&["nonexistent_command"]);
-    }
-
-    //version subcommand
-    {
-        run_command(&["version"]);
-    }
 
 
     //hash subcommand
     {
         let valid_hashdeep_target = "tests/hashdeep_target/";
 
-        run_command(&["hash"]);
-        run_command(&["hash", "arg2"]);
-        run_command(&["hash", "", temp_file]);
-        std::fs::remove_file(temp_file).unwrap();
-        std::fs::remove_file(temp_error_log).unwrap();
-        run_command(&["hash", "/dev/null", temp_file]);
-        std::fs::remove_file(temp_file).unwrap();
-        std::fs::remove_file(temp_error_log).unwrap();
-        run_command(&["hash", "non-existent_file", temp_file]);
-        std::fs::remove_file(temp_file).unwrap();
-        std::fs::remove_file(temp_error_log).unwrap();
-        run_command(&["hash", "non-existent_dir/", temp_file]);
+
         run_command(&["hash", valid_hashdeep_target, ""]);
         run_command(&["hash", valid_hashdeep_target, "/dev/null/invalid"]);
         run_command(&["hash", valid_hashdeep_target, "tests/temp/nonexistent/"]);
-        std::fs::remove_file(temp_file).unwrap();
-        std::fs::remove_file(temp_error_log).unwrap();
         run_command(&["hash", valid_hashdeep_target, temp_file]);
     }
 
