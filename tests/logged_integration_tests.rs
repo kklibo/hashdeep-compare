@@ -78,12 +78,16 @@ fn logged_integration_tests() {
         run_command(&["hash"]);
         run_command(&["hash", "arg2"]);
         run_command(&["hash", "", temp_file]);
+        std::fs::remove_file(temp_file).unwrap();
         run_command(&["hash", "/dev/null", temp_file]);
+        std::fs::remove_file(temp_file).unwrap();
         run_command(&["hash", "non-existent_file", temp_file]);
+        std::fs::remove_file(temp_file).unwrap();
         run_command(&["hash", "non-existent_dir/", temp_file]);
         run_command(&["hash", valid_hashdeep_target, ""]);
-        run_command(&["hash", valid_hashdeep_target, "/dev/null"]);
-        run_command(&["hash", valid_hashdeep_target, temp_dir]);
+        run_command(&["hash", valid_hashdeep_target, "/dev/null/invalid"]);
+        run_command(&["hash", valid_hashdeep_target, "tests/temp/nonexistent/"]);
+        std::fs::remove_file(temp_file).unwrap();
         run_command(&["hash", valid_hashdeep_target, temp_file]);
     }
 

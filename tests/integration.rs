@@ -152,6 +152,8 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("hash/output_path_base/invalid",         &["hash", ".", "/dev/null"])?;
     run_test("hash/output_path_base/nonexistent_dir", &["hash", ".", "does_not_exist/hash"])?;
 
+    create_path_and_file("tests/expected/hash/output_path_base/log_file_exists/outfiles/hashlog", "");
+    run_test("hash/output_path_base/log_file_exists", &["hash", ".", "hashlog"])?;
 
     //sort subcommand tests
     run_test("sort/0_arguments",    &["sort"])?;
@@ -258,6 +260,11 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
         *invocation_path_line = "## Invoked from: [path removed by hashdeep-compare test]";
 
         std::fs::write(target_path, lines.join("\n")).unwrap();
+    }
+
+    fn create_path_and_file(target_path: &str, contents: &str) {
+        std::fs::create_dir_all( Path::new(target_path).parent().unwrap() ).unwrap();
+        std::fs::write(target_path, contents).unwrap();
     }
 
     fn run_test (subdir: &str, args: &[&str]) -> Result<(), Box<dyn std::error::Error>> {

@@ -1,8 +1,13 @@
-use std::process::{Command,Stdio,ExitStatus};
+use std::process::{Command,Stdio};
+use std::error::Error;
 
-pub fn run_hashdeep_command(target_directory: &str, output_path_base: &str) -> std::io::Result<ExitStatus> {
+pub fn run_hashdeep_command(target_directory: &str, output_path_base: &str) -> Result<(), Box<dyn Error>> {
 
     use std::fs::File;
+
+    if std::path::Path::new(output_path_base).exists() {
+        return Err(format!("{} exists (will not overwrite existing files)", output_path_base).into());
+    }
 
     Command::new("hashdeep")
 
@@ -15,5 +20,6 @@ pub fn run_hashdeep_command(target_directory: &str, output_path_base: &str) -> s
     .stdout(File::create(output_path_base)?)
     .stderr(File::create(format!("{}.errors", output_path_base))?)
 
-    .status()
+    .status()?;
+    Ok(())
 }
