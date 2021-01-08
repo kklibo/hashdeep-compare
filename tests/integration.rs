@@ -128,6 +128,8 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("part/output_file_base/invalid",     &["part", &path_in_tests("partition_test1.txt"), &path_in_tests("partition_test2.txt"), "/dev/null/invalid"])?;
     run_test("part/output_file_base/nonexistent", &["part", &path_in_tests("partition_test1.txt"), &path_in_tests("partition_test2.txt"), "does_not_exist/part"])?;
 
+    run_test("part/input_file1_is_input_file2", &["part", &path_in_tests("test1.txt"), &path_in_tests("test1.txt"), "part"])?;
+
     fn part_test(testname: &str) -> Result<(), Box<dyn std::error::Error>> {
         run_test(format!("part/{}", testname).as_str(), &["part",
             &path_in_tests(&format!("part_files/{}_file1", testname)),
