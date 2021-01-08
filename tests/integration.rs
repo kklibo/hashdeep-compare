@@ -43,9 +43,10 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("hash/0_arguments",    &["hash"])?;
     run_test("hash/1_argument",     &["hash", "arg1"])?;
 
-    run_test("hash/target_dir/empty",       &["hash", "",               "./hashlog"])?;
-    run_test("hash/target_dir/invalid",     &["hash", "/dev/null",      "./hashlog"])?;
-    run_test("hash/target_dir/nonexistent", &["hash", "does_not_exist/","./hashlog"])?;
+    run_test("hash/target_dir/empty",           &["hash", "",               "./hashlog"])?;
+    run_test("hash/target_dir/invalid",         &["hash", "/dev/null",      "./hashlog"])?;
+    run_test("hash/target_dir/nonexistent_file",&["hash", "does_not_exist ","./hashlog"])?;
+    run_test("hash/target_dir/nonexistent_dir", &["hash", "does_not_exist/","./hashlog"])?;
 
     {
         let rel_path = relative_path(
@@ -57,7 +58,8 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
         remove_hashdeep_log_header_invocation_path("tests/expected/hash/target_dir/is_file/outfiles/hashlog");
     }
 
-    run_test("hash/output_path_base/invalid",         &["hash", ".", "/dev/null"])?;
+    run_test("hash/output_path_base/empty",           &["hash", ".", ""])?;
+    run_test("hash/output_path_base/invalid",         &["hash", ".", "/dev/null/invalid"])?;
     run_test("hash/output_path_base/nonexistent_dir", &["hash", ".", "does_not_exist/hash"])?;
 
     create_path_and_file("tests/expected/hash/output_path_base/log_file_exists/outfiles/hashlog", "");
@@ -85,13 +87,15 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("sort/0_arguments",    &["sort"])?;
     run_test("sort/1_argument",     &["sort", "arg1"])?;
 
-    run_test("sort/input_file/empty",       &["sort", "",               "sorted"])?;
-    run_test("sort/input_file/invalid",     &["sort", "/dev/null",      "sorted"])?;
-    run_test("sort/input_file/nonexistent", &["sort", "does_not_exist", "sorted"])?;
+    run_test("sort/input_file/empty",           &["sort", "",                   "sorted"])?;
+    run_test("sort/input_file/invalid",         &["sort", "/dev/null/invalid",  "sorted"])?;
+    run_test("sort/input_file/nonexistent_file",&["sort", "does_not_exist",     "sorted"])?;
+    run_test("sort/input_file/nonexistent_dir", &["sort", "does_not_exist/",    "sorted"])?;
 
-    run_test("sort/output_file/empty",       &["sort", &path_in_tests("test1.txt"), ""                     ])?;
-    run_test("sort/output_file/invalid",     &["sort", &path_in_tests("test1.txt"), "/dev/null/invalid"    ])?;
-    run_test("sort/output_file/nonexistent", &["sort", &path_in_tests("test1.txt"), "does_not_exist/sorted"])?;
+    run_test("sort/output_file/empty",           &["sort", &path_in_tests("test1.txt"), ""                     ])?;
+    run_test("sort/output_file/invalid",         &["sort", &path_in_tests("test1.txt"), "/dev/null/invalid"    ])?;
+    run_test("sort/output_file/nonexistent_dir", &["sort", &path_in_tests("test1.txt"), "does_not_exist/sorted"])?;
+    run_test("sort/output_file/is_dir",          &["sort", &path_in_tests("test1.txt"), "."])?;
 
     run_test("sort/success", &["sort", &path_in_tests("test1.txt"), "test1_sorted.txt"])?;
 
@@ -101,16 +105,20 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("part/1_argument",     &["part", "arg1"])?;
     run_test("part/2_arguments",    &["part", "arg1", "arg2"])?;
 
-    run_test("part/input_file1/empty",       &["part", "",                  &path_in_tests("partition_test2.txt"), "part"])?;
-    run_test("part/input_file1/invalid",     &["part", "/dev/null/invalid", &path_in_tests("partition_test2.txt"), "part"])?;
-    run_test("part/input_file1/nonexistent", &["part", "does_not_exist",    &path_in_tests("partition_test2.txt"), "part"])?;
+    run_test("part/input_file1/empty",              &["part", "",                  &path_in_tests("partition_test2.txt"), "part"])?;
+    run_test("part/input_file1/invalid",            &["part", "/dev/null/invalid", &path_in_tests("partition_test2.txt"), "part"])?;
+    run_test("part/input_file1/nonexistent_file",   &["part", "does_not_exist",    &path_in_tests("partition_test2.txt"), "part"])?;
+    run_test("part/input_file1/nonexistent_dir",    &["part", "does_not_exist/",   &path_in_tests("partition_test2.txt"), "part"])?;
+    run_test("part/input_file1/is_dir",             &["part", ".",                 &path_in_tests("partition_test2.txt"), "part"])?;
 
-    run_test("part/input_file2/empty",       &["part", &path_in_tests("partition_test1.txt"), "",                  "part"])?;
-    run_test("part/input_file2/invalid",     &["part", &path_in_tests("partition_test1.txt"), "/dev/null/invalid", "part"])?;
-    run_test("part/input_file2/nonexistent", &["part", &path_in_tests("partition_test1.txt"), "does_not_exist",    "part"])?;
+    run_test("part/input_file2/empty",              &["part", &path_in_tests("partition_test1.txt"), "",                  "part"])?;
+    run_test("part/input_file2/invalid",            &["part", &path_in_tests("partition_test1.txt"), "/dev/null/invalid", "part"])?;
+    run_test("part/input_file2/nonexistent_file",   &["part", &path_in_tests("partition_test1.txt"), "does_not_exist",    "part"])?;
+    run_test("part/input_file2/nonexistent_dir",    &["part", &path_in_tests("partition_test1.txt"), "does_not_exist/",   "part"])?;
+    run_test("part/input_file2/is_dir",             &["part", &path_in_tests("partition_test1.txt"), ".",                 "part"])?;
 
     run_test("part/output_file_base/empty",       &["part", &path_in_tests("partition_test1.txt"), &path_in_tests("partition_test2.txt"), ""])?;
-    run_test("part/output_file_base/invalid",     &["part", &path_in_tests("partition_test1.txt"), &path_in_tests("partition_test2.txt"), "/dev/null"])?;
+    run_test("part/output_file_base/invalid",     &["part", &path_in_tests("partition_test1.txt"), &path_in_tests("partition_test2.txt"), "/dev/null/invalid"])?;
     run_test("part/output_file_base/nonexistent", &["part", &path_in_tests("partition_test1.txt"), &path_in_tests("partition_test2.txt"), "does_not_exist/part"])?;
 
     fn part_test(testname: &str) -> Result<(), Box<dyn std::error::Error>> {
@@ -120,6 +128,8 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
             "part"
         ])
     }
+
+    part_test("general_test")?;
 
     part_test("1_full_match_pair")?;
     part_test("1_full_match_group_in_file1_only")?;
