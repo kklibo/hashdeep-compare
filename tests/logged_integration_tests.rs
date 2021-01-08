@@ -58,19 +58,6 @@ fn logged_integration_tests() {
     let temp_file = "tests/temp/temp_file";
     std::fs::create_dir_all(temp_dir).unwrap();
 
-
-
-    //hash subcommand
-    {
-        let valid_hashdeep_target = "tests/hashdeep_target/";
-
-
-        run_command(&["hash", valid_hashdeep_target, ""]);
-        run_command(&["hash", valid_hashdeep_target, "/dev/null/invalid"]);
-        run_command(&["hash", valid_hashdeep_target, "tests/temp/nonexistent/"]);
-        run_command(&["hash", valid_hashdeep_target, temp_file]);
-    }
-
     //sort subcommand
     {
         let valid_hashdeep_logfile = "tests/test1.txt";

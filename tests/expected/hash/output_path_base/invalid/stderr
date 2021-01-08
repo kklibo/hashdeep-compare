@@ -1,1 +1,1 @@
-Error: "/dev/null exists (will not overwrite existing files)"
+Error: Os { code: 20, kind: Other, message: "Not a directory" }

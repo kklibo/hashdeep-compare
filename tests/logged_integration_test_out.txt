@@ -1,26 +1,3 @@
-[ arguments ]: hash tests/hashdeep_target/ 
-[ stdout ]
-[ stderr ]
-Error: Os { code: 2, kind: NotFound, message: "No such file or directory" }
-[ return ]: exit code: 1
-
-[ arguments ]: hash tests/hashdeep_target/ /dev/null/invalid
-[ stdout ]
-[ stderr ]
-Error: Os { code: 20, kind: Other, message: "Not a directory" }
-[ return ]: exit code: 1
-
-[ arguments ]: hash tests/hashdeep_target/ tests/temp/nonexistent/
-[ stdout ]
-[ stderr ]
-Error: Os { code: 21, kind: Other, message: "Is a directory" }
-[ return ]: exit code: 1
-
-[ arguments ]: hash tests/hashdeep_target/ tests/temp/temp_file
-[ stdout ]
-[ stderr ]
-[ return ]: exit code: 0
-
 [ arguments ]: sort
 [ stdout ]
 [ stderr ]
