@@ -26,7 +26,6 @@ mod test {
     extern crate tempfile;
     extern crate predicates;
 
-    use self::tempfile::NamedTempFile;
     use self::predicates::prelude::*;
 
     #[test]

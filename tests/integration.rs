@@ -101,6 +101,9 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     create_path_and_file("tests/expected/sort/output_file/exists/outfiles/sorted", "");
     run_test("sort/output_file/exists",          &["sort", &path_in_tests("test1.txt"), "sorted"])?;
 
+    create_path_and_file("tests/expected/sort/input_file_is_output_file/outfiles/same_file", "");
+    run_test("sort/input_file_is_output_file", &["sort", "same_file", "same_file"])?;
+
     run_test("sort/success", &["sort", &path_in_tests("test1.txt"), "test1_sorted.txt"])?;
 
 
