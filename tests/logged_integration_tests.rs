@@ -64,7 +64,6 @@ fn logged_integration_tests() {
         let valid_hashdeep_logfile2 = "tests/partition_test2.txt";
 
         //success
-        run_command(&["part", valid_hashdeep_logfile1, valid_hashdeep_logfile2, temp_file]);
     }
 
 

@@ -1,0 +1,17 @@
+log partition statistics:
+   (note: "pairs" have 1 entry in each file)
+ 2 full match pairs
+ 1 full match groups in file 1 only (should be 0)
+ 1 full match groups in file 2 only (should be 0)
+ 1 full match groups in both files (should be 0)
+ 1 name match pairs
+ 1 name match groups in file 1 only (should be 0)
+ 1 name match groups in file 2 only (should be 0)
+ 1 name match groups in both files (should be 0)
+ 1 hashes match pairs
+ 1 hashes match groups in file 1 only
+ 1 hashes match groups in file 2 only
+ 1 hashes match groups in both files
+ 1 entries in file 1 with no match
+ 1 entries in file 2 with no match
+
