@@ -61,6 +61,7 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("hash/output_path_base/empty",           &["hash", ".", ""])?;
     run_test("hash/output_path_base/invalid",         &["hash", ".", "/dev/null/invalid"])?;
     run_test("hash/output_path_base/nonexistent_dir", &["hash", ".", "does_not_exist/hash"])?;
+    run_test("hash/output_path_base/in_target_dir",   &["hash", ".", "hashlog"])?;
 
     create_path_and_file("tests/expected/hash/output_path_base/log_file_exists/outfiles/hashlog", "");
     run_test("hash/output_path_base/log_file_exists", &["hash", ".", "hashlog"])?;

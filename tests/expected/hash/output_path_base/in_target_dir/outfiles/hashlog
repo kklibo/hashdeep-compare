@@ -1,0 +1,7 @@
+%%%% HASHDEEP-1.0
+%%%% size,md5,sha256,filename
+## Invoked from: /media/sf_RustDevVM_Shared/projects/hashdeep-compare/tests/expected/hash/output_path_base/in_target_dir/outfiles
+## $ hashdeep -l -r -o f .
+## 
+0,d41d8cd98f00b204e9800998ecf8427e,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,./hashlog
+0,d41d8cd98f00b204e9800998ecf8427e,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,./hashlog.errors
