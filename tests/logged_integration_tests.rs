@@ -62,12 +62,6 @@ fn logged_integration_tests() {
     {
         let valid_hashdeep_logfile = "tests/test1.txt";
 
-        run_command(&["sort"]);
-        run_command(&["sort", "arg2"]);
-        run_command(&["sort", "", temp_file]);
-        run_command(&["sort", "/dev/null", temp_file]);
-        run_command(&["sort", "non-existent_file", temp_file]);
-        run_command(&["sort", "non-existent_dir/", temp_file]);
         run_command(&["sort", valid_hashdeep_logfile, ""]);
         run_command(&["sort", valid_hashdeep_logfile, "/dev/null/invalid"]);
         run_command(&["sort", valid_hashdeep_logfile, temp_dir]);
