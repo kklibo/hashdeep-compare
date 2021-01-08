@@ -63,27 +63,6 @@ fn logged_integration_tests() {
         let valid_hashdeep_logfile1 = "tests/partition_test1.txt";
         let valid_hashdeep_logfile2 = "tests/partition_test2.txt";
 
-        //not enough parameters
-        run_command(&["part"]);
-        run_command(&["part", "arg2", "arg3"]);
-
-        //invalid first logfile
-        run_command(&["part", "",                  valid_hashdeep_logfile2, temp_file]);
-        run_command(&["part", "/dev/null",         valid_hashdeep_logfile2, temp_file]);
-        run_command(&["part", "non-existent_file", valid_hashdeep_logfile2, temp_file]);
-        run_command(&["part", "non-existent_dir/", valid_hashdeep_logfile2, temp_file]);
-        run_command(&["part", temp_dir           , valid_hashdeep_logfile2, temp_file]);
-
-        //invalid second logfile
-        run_command(&["part", valid_hashdeep_logfile1, "",                  temp_file]);
-        run_command(&["part", valid_hashdeep_logfile1, "/dev/null",         temp_file]);
-        run_command(&["part", valid_hashdeep_logfile1, "non-existent_file", temp_file]);
-        run_command(&["part", valid_hashdeep_logfile1, "non-existent_dir/", temp_file]);
-        run_command(&["part", valid_hashdeep_logfile1, temp_dir,            temp_file]);
-
-        //invalid output file base
-        run_command(&["part", valid_hashdeep_logfile1, valid_hashdeep_logfile2, "/dev/null"  ]);
-
         //success
         run_command(&["part", valid_hashdeep_logfile1, valid_hashdeep_logfile2, temp_file]);
     }

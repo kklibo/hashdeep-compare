@@ -1,1 +1,1 @@
-Error: Os { code: 13, kind: PermissionDenied, message: "Permission denied" }
+Error: Os { code: 20, kind: Other, message: "Not a directory" }
