@@ -58,16 +58,6 @@ fn logged_integration_tests() {
     let temp_file = "tests/temp/temp_file";
     std::fs::create_dir_all(temp_dir).unwrap();
 
-    //sort subcommand
-    {
-        let valid_hashdeep_logfile = "tests/test1.txt";
-
-        run_command(&["sort", valid_hashdeep_logfile, ""]);
-        run_command(&["sort", valid_hashdeep_logfile, "/dev/null/invalid"]);
-        run_command(&["sort", valid_hashdeep_logfile, temp_dir]);
-        run_command(&["sort", valid_hashdeep_logfile, temp_file]);
-    }
-
     //part subcommand
     {
         let valid_hashdeep_logfile1 = "tests/partition_test1.txt";

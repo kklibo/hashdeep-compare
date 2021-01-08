@@ -92,9 +92,10 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("sort/input_file/nonexistent_file",&["sort", "does_not_exist",     "sorted"])?;
     run_test("sort/input_file/nonexistent_dir", &["sort", "does_not_exist/",    "sorted"])?;
 
-    run_test("sort/output_file/empty",       &["sort", &path_in_tests("test1.txt"), ""                     ])?;
-    run_test("sort/output_file/invalid",     &["sort", &path_in_tests("test1.txt"), "/dev/null/invalid"    ])?;
-    run_test("sort/output_file/nonexistent", &["sort", &path_in_tests("test1.txt"), "does_not_exist/sorted"])?;
+    run_test("sort/output_file/empty",           &["sort", &path_in_tests("test1.txt"), ""                     ])?;
+    run_test("sort/output_file/invalid",         &["sort", &path_in_tests("test1.txt"), "/dev/null/invalid"    ])?;
+    run_test("sort/output_file/nonexistent_dir", &["sort", &path_in_tests("test1.txt"), "does_not_exist/sorted"])?;
+    run_test("sort/output_file/is_dir",          &["sort", &path_in_tests("test1.txt"), "."])?;
 
     run_test("sort/success", &["sort", &path_in_tests("test1.txt"), "test1_sorted.txt"])?;
 
