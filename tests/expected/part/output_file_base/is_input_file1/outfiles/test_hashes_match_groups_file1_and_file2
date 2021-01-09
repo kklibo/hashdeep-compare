@@ -1,0 +1,4 @@
+file1: 4,ba1f2511fc30423bdbb183fe33f3dd0f,181210f8f9c779c26da1d9b2075bde0127302ee0e3fca38c9a83f5b1dd8e5d3b,hashes_match_group_1_a, file1&2.txt
+file1: 4,ba1f2511fc30423bdbb183fe33f3dd0f,181210f8f9c779c26da1d9b2075bde0127302ee0e3fca38c9a83f5b1dd8e5d3b,hashes_match_group_1_b, file1&2.txt
+file2: 4,ba1f2511fc30423bdbb183fe33f3dd0f,181210f8f9c779c26da1d9b2075bde0127302ee0e3fca38c9a83f5b1dd8e5d3b,hashes_match_group_1_c, file1&2.txt
+

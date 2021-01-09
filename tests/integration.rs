@@ -61,6 +61,7 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("hash/output_path_base/empty",           &["hash", ".", ""])?;
     run_test("hash/output_path_base/invalid",         &["hash", ".", "/dev/null/invalid"])?;
     run_test("hash/output_path_base/nonexistent_dir", &["hash", ".", "does_not_exist/hash"])?;
+    run_test("hash/output_path_base/in_target_dir",   &["hash", ".", "hashlog"])?;
 
     create_path_and_file("tests/expected/hash/output_path_base/log_file_exists/outfiles/hashlog", "");
     run_test("hash/output_path_base/log_file_exists", &["hash", ".", "hashlog"])?;
@@ -95,7 +96,13 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("sort/output_file/empty",           &["sort", &path_in_tests("test1.txt"), ""                     ])?;
     run_test("sort/output_file/invalid",         &["sort", &path_in_tests("test1.txt"), "/dev/null/invalid"    ])?;
     run_test("sort/output_file/nonexistent_dir", &["sort", &path_in_tests("test1.txt"), "does_not_exist/sorted"])?;
-    run_test("sort/output_file/is_dir",          &["sort", &path_in_tests("test1.txt"), "."])?;
+    run_test("sort/output_file/is_dir",          &["sort", &path_in_tests("test1.txt"), "dir/"])?;
+
+    create_path_and_file("tests/expected/sort/output_file/exists/outfiles/sorted", "");
+    run_test("sort/output_file/exists",          &["sort", &path_in_tests("test1.txt"), "sorted"])?;
+
+    create_path_and_file("tests/expected/sort/input_file_is_output_file/outfiles/same_file", "");
+    run_test("sort/input_file_is_output_file", &["sort", "same_file", "same_file"])?;
 
     run_test("sort/success", &["sort", &path_in_tests("test1.txt"), "test1_sorted.txt"])?;
 
@@ -120,6 +127,14 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("part/output_file_base/empty",       &["part", &path_in_tests("partition_test1.txt"), &path_in_tests("partition_test2.txt"), ""])?;
     run_test("part/output_file_base/invalid",     &["part", &path_in_tests("partition_test1.txt"), &path_in_tests("partition_test2.txt"), "/dev/null/invalid"])?;
     run_test("part/output_file_base/nonexistent", &["part", &path_in_tests("partition_test1.txt"), &path_in_tests("partition_test2.txt"), "does_not_exist/part"])?;
+
+    create_path_and_copy_file("tests/part_files/general_test_file1", "tests/expected/part/output_file_base/is_input_file1/outfiles/test");
+    run_test("part/output_file_base/is_input_file1", &["part", "test", &path_in_tests("part_files/general_test_file2"), "test"])?;
+
+    create_path_and_copy_file("tests/part_files/general_test_file2", "tests/expected/part/output_file_base/is_input_file2/outfiles/test");
+    run_test("part/output_file_base/is_input_file2", &["part", &path_in_tests("part_files/general_test_file1"), "test", "test"])?;
+
+    run_test("part/input_file1_is_input_file2", &["part", &path_in_tests("test1.txt"), &path_in_tests("test1.txt"), "part"])?;
 
     fn part_test(testname: &str) -> Result<(), Box<dyn std::error::Error>> {
         run_test(format!("part/{}", testname).as_str(), &["part",
@@ -201,6 +216,11 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     fn create_path_and_file(target_path: &str, contents: &str) {
         std::fs::create_dir_all( Path::new(target_path).parent().unwrap() ).unwrap();
         std::fs::write(target_path, contents).unwrap();
+    }
+
+    fn create_path_and_copy_file(source_path: &str, target_path: &str) {
+        std::fs::create_dir_all( Path::new(target_path).parent().unwrap() ).unwrap();
+        std::fs::copy(source_path, target_path).unwrap();
     }
 
     fn run_test (subdir: &str, args: &[&str]) -> Result<(), Box<dyn std::error::Error>> {
