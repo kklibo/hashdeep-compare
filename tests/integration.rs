@@ -131,6 +131,9 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     create_path_and_copy_file("tests/part_files/general_test_file1", "tests/expected/part/output_file_base/is_input_file1/outfiles/test");
     run_test("part/output_file_base/is_input_file1", &["part", "test", &path_in_tests("part_files/general_test_file2"), "test"])?;
 
+    create_path_and_copy_file("tests/part_files/general_test_file2", "tests/expected/part/output_file_base/is_input_file2/outfiles/test");
+    run_test("part/output_file_base/is_input_file2", &["part", &path_in_tests("part_files/general_test_file1"), "test", "test"])?;
+
     run_test("part/input_file1_is_input_file2", &["part", &path_in_tests("test1.txt"), &path_in_tests("test1.txt"), "part"])?;
 
     fn part_test(testname: &str) -> Result<(), Box<dyn std::error::Error>> {
