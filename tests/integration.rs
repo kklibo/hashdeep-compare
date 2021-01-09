@@ -128,6 +128,9 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("part/output_file_base/invalid",     &["part", &path_in_tests("partition_test1.txt"), &path_in_tests("partition_test2.txt"), "/dev/null/invalid"])?;
     run_test("part/output_file_base/nonexistent", &["part", &path_in_tests("partition_test1.txt"), &path_in_tests("partition_test2.txt"), "does_not_exist/part"])?;
 
+    create_path_and_copy_file("tests/part_files/general_test_file1", "tests/expected/part/output_file_base/is_input_file1/outfiles/test");
+    run_test("part/output_file_base/is_input_file1", &["part", "test", &path_in_tests("part_files/general_test_file2"), "test"])?;
+
     run_test("part/input_file1_is_input_file2", &["part", &path_in_tests("test1.txt"), &path_in_tests("test1.txt"), "part"])?;
 
     fn part_test(testname: &str) -> Result<(), Box<dyn std::error::Error>> {
@@ -210,6 +213,11 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     fn create_path_and_file(target_path: &str, contents: &str) {
         std::fs::create_dir_all( Path::new(target_path).parent().unwrap() ).unwrap();
         std::fs::write(target_path, contents).unwrap();
+    }
+
+    fn create_path_and_copy_file(source_path: &str, target_path: &str) {
+        std::fs::create_dir_all( Path::new(target_path).parent().unwrap() ).unwrap();
+        std::fs::copy(source_path, target_path).unwrap();
     }
 
     fn run_test (subdir: &str, args: &[&str]) -> Result<(), Box<dyn std::error::Error>> {
