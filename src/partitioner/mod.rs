@@ -4,8 +4,8 @@ pub mod match_group;
 use self::match_pair::MatchPair;
 use self::match_group::{MatchGroup,SingleFileMatchGroup};
 use std::collections::BTreeMap;
-use log_entry::LogEntry;
-use some_vec::SomeVec;
+use crate::log_entry::LogEntry;
+use crate::some_vec::SomeVec;
 
 pub struct MatchPartition<'a> {
 
@@ -245,7 +245,7 @@ pub fn match_partition<'b>(from_file1: &[&'b LogEntry], from_file2: &[&'b LogEnt
 #[cfg(test)]
 mod test {
     use super::*;
-    use common::read_log_entries_from_file;
+    use crate::common::read_log_entries_from_file;
 
     #[test]
     fn match_partition_test() {

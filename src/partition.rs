@@ -1,6 +1,6 @@
-use common;
-use log_entry::LogEntry;
-use partitioner;
+use crate::common;
+use crate::log_entry::LogEntry;
+use crate::partitioner;
 
 
 /// Partition entries from two hashdeep logs by content and name matches

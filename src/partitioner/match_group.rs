@@ -1,5 +1,5 @@
-use log_entry::LogEntry;
-use some_vec::SomeVec;
+use crate::log_entry::LogEntry;
+use crate::some_vec::SomeVec;
 
 pub struct SingleFileMatchGroup<'a> {
     pub log_entries: SomeVec<&'a LogEntry>,

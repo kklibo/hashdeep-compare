@@ -1,4 +1,4 @@
-use log_entry::LogEntry;
+use crate::log_entry::LogEntry;
 
 #[derive(Eq, PartialEq, Debug)]
 pub struct MatchPair<'a> {

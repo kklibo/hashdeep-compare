@@ -1,10 +1,10 @@
 use std::fs::{File,read_to_string};
 use std::io::{Write,Error};
 
-use log_entry::LogEntry;
-use partitioner::match_pair::MatchPair;
-use partitioner::match_group::{SingleFileMatchGroup,MatchGroup};
-use some_vec::SomeVec;
+use crate::log_entry::LogEntry;
+use crate::partitioner::match_pair::MatchPair;
+use crate::partitioner::match_group::{SingleFileMatchGroup,MatchGroup};
+use crate::some_vec::SomeVec;
 
 pub struct LogFile<T>
     where T: Extend<LogEntry> + Default + IntoIterator

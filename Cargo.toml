@@ -2,6 +2,7 @@
 name = "hashdeep-compare"
 version = "0.2.0"
 authors = ["user"]
+edition = "2018"
 
 [dependencies]
 

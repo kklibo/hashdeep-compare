@@ -1,5 +1,5 @@
-use common;
-use log_entry::LogEntry;
+use crate::common;
+use crate::log_entry::LogEntry;
 
 pub fn sort_log(filename: &str, out_filename: &str) -> Result<(), Box<dyn std::error::Error>>{
 
