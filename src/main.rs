@@ -2,19 +2,24 @@ extern crate hashdeep_compare;
 use hashdeep_compare::*;
 
 use std::error::Error;
+use std::io::{stdout,stderr,Write};
 
 fn main() -> Result<(), Box<dyn Error>> {
+    main_impl(Box::new(stdout()))
+}
+
+fn main_impl(mut stdout: Box<dyn Write>) -> Result<(), Box<dyn Error>> {
 
     const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-    fn show_help() {
-        println!("hashdeep-compare version {}", VERSION);
-        println!(" arguments");
-        println!("  version");
-        println!("  hash target_directory output_path_base");
-        println!("  sort input_file output_file");
-        println!("  part input_file1 input_file2 output_file_base");
-    }
+    let mut show_help = ||{
+        writeln!(stdout, "hashdeep-compare version {}", VERSION);
+        writeln!(stdout, " arguments");
+        writeln!(stdout, "  version");
+        writeln!(stdout, "  hash target_directory output_path_base");
+        writeln!(stdout, "  sort input_file output_file");
+        writeln!(stdout, "  part input_file1 input_file2 output_file_base");
+    };
 
     let args: Vec<String> = std::env::args().collect();
 
@@ -40,10 +45,13 @@ fn main() -> Result<(), Box<dyn Error>> {
         "part" => {
             if args.len() < 5 {return Err("part: not enough arguments".into());}
 
+            let partition_stats =
             partition::partition_log(args[2].as_str(), args[3].as_str(), args[4].as_str())?;
+
+            writeln!(stdout, "{}", partition_stats);
         },
         "version" => {
-            println!("hashdeep-compare version {}", VERSION);
+            writeln!(stdout, "hashdeep-compare version {}", VERSION);
         },
 
         x => return Err(format!("invalid command: {}", x).into())
