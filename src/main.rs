@@ -6,17 +6,31 @@ use std::io::{stdout,stderr,Write};
 
 fn main() -> Result<(), Box<dyn Error>> {
 
+    let return_code=
+    main_io_wrapper(
+        Box::new(stdout()),
+        Box::new(stderr()),
+    )?;
+
+    std::process::exit(return_code);
+}
+
+fn main_io_wrapper(
+    stdout: Box<dyn Write>,
+    mut stderr: Box<dyn Write>,
+) -> Result<i32, Box<dyn Error>> {
+
     let return_code =
-    match main_impl(Box::new(stdout()))
+    match main_impl(stdout)
     {
         Ok(()) => 0,
         Err(err) => {
-            writeln! (stderr(), "Error: {:?}", err)?;
+            writeln! (stderr, "Error: {:?}", err)?;
             1
         }
     };
 
-    std::process::exit(return_code);
+    Ok(return_code)
 }
 
 fn main_impl(mut stdout: Box<dyn Write>) -> Result<(), Box<dyn Error>> {
