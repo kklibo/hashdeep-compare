@@ -6,16 +6,21 @@ use assert_cmd::prelude::*;
 use std::process::Command;
 use std::path::Path;
 use std::fs::File;
-use std::io::Write;
 use pathdiff::diff_paths;
 
 
 const BIN_NAME: &str = env!("CARGO_PKG_NAME");
 
 
+#[cfg(feature = "integration_test_coverage")]
+include!("../src/main.rs");
+
+
 #[test]
 //todo: rename this function?
 fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
+
+    use std::io::Write;
 
     //remove existing test results
     std::fs::remove_dir_all("tests/expected")?;
