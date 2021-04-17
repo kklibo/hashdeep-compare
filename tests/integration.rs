@@ -271,7 +271,7 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
         Ok(())
     }
 
-        fn run_test (subdir: &str, args: &[&str]) -> Result<(), Box<dyn std::error::Error>> {
+    fn run_coverage_test (subdir: &str, args: &[&str]) -> Result<(), Box<dyn std::error::Error>> {
         let expected_files =
             Path::new("tests/expected")
                 .join(subdir);
@@ -284,18 +284,29 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
 
         std::fs::create_dir_all(&outfiles)?;
 
+        //prepend an element to shift the indices to the right:
+        // main_io_wrapper expects arguments to start at index 1
+        let mut padded_args = args.to_vec();
+            padded_args.insert(0, "");
+
+        let args = &padded_args;
+
+        /*
         let output =
             Command::cargo_bin(BIN_NAME)?
                 .current_dir(outfiles.as_path())
                 .args(args)
                 .output()?;
+        */
 
         let mut stdout_file = File::create(stdout_path.as_path())?;
-        stdout_file.write_all(&output.stdout)?;
-
         let mut stderr_file = File::create(stderr_path.as_path())?;
-        stderr_file.write_all(&output.stderr)?;
 
+        let exit_code = main_io_wrapper(
+            args,
+            Box::new(stdout_file),
+            Box::new(stderr_file),
+        )?;
 
         //remove empty outputs
         let _ = std::fs::remove_dir(outfiles.as_path()); //will fail if not empty
@@ -309,7 +320,8 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
 
 
         let mut exitcode_file = File::create(exitcode_path.as_path())?;
-        write!(exitcode_file, "{:?}", output.status.code())?;
+        //put exit code in Some() to match expected std::process::ExitStatus::code output
+        write!(exitcode_file, "{:?}", Some(exit_code))?;
 
         Ok(())
     }
