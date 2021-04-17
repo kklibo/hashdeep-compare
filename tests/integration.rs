@@ -271,5 +271,48 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
         Ok(())
     }
 
+        fn run_test (subdir: &str, args: &[&str]) -> Result<(), Box<dyn std::error::Error>> {
+        let expected_files =
+            Path::new("tests/expected")
+                .join(subdir);
+
+        let outfiles = expected_files.join("outfiles");
+        let stdout_path = expected_files.join("stdout");
+        let stderr_path = expected_files.join("stderr");
+        let exitcode_path = expected_files.join("exitcode");
+
+
+        std::fs::create_dir_all(&outfiles)?;
+
+        let output =
+            Command::cargo_bin(BIN_NAME)?
+                .current_dir(outfiles.as_path())
+                .args(args)
+                .output()?;
+
+        let mut stdout_file = File::create(stdout_path.as_path())?;
+        stdout_file.write_all(&output.stdout)?;
+
+        let mut stderr_file = File::create(stderr_path.as_path())?;
+        stderr_file.write_all(&output.stderr)?;
+
+
+        //remove empty outputs
+        let _ = std::fs::remove_dir(outfiles.as_path()); //will fail if not empty
+
+        if std::fs::metadata(&stdout_path)?.len() == 0 {
+            std::fs::remove_file(&stdout_path)?;
+        }
+        if std::fs::metadata(&stderr_path)?.len() == 0 {
+            std::fs::remove_file(&stderr_path)?;
+        }
+
+
+        let mut exitcode_file = File::create(exitcode_path.as_path())?;
+        write!(exitcode_file, "{:?}", output.status.code())?;
+
+        Ok(())
+    }
+
     Ok(())
 }
