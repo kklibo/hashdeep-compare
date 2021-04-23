@@ -4,9 +4,12 @@ extern crate pathdiff;
 use assert_cmd::prelude::*;
 
 use std::process::Command;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::fs::File;
 use pathdiff::diff_paths;
+
+#[cfg(feature = "integration_test_coverage")]
+use std::path::PathBuf;
 
 
 const BIN_NAME: &str = env!("CARGO_PKG_NAME");
@@ -22,7 +25,7 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     use std::io::Write;
 
 
-    //#[cfg(feature = "integration_test_coverage")]
+    #[cfg(feature = "integration_test_coverage")]
     let initial_working_dir = std::env::current_dir()
         .expect("Failed to start tests: could not read working directory");
 
@@ -316,14 +319,6 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
 
         assert!( ! outfiles.is_absolute(),
             "test aborted: outfiles path should not be absolute (could escape test directory)");
-
-        /*
-        let output =
-            Command::cargo_bin(BIN_NAME)?
-                .current_dir(outfiles.as_path())
-                .args(args)
-                .output()?;
-        */
 
         std::env::set_current_dir(&initial_working_dir)?;
 
