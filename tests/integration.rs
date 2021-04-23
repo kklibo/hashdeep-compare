@@ -4,7 +4,7 @@ extern crate pathdiff;
 use assert_cmd::prelude::*;
 
 use std::process::Command;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::fs::File;
 use pathdiff::diff_paths;
 
@@ -19,8 +19,25 @@ include!("../src/main.rs");
 #[test]
 //todo: rename this function?
 fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
-
     use std::io::Write;
+
+
+    //#[cfg(feature = "integration_test_coverage")]
+    let initial_working_dir = std::env::current_dir()
+        .expect("Failed to start tests: could not read working directory");
+
+    #[cfg(feature = "integration_test_coverage")]
+    let run_test =  |subdir: &str, args: &[&str]| -> Result<(), Box<dyn std::error::Error>> {
+
+        run_coverage_test(subdir, args, &initial_working_dir)
+    };
+
+    #[cfg(not(feature = "integration_test_coverage"))]
+    let run_test =  |subdir: &str, args: &[&str]| -> Result<(), Box<dyn std::error::Error>> {
+
+        run_bin_test(subdir, args)
+    };
+
 
     //remove existing test results
     std::fs::remove_dir_all("tests/expected")?;
@@ -141,13 +158,13 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
 
     run_test("part/input_file1_is_input_file2", &["part", &path_in_tests("test1.txt"), &path_in_tests("test1.txt"), "part"])?;
 
-    fn part_test(testname: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let part_test = |testname: &str| -> Result<(), Box<dyn std::error::Error>> {
         run_test(format!("part/{}", testname).as_str(), &["part",
             &path_in_tests(&format!("part_files/{}_file1", testname)),
             &path_in_tests(&format!("part_files/{}_file2", testname)),
             "part"
         ])
-    }
+    };
 
     part_test("general_test")?;
 
@@ -228,7 +245,8 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
         std::fs::copy(source_path, target_path).unwrap();
     }
 
-    fn run_test (subdir: &str, args: &[&str]) -> Result<(), Box<dyn std::error::Error>> {
+    #[cfg(not(feature = "integration_test_coverage"))]
+    fn run_bin_test (subdir: &str, args: &[&str]) -> Result<(), Box<dyn std::error::Error>> {
         let expected_files =
             Path::new("tests/expected")
                 .join(subdir);
@@ -271,7 +289,8 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
         Ok(())
     }
 
-    fn run_coverage_test (subdir: &str, args: &[&str]) -> Result<(), Box<dyn std::error::Error>> {
+    #[cfg(feature = "integration_test_coverage")]
+    fn run_coverage_test (subdir: &str, args: &[&str], initial_working_dir: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
         let expected_files =
             Path::new("tests/expected")
                 .join(subdir);
@@ -291,6 +310,13 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
 
         let args = &padded_args;
 
+
+        assert!( initial_working_dir.is_absolute(),
+            "test aborted: initial_working_dir path must be absolute (could reset to wrong directory)");
+
+        assert!( ! outfiles.is_absolute(),
+            "test aborted: outfiles path should not be absolute (could escape test directory)");
+
         /*
         let output =
             Command::cargo_bin(BIN_NAME)?
@@ -299,14 +325,22 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
                 .output()?;
         */
 
+        std::env::set_current_dir(&initial_working_dir)?;
+
         let mut stdout_file = File::create(stdout_path.as_path())?;
         let mut stderr_file = File::create(stderr_path.as_path())?;
+
+
+        let working_dir = initial_working_dir.join(&outfiles);
+        std::env::set_current_dir(&working_dir)?;
 
         let exit_code = main_io_wrapper(
             args,
             Box::new(stdout_file),
             Box::new(stderr_file),
         )?;
+
+        std::env::set_current_dir(&initial_working_dir)?;
 
         //remove empty outputs
         let _ = std::fs::remove_dir(outfiles.as_path()); //will fail if not empty
