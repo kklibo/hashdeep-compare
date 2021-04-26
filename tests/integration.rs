@@ -18,6 +18,70 @@ const BIN_NAME: &str = env!("CARGO_PKG_NAME");
 #[cfg(feature = "integration_test_coverage")]
 include!("../src/main.rs");
 
+/*!
+##Integration Tests: Overview
+This file implements an integration test system for hashdeep-compare.
+
+*run_test* function calls define the tests: each one invokes a separate execution of
+the program and records its results.
+
+Normally, the program is tested as a separate binary. The **integration_test_coverage** feature
+modifies how integration tests are invoked to allow code coverage analysis. Test results are
+intended to be identical with and without this feature.
+
+##Tests
+
+A test is defined by
+- a set of command line arguments with which to run the program
+- a unique results subdirectory (in the project's tests/expected/ directory)
+
+Each test is run with its specified command line arguments, and its outputs are saved in its
+results subdirectory.
+
+
+Test result subdirectories have the following structure:
+- stdout: a file containing the program's stdout output
+- stderr: a file containing the program's stderr output
+- exitcode: a file containing the program's exit code, as a string representation of an
+Option\<i32\>
+- outfiles: a directory containing the files created by the program in its working directory
+
+Any file or directory which would be left empty (e.g.: stderr after a run with no errors)
+is not generated.
+
+Test command line arguments often include references to input files in the tests/ directory.
+
+##Test results are version-controlled
+
+The test result subdirectories are checked into the project repository along with the code. This
+means that after the tests are run, any changes in results since the last commit will be visible
+and must be approved (or fixed) as part of the commit/code review process. The first action after
+the integration test is started is the deletion of all existing test results: this means that all
+tests must be run to completion with the expected results to return the tests/expected/
+subdirectory to the state that matches the repo.
+
+### Disadvantage: determinism required
+
+One problem with this approach is that all tests must generate the same output every time.
+This is an issue for tests that use the **hash** option: multithreaded hashdeep does not
+consistently order its output lines. The integration tests currently work around this by testing
+the **hash** and **sort** options together: a hash log is generated, and then sorted, thus
+rendering it deterministic.
+
+##Special handling: the **integration_test_coverage** feature
+
+When the **integration_test_coverage** feature is enabled, the *run_test* function runs tests
+through function calls in the codebase, rather than by invoking a separate binary. This allows a
+code coverage tool to observe the integration tests' use of the codebase directly. When this feature
+is enabled, *run_test* uses the *run_coverage_test* function instead of the normal *run_bin_test*
+function.
+
+See main.rs for more details.
+
+**/
+
+
+
 
 #[test]
 //todo: rename this function?
