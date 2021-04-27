@@ -1,4 +1,4 @@
-hashdeep-compare version 0.2.0
+hashdeep-compare version 0.3.0
  arguments
   version
   hash target_directory output_path_base
