@@ -1,25 +1,4 @@
-extern crate assert_cmd;
-extern crate pathdiff;
-
-use assert_cmd::prelude::*;
-
-use std::process::Command;
-use std::path::Path;
-use std::fs::File;
-use pathdiff::diff_paths;
-
-#[cfg(feature = "integration_test_coverage")]
-use std::path::PathBuf;
-
-
-const BIN_NAME: &str = env!("CARGO_PKG_NAME");
-
-
-#[cfg(feature = "integration_test_coverage")]
-use hashdeep_compare::main_impl::main_io_wrapper;
-
-
-/**
+/*!
 ##Integration Tests: Overview
 This file implements an integration test system for hashdeep-compare.
 
@@ -80,6 +59,28 @@ function.
 See main.rs for more details.
 
 **/
+
+
+extern crate assert_cmd;
+extern crate pathdiff;
+
+use assert_cmd::prelude::*;
+
+use std::process::Command;
+use std::path::Path;
+use std::fs::File;
+use pathdiff::diff_paths;
+
+#[cfg(feature = "integration_test_coverage")]
+use std::path::PathBuf;
+
+
+const BIN_NAME: &str = env!("CARGO_PKG_NAME");
+
+
+#[cfg(feature = "integration_test_coverage")]
+use hashdeep_compare::main_impl::main_io_wrapper;
+
 
 
 
