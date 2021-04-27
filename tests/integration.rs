@@ -62,35 +62,26 @@
 //! To use the Tarpaulin code coverage tool to create an html report:
 //! `cargo tarpaulin -o Html --features integration_test_coverage`
 
-extern crate assert_cmd;
-extern crate pathdiff;
-
 use assert_cmd::prelude::*;
 
 use std::process::Command;
 use std::path::Path;
 use std::fs::File;
+use std::io::{Write, ErrorKind};
 use pathdiff::diff_paths;
 
 #[cfg(feature = "integration_test_coverage")]
 use std::path::PathBuf;
 
-
-const BIN_NAME: &str = env!("CARGO_PKG_NAME");
-
-
 #[cfg(feature = "integration_test_coverage")]
 use hashdeep_compare::main_impl::main_io_wrapper;
 
 
-
+const BIN_NAME: &str = env!("CARGO_PKG_NAME");
 
 
 #[test]
-//todo: rename this function?
-fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
-    use std::io::Write;
-
+fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
 
     #[cfg(feature = "integration_test_coverage")]
     let initial_working_dir = std::env::current_dir()
@@ -110,7 +101,11 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
 
 
     //remove existing test results
-    std::fs::remove_dir_all("tests/expected")?;
+    match std::fs::remove_dir_all("tests/expected") {
+        //ignore error from nonexistent target directory (this is not a failure of the current test)
+        Err(e) if e.kind() == ErrorKind::NotFound => (),
+        x => x?,
+    };
 
 
     /*
