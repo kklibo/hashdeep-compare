@@ -16,9 +16,10 @@ const BIN_NAME: &str = env!("CARGO_PKG_NAME");
 
 
 #[cfg(feature = "integration_test_coverage")]
-include!("../src/main.rs");
+use hashdeep_compare::main_impl::main_io_wrapper;
 
-/*!
+
+/**
 ##Integration Tests: Overview
 This file implements an integration test system for hashdeep-compare.
 

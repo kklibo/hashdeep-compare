@@ -1,9 +1,3 @@
-extern crate hashdeep_compare;
-use hashdeep_compare::*;
-
-use std::error::Error;
-use std::io::{stdout,stderr,Write};
-
 /*!
 main.rs has a chain of three main-like functions instead of just main():
 - main
@@ -26,6 +20,10 @@ Note: when the **integration_test_coverage** feature is enabled, tests/integrati
 file directly through the include! macro. Some special handling may be needed to avoid importing
 modules more than once.
 **/
+
+use std::error::Error;
+use std::io::{stdout,stderr};
+use hashdeep_compare::main_impl::main_io_wrapper;
 
 /**
 Runs the program normally: directs program arguments, stdout, and stderr to main_io_wrapper,

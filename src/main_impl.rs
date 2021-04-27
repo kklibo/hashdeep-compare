@@ -1,3 +1,6 @@
+use crate::*;
+use std::error::Error;
+use std::io::Write;
 
 /**
 Specifies program arguments and (re)direction of stdout/stderr, then runs the program
@@ -8,7 +11,7 @@ This is called by
 - main() in normal execution
 - integration.rs when the **integration_test_coverage** feature is enabled
 **/
-fn main_io_wrapper(
+pub fn main_io_wrapper(
     args: &[&str],
     stdout: Box<dyn Write>,
     mut stderr: Box<dyn Write>,
