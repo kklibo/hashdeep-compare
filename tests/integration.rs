@@ -1,5 +1,5 @@
 /*!
-##Integration Tests: Overview
+## Integration Tests: Overview
 This file implements an integration test system for hashdeep-compare.
 
 *run_test* function calls define the tests: each one invokes a separate execution of
@@ -9,7 +9,7 @@ Normally, the program is tested as a separate binary. The **integration_test_cov
 modifies how integration tests are invoked to allow code coverage analysis. Test results are
 intended to be identical with and without this feature.
 
-##Tests
+## Tests
 
 A test is defined by
 - a set of command line arguments with which to run the program
@@ -26,12 +26,12 @@ Test result subdirectories have the following structure:
 Option\<i32\>
 - outfiles: a directory containing the files created by the program in its working directory
 
-Any file or directory which would be left empty (e.g.: stderr after a run with no errors)
+Any file or directory which would be empty (e.g.: stderr after a run with no errors)
 is not generated.
 
 Test command line arguments often include references to input files in the tests/ directory.
 
-##Test results are version-controlled
+## Test results are version-controlled
 
 The test result subdirectories are checked into the project repository along with the code. This
 means that after the tests are run, any changes in results since the last commit will be visible
@@ -48,16 +48,15 @@ consistently order its output lines. The integration tests currently work around
 the **hash** and **sort** options together: a hash log is generated, and then sorted, thus
 rendering it deterministic.
 
-##Special handling: the **integration_test_coverage** feature
+## Special handling: the **integration_test_coverage** feature
 
 When the **integration_test_coverage** feature is enabled, the *run_test* function runs tests
 through function calls in the codebase, rather than by invoking a separate binary. This allows a
-code coverage tool to observe the integration tests' use of the codebase directly. When this feature
-is enabled, *run_test* uses the *run_coverage_test* function instead of the normal *run_bin_test*
-function.
+code coverage tool to observe the integration tests' use of the codebase directly. When this
+feature is enabled, *run_test* uses the *run_coverage_test* function instead of the normal
+*run_bin_test* function.
 
-See main.rs for more details.
-
+See main_impl.rs for more details.
 **/
 
 

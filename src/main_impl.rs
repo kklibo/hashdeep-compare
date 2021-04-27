@@ -1,3 +1,40 @@
+/*!
+The **main_impl** module exists to add I/O redirection to the main program function, to allow
+test coverage analysis for integration tests.
+
+## Normal Program Behavior
+
+*main()* in main.rs calls *main_io_wrapper* in this module, supplying arguments and the standard
+output and error streams.
+*main_io_wrapper*, in turn, calls *main_impl*, which is the equivalent of a typical *main()*
+function.
+
+## Special handling: the **integration_test_coverage** feature
+
+Integration tests are defined in tests/integration.rs. These tests invoke the compiled program
+binary and test its functions with command-line arguments. Because they call a
+separate binary instead of code in hashdeep-compare's codebase, code coverage tools can't observe
+what code they use.
+
+To work around this, hashdeep-compare has an **integration_test_coverage** feature. When enabled,
+integration.rs uses a modified test function that runs the same tests as before, but through direct
+calls in the codebase, instead of through a precompiled binary. The *main_io_wrapper* function is
+its interface in this mode. These direct calls are part of the test binary, and can be observed by
+a code coverage tool.
+
+## Justification
+
+Separating the program's main function code between main.rs and **main_impl** does add some
+complexity to the codebase.
+The option of doing integration testing through direct calls to *main_io_wrapper*, as the
+**integration_test_coverage** mode does now, would test almost all of the relevant code: the only code bypassed
+is the code in *main()* in main.rs, which is a minimal wrapper around *main_io_wrapper*. However,
+actual invocation through a separate binary provides a higher level of certainty against potential
+future anomalies that disrupt the creation of the binary itself, or the processing of its inputs.
+Integration testing with binaries is meant to replicate the actual use of the tool as closely as
+possible: for this reason, the **integration_test_coverage** feature-based mode switch is preferred.
+**/
+
 use crate::*;
 use std::error::Error;
 use std::io::Write;
