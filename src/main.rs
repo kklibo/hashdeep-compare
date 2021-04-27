@@ -1,53 +1,23 @@
-extern crate hashdeep_compare;
-use hashdeep_compare::*;
-
 use std::error::Error;
+use std::io::{stdout,stderr};
+use hashdeep_compare::main_impl::main_io_wrapper;
+
+/// Runs the program: directs program arguments, stdout, and stderr to main_impl::main_io_wrapper,
+/// and exits with the resulting exit code or error
+///
+/// See main_impl.rs for more details.
 
 fn main() -> Result<(), Box<dyn Error>> {
 
-    const VERSION: &str = env!("CARGO_PKG_VERSION");
-
-    fn show_help() {
-        println!("hashdeep-compare version {}", VERSION);
-        println!(" arguments");
-        println!("  version");
-        println!("  hash target_directory output_path_base");
-        println!("  sort input_file output_file");
-        println!("  part input_file1 input_file2 output_file_base");
-    }
-
     let args: Vec<String> = std::env::args().collect();
+    let args: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
 
-    if args.len() < 2 {
-        show_help();
-        return Ok(());
-    }
+    let exit_code=
+    main_io_wrapper(
+        &args,
+        Box::new(stdout()),
+        Box::new(stderr()),
+    )?;
 
-
-    match args[1].as_str() {
-        "hash" => {
-            if args.len() < 4 {return Err("hash: not enough arguments".into());}
-
-            command::run_hashdeep_command(
-                args[2].as_str(),
-                args[3].as_str())?;
-        },
-        "sort" => {
-            if args.len() < 4 {return Err("sort: not enough arguments".into());}
-
-            sort::sort_log(args[2].as_str(), args[3].as_str())?;
-        },
-        "part" => {
-            if args.len() < 5 {return Err("part: not enough arguments".into());}
-
-            partition::partition_log(args[2].as_str(), args[3].as_str(), args[4].as_str())?;
-        },
-        "version" => {
-            println!("hashdeep-compare version {}", VERSION);
-        },
-
-        x => return Err(format!("invalid command: {}", x).into())
-    }
-
-    Ok(())
+    std::process::exit(exit_code);
 }

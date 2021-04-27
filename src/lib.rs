@@ -1,6 +1,7 @@
 //! hashdeep-compare
 //!
 
+pub mod main_impl;
 pub mod sort;
 mod common;
 mod log_entry;

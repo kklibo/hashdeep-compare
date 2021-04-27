@@ -1,24 +1,111 @@
-extern crate assert_cmd;
-extern crate pathdiff;
+//! ## Integration Tests: Overview
+//! This file implements an integration test system for hashdeep-compare.
+//!
+//! *run_test* function calls define the tests: each one invokes a separate execution of
+//! the program and records its results.
+//!
+//! Normally, the program is tested as a separate binary. The **integration_test_coverage** feature
+//! modifies how integration tests are invoked to allow code coverage analysis. Test results are
+//! intended to be identical with and without this feature.
+//!
+//! ## Tests
+//!
+//! A test is defined by
+//! - a set of command line arguments with which to run the program
+//! - a unique results subdirectory (in the project's tests/expected/ directory)
+//!
+//! Each test is run with its specified command line arguments, and its outputs are saved in its
+//! results subdirectory.
+//!
+//!
+//! Test result subdirectories have the following structure:
+//! - stdout: a file containing the program's stdout output
+//! - stderr: a file containing the program's stderr output
+//! - exitcode: a file containing the program's exit code, as a string representation of an
+//! Option\<i32\>
+//! - outfiles: a directory containing the files created by the program in its working directory
+//!
+//! Any file or directory which would be empty (e.g.: stderr after a run with no errors)
+//! is not generated.
+//!
+//! Test command line arguments often include references to input files in the tests/ directory.
+//!
+//! ## Test results are version-controlled
+//!
+//! The test result subdirectories are checked into the project repository along with the code. This
+//! means that after the tests are run, any changes in results since the last commit will be visible
+//! and must be approved (or fixed) as part of the commit/code review process. The first action after
+//! the integration test is started is the deletion of all existing test results: this means that all
+//! tests must be run to completion with the expected results to return the tests/expected/
+//! subdirectory to the state that matches the repo.
+//!
+//! ### Disadvantage: determinism required
+//!
+//! One problem with this approach is that all tests must generate the same output every time.
+//! This is an issue for tests that use the **hash** option: multithreaded hashdeep does not
+//! consistently order its output lines. The integration tests currently work around this by testing
+//! the **hash** and **sort** options together: a hash log is generated, and then sorted, thus
+//! rendering it deterministic.
+//!
+//! ## Special handling: the **integration_test_coverage** feature
+//!
+//! When the **integration_test_coverage** feature is enabled, the *run_test* function runs tests
+//! through function calls in the codebase, rather than by invoking a separate binary. This allows a
+//! code coverage tool to observe the integration tests' use of the codebase directly. When this
+//! feature is enabled, *run_test* uses the *run_coverage_test* function instead of the normal
+//! *run_bin_test* function.
+//!
+//! See main_impl.rs for more details.
+//!
+//! ### Example: Tarpaulin
+//!
+//! To use the Tarpaulin code coverage tool to create an html report:
+//! `cargo tarpaulin -o Html --features integration_test_coverage`
 
 use assert_cmd::prelude::*;
 
 use std::process::Command;
 use std::path::Path;
 use std::fs::File;
-use std::io::Write;
+use std::io::{Write, ErrorKind};
 use pathdiff::diff_paths;
+
+#[cfg(feature = "integration_test_coverage")]
+use std::path::PathBuf;
+
+#[cfg(feature = "integration_test_coverage")]
+use hashdeep_compare::main_impl::main_io_wrapper;
 
 
 const BIN_NAME: &str = env!("CARGO_PKG_NAME");
 
 
 #[test]
-//todo: rename this function?
-fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
+fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
+
+    #[cfg(feature = "integration_test_coverage")]
+    let initial_working_dir = std::env::current_dir()
+        .expect("Failed to start tests: could not read working directory");
+
+    #[cfg(feature = "integration_test_coverage")]
+    let run_test =  |subdir: &str, args: &[&str]| -> Result<(), Box<dyn std::error::Error>> {
+
+        run_coverage_test(subdir, args, &initial_working_dir)
+    };
+
+    #[cfg(not(feature = "integration_test_coverage"))]
+    let run_test =  |subdir: &str, args: &[&str]| -> Result<(), Box<dyn std::error::Error>> {
+
+        run_bin_test(subdir, args)
+    };
+
 
     //remove existing test results
-    std::fs::remove_dir_all("tests/expected")?;
+    match std::fs::remove_dir_all("tests/expected") {
+        //ignore error from nonexistent target directory (this is not a failure of the current test)
+        Err(e) if e.kind() == ErrorKind::NotFound => (),
+        x => x?,
+    };
 
 
     /*
@@ -136,13 +223,13 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
 
     run_test("part/input_file1_is_input_file2", &["part", &path_in_tests("test1.txt"), &path_in_tests("test1.txt"), "part"])?;
 
-    fn part_test(testname: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let part_test = |testname: &str| -> Result<(), Box<dyn std::error::Error>> {
         run_test(format!("part/{}", testname).as_str(), &["part",
             &path_in_tests(&format!("part_files/{}_file1", testname)),
             &path_in_tests(&format!("part_files/{}_file2", testname)),
             "part"
         ])
-    }
+    };
 
     part_test("general_test")?;
 
@@ -223,7 +310,8 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
         std::fs::copy(source_path, target_path).unwrap();
     }
 
-    fn run_test (subdir: &str, args: &[&str]) -> Result<(), Box<dyn std::error::Error>> {
+    #[cfg(not(feature = "integration_test_coverage"))]
+    fn run_bin_test (subdir: &str, args: &[&str]) -> Result<(), Box<dyn std::error::Error>> {
         let expected_files =
             Path::new("tests/expected")
                 .join(subdir);
@@ -262,6 +350,69 @@ fn structured_integration_tests() -> Result<(), Box<dyn std::error::Error>> {
 
         let mut exitcode_file = File::create(exitcode_path.as_path())?;
         write!(exitcode_file, "{:?}", output.status.code())?;
+
+        Ok(())
+    }
+
+    #[cfg(feature = "integration_test_coverage")]
+    fn run_coverage_test (subdir: &str, args: &[&str], initial_working_dir: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+        let expected_files =
+            Path::new("tests/expected")
+                .join(subdir);
+
+        let outfiles = expected_files.join("outfiles");
+        let stdout_path = expected_files.join("stdout");
+        let stderr_path = expected_files.join("stderr");
+        let exitcode_path = expected_files.join("exitcode");
+
+
+        std::fs::create_dir_all(&outfiles)?;
+
+        //prepend an element to shift the indices to the right:
+        // main_io_wrapper expects arguments to start at index 1
+        let mut padded_args = args.to_vec();
+            padded_args.insert(0, "");
+
+        let args = &padded_args;
+
+
+        assert!( initial_working_dir.is_absolute(),
+            "test aborted: initial_working_dir path must be absolute (could reset to wrong directory)");
+
+        assert!( ! outfiles.is_absolute(),
+            "test aborted: outfiles path should not be absolute (could escape test directory)");
+
+        std::env::set_current_dir(&initial_working_dir)?;
+
+        let mut stdout_file = File::create(stdout_path.as_path())?;
+        let mut stderr_file = File::create(stderr_path.as_path())?;
+
+
+        let working_dir = initial_working_dir.join(&outfiles);
+        std::env::set_current_dir(&working_dir)?;
+
+        let exit_code = main_io_wrapper(
+            args,
+            Box::new(stdout_file),
+            Box::new(stderr_file),
+        )?;
+
+        std::env::set_current_dir(&initial_working_dir)?;
+
+        //remove empty outputs
+        let _ = std::fs::remove_dir(outfiles.as_path()); //will fail if not empty
+
+        if std::fs::metadata(&stdout_path)?.len() == 0 {
+            std::fs::remove_file(&stdout_path)?;
+        }
+        if std::fs::metadata(&stderr_path)?.len() == 0 {
+            std::fs::remove_file(&stderr_path)?;
+        }
+
+
+        let mut exitcode_file = File::create(exitcode_path.as_path())?;
+        //put exit code in Some() to match expected std::process::ExitStatus::code output
+        write!(exitcode_file, "{:?}", Some(exit_code))?;
 
         Ok(())
     }
