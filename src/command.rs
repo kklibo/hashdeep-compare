@@ -1,23 +1,44 @@
 use std::process::{Command,Stdio};
-use std::error::Error;
 use std::fs::OpenOptions;
 use std::io::ErrorKind;
 
+use thiserror::Error;
+use anyhow::anyhow;
 use which::which;
 
 const CANNOT_FIND_BINARY_PATH_STR : &str = "external hashdeep binary cannot be found (is hashdeep installed?)";
 
 
+#[derive(Error, Debug)]
+pub enum RunHashdeepCommandError {
+
+    #[error("{}",CANNOT_FIND_BINARY_PATH_STR)]
+    CannotFindBinaryPath,
+
+    #[error("{0} exists (will not overwrite existing files)")]
+    OutputFileExists(String),
+
+    #[error("{0} and {1} exist (will not overwrite existing files)")]
+    OutputFilesExist(String, String),
+
+    #[error(transparent)]
+    Io(#[from] std::io::Error),
+
+    #[error(transparent)]
+    Other(#[from] anyhow::Error),
+}
+
 pub fn run_hashdeep_command(
     target_directory: &str,
     output_path_base: &str,
     hashdeep_command_name: &str,
-) -> Result<(), Box<dyn Error>> {
+) -> Result<(), RunHashdeepCommandError> {
 
     //confirm availability of external hashdeep binary
     match which(hashdeep_command_name) {
-        Err(which::Error::CannotFindBinaryPath) => return Err(CANNOT_FIND_BINARY_PATH_STR.into()),
-        x => x?,
+        Err(which::Error::CannotFindBinaryPath) => return Err(RunHashdeepCommandError::CannotFindBinaryPath),
+        Err(x) => return Err(anyhow!(x).into()),
+        _ => ()
     };
 
     let error_log_suffix = ".errors";
@@ -37,7 +58,7 @@ pub fn run_hashdeep_command(
         (Ok(output_file), Ok(error_file)) => (output_file, error_file),
 
 
-        //if either file failed to open, abort command and clean up:
+        //if either file failed to open, abort the command and clean up:
 
         (Err(output_file_error), Ok(_)) => {
 
@@ -45,7 +66,7 @@ pub fn run_hashdeep_command(
             std::fs::remove_file(&output_error_path)?;
 
             return match output_file_error.kind() == ErrorKind::AlreadyExists {
-                true  => Err(format!("{} exists (will not overwrite existing files)", output_path_base).into()),
+                true  => Err(RunHashdeepCommandError::OutputFileExists(output_path_base.into())),
                 false => Err(output_file_error.into()),
             }
         },
@@ -56,7 +77,7 @@ pub fn run_hashdeep_command(
             std::fs::remove_file(&output_path_base)?;
 
             return match error_file_error.kind() == ErrorKind::AlreadyExists {
-                true  => Err(format!("{} exists (will not overwrite existing files)", output_error_path).into()),
+                true  => Err(RunHashdeepCommandError::OutputFileExists(output_error_path.into())),
                 false => Err(error_file_error.into()),
             }
         },
@@ -66,9 +87,9 @@ pub fn run_hashdeep_command(
             return match ( output_file_error.kind() == ErrorKind::AlreadyExists,
                             error_file_error.kind() == ErrorKind::AlreadyExists ) {
 
-                (true,  false) => Err(format!("{} exists (will not overwrite existing files)", output_path_base).into()),
-                (false, true ) => Err(format!("{} exists (will not overwrite existing files)", output_error_path).into()),
-                (true,  true ) => Err(format!("{} and {} exist (will not overwrite existing files)", output_path_base, output_error_path).into()),
+                (true,  false) => Err(RunHashdeepCommandError::OutputFileExists(output_path_base.into())),
+                (false, true ) => Err(RunHashdeepCommandError::OutputFileExists(output_error_path.into())),
+                (true,  true ) => Err(RunHashdeepCommandError::OutputFilesExist(output_path_base.into(), output_error_path.into())),
 
                 //just return the output file's error (todo: do something more useful here?)
                 (false, false) => Err(output_file_error.into()),

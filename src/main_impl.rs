@@ -55,7 +55,13 @@ pub fn main_io_wrapper(
     {
         Ok(()) => 0,
         Err(err) => {
-            writeln! (stderr, "Error: {:?}", err)?;
+
+            //conditionally use Display output for thiserror-based error types
+            match err.downcast::<command::RunHashdeepCommandError>() {
+                Ok(err) => writeln! (stderr, "Error: \"{}\"", err)?,
+                Err(err) => writeln! (stderr, "Error: {:?}", err)?,
+            }
+
             1
         }
     };
