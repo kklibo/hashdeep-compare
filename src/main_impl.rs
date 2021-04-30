@@ -55,7 +55,13 @@ pub fn main_io_wrapper(
     {
         Ok(()) => 0,
         Err(err) => {
-            writeln! (stderr, "Error: {:?}", err)?;
+
+            //conditionally use Display output for thiserror-based error types
+            match err.downcast::<command::RunHashdeepCommandError>() {
+                Ok(err) => writeln! (stderr, "Error: \"{}\"", err)?,
+                Err(err) => writeln! (stderr, "Error: {:?}", err)?,
+            }
+
             1
         }
     };
@@ -92,7 +98,8 @@ fn main_impl(args: &[&str], mut stdout: Box<dyn Write>) -> Result<(), Box<dyn Er
 
             command::run_hashdeep_command(
                 args[2],
-                args[3])?;
+                args[3],
+                "hashdeep")?;
         },
         "sort" => {
             if args.len() < 4 {return Err("sort: not enough arguments".into());}

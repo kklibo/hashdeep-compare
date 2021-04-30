@@ -5,6 +5,9 @@ authors = ["user"]
 edition = "2018"
 
 [dependencies]
+thiserror = "1.0.24"
+anyhow = "1.0.40"
+which = "4.1.0"
 
 [dev-dependencies]
 assert_cmd = "1.0.1"
