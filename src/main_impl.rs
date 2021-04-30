@@ -95,6 +95,7 @@ fn main_impl(args: &[&str], mut stdout: Box<dyn Write>) -> Result<(), Box<dyn Er
     match args[1] {
         "hash" => {
             if args.len() < 4 {return Err("hash: not enough arguments".into());}
+            if args.len() > 4 {return Err("hash: too many arguments".into());}
 
             command::run_hashdeep_command(
                 args[2],
@@ -103,11 +104,13 @@ fn main_impl(args: &[&str], mut stdout: Box<dyn Write>) -> Result<(), Box<dyn Er
         },
         "sort" => {
             if args.len() < 4 {return Err("sort: not enough arguments".into());}
+            if args.len() > 4 {return Err("sort: too many arguments".into());}
 
             sort::sort_log(args[2], args[3])?;
         },
         "part" => {
             if args.len() < 5 {return Err("part: not enough arguments".into());}
+            if args.len() > 5 {return Err("part: too many arguments".into());}
 
             let partition_stats =
             partition::partition_log(args[2], args[3], args[4])?;
@@ -115,6 +118,8 @@ fn main_impl(args: &[&str], mut stdout: Box<dyn Write>) -> Result<(), Box<dyn Er
             writeln!(stdout, "{}", partition_stats)?;
         },
         "version" => {
+            if args.len() > 2 {return Err("version: does not accept arguments".into());}
+
             writeln!(stdout, "hashdeep-compare version {}", VERSION)?;
         },
 

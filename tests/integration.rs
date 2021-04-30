@@ -117,7 +117,8 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     */
 
 
-    run_test("version", &["version"])?;
+    run_test("version/success",    &["version"])?;
+    run_test("version/1_argument", &["version", "arg1"])?;
 
 
     //invalid subcommand tests
@@ -129,6 +130,7 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     //hash subcommand tests
     run_test("hash/0_arguments",    &["hash"])?;
     run_test("hash/1_argument",     &["hash", "arg1"])?;
+    run_test("hash/3_arguments",    &["hash", "arg1", "arg2", "arg3"])?;
 
     run_test("hash/target_dir/empty",           &["hash", "",               "./hashlog"])?;
     run_test("hash/target_dir/invalid",         &["hash", "/dev/null",      "./hashlog"])?;
@@ -174,6 +176,7 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     //sort subcommand tests
     run_test("sort/0_arguments",    &["sort"])?;
     run_test("sort/1_argument",     &["sort", "arg1"])?;
+    run_test("sort/3_arguments",    &["sort", "arg1", "arg2", "arg3"])?;
 
     run_test("sort/input_file/empty",           &["sort", "",                   "sorted"])?;
     run_test("sort/input_file/invalid",         &["sort", "/dev/null/invalid",  "sorted"])?;
@@ -198,6 +201,7 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("part/0_arguments",    &["part"])?;
     run_test("part/1_argument",     &["part", "arg1"])?;
     run_test("part/2_arguments",    &["part", "arg1", "arg2"])?;
+    run_test("part/4_arguments",    &["part", "arg1", "arg2", "arg3", "arg4"])?;
 
     run_test("part/input_file1/empty",              &["part", "",                  &path_in_tests("partition_test2.txt"), "part"])?;
     run_test("part/input_file1/invalid",            &["part", "/dev/null/invalid", &path_in_tests("partition_test2.txt"), "part"])?;
