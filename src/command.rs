@@ -3,7 +3,22 @@ use std::error::Error;
 use std::fs::OpenOptions;
 use std::io::ErrorKind;
 
-pub fn run_hashdeep_command(target_directory: &str, output_path_base: &str) -> Result<(), Box<dyn Error>> {
+use which::which;
+
+const CANNOT_FIND_BINARY_PATH_STR : &str = "external hashdeep binary cannot be found (is hashdeep installed?)";
+
+
+pub fn run_hashdeep_command(
+    target_directory: &str,
+    output_path_base: &str,
+    hashdeep_command_name: &str,
+) -> Result<(), Box<dyn Error>> {
+
+    //confirm availability of external hashdeep binary
+    match which(hashdeep_command_name) {
+        Err(which::Error::CannotFindBinaryPath) => return Err(CANNOT_FIND_BINARY_PATH_STR.into()),
+        x => x?,
+    };
 
     let error_log_suffix = ".errors";
 
@@ -61,7 +76,7 @@ pub fn run_hashdeep_command(target_directory: &str, output_path_base: &str) -> R
         }
     };
 
-    Command::new("hashdeep")
+    Command::new(hashdeep_command_name)
 
     .arg("-l")
     .arg("-r")
@@ -74,4 +89,24 @@ pub fn run_hashdeep_command(target_directory: &str, output_path_base: &str) -> R
 
     .status()?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn run_hashdeep_command_missing_hashdeep_test() {
+
+        //directly test the 'no hashdeep' error
+        //(could eventually be replaced if integration testing can somehow hide hashdeep)
+
+        assert_eq!(CANNOT_FIND_BINARY_PATH_STR,
+
+            run_hashdeep_command("fake_target_dir",
+                                 "fake_output_path_base",
+                                 "nonexistent_program_name_Cmn2TMmwGO9U2j7")
+            .unwrap_err().to_string()
+        );
+    }
 }

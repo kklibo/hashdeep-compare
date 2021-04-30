@@ -92,7 +92,8 @@ fn main_impl(args: &[&str], mut stdout: Box<dyn Write>) -> Result<(), Box<dyn Er
 
             command::run_hashdeep_command(
                 args[2],
-                args[3])?;
+                args[3],
+                "hashdeep")?;
         },
         "sort" => {
             if args.len() < 4 {return Err("sort: not enough arguments".into());}
