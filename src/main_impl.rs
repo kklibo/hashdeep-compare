@@ -81,12 +81,21 @@ fn main_impl(args: &[&str], mut stdout: Box<dyn Write>) -> Result<(), Box<dyn Er
     let mut show_help = || -> Result<(), Box<dyn Error>> {
 
         let help_string = formatdoc!("
-            hashdeep-compare version {}
-             arguments
-              version
-              hash target_directory output_path_base
-              sort input_file output_file
-              part input_file1 input_file2 output_file_base",
+            hashdeep-compare v{}
+
+              Options:
+
+                version
+                  Display version string
+
+                hash <target_directory> <output_path_base>
+                  Invoke hashdeep on a target directory
+
+                sort <input_file> <output_file>
+                  Sort a hashdeep log (by file path)
+
+                part <input_file1> <input_file2> <output_file_base>
+                  Partition contents of two hashdeep logs into category files",
 
             VERSION
         );
