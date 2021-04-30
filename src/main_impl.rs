@@ -37,6 +37,8 @@ use crate::*;
 use std::error::Error;
 use std::io::Write;
 
+use indoc::formatdoc;
+
 /// Specifies program arguments and (re)direction of stdout/stderr, then runs the program
 ///
 /// Returns the program's exit code
@@ -77,12 +79,19 @@ fn main_impl(args: &[&str], mut stdout: Box<dyn Write>) -> Result<(), Box<dyn Er
     const VERSION: &str = env!("CARGO_PKG_VERSION");
 
     let mut show_help = || -> Result<(), Box<dyn Error>> {
-        writeln!(stdout, "hashdeep-compare version {}", VERSION)?;
-        writeln!(stdout, " arguments")?;
-        writeln!(stdout, "  version")?;
-        writeln!(stdout, "  hash target_directory output_path_base")?;
-        writeln!(stdout, "  sort input_file output_file")?;
-        writeln!(stdout, "  part input_file1 input_file2 output_file_base")?;
+
+        let help_string = formatdoc!("
+            hashdeep-compare version {}
+             arguments
+              version
+              hash target_directory output_path_base
+              sort input_file output_file
+              part input_file1 input_file2 output_file_base",
+
+            VERSION
+        );
+
+        writeln!(stdout, "{}", help_string)?;
         Ok(())
     };
 
