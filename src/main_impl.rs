@@ -37,8 +37,6 @@ use crate::*;
 use std::error::Error;
 use std::io::Write;
 
-use indoc::formatdoc;
-
 /// Specifies program arguments and (re)direction of stdout/stderr, then runs the program
 ///
 /// Returns the program's exit code
@@ -80,27 +78,7 @@ fn main_impl(args: &[&str], mut stdout: Box<dyn Write>) -> Result<(), Box<dyn Er
 
     let mut show_help = || -> Result<(), Box<dyn Error>> {
 
-        let help_string = formatdoc!("
-            hashdeep-compare v{}
-
-              Options:
-
-                version
-                  Display version string
-
-                hash <target_directory> <output_path_base>
-                  Invoke hashdeep on a target directory
-
-                sort <input_file> <output_file>
-                  Sort a hashdeep log (by file path)
-
-                part <input_file1> <input_file2> <output_file_base>
-                  Partition contents of two hashdeep logs into category files",
-
-            VERSION
-        );
-
-        writeln!(stdout, "{}", help_string)?;
+        writeln!(stdout, "{}", help::help_string(VERSION))?;
         Ok(())
     };
 
