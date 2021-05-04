@@ -1,3 +1,5 @@
+use std::io::ErrorKind;
+
 use crate::common;
 use crate::log_entry::LogEntry;
 
@@ -15,7 +17,15 @@ pub fn sort_log(filename: &str, out_filename: &str) -> Result<(), Box<dyn std::e
         v1.filename.cmp(&v2.filename)
     });
 
-    common::write_log_entries_to_file(log_file.entries, out_filename)?;
+    //check for an already-existing output file again
+    //(in case a coinciding file was made while the sort operation was running)
+    match common::write_log_entries_to_file(log_file.entries, out_filename) {
+        Err(e) if e.kind() == ErrorKind::AlreadyExists => {
+            return Err(format!("{} exists (will not overwrite existing files)", out_filename).into())
+        },
+        a => a?,
+    }
+
     Ok(())
 }
 

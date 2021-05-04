@@ -219,6 +219,9 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("part/output_file_base/invalid",     &["part", &path_in_tests("partition_test1.txt"), &path_in_tests("partition_test2.txt"), "/dev/null/invalid"])?;
     run_test("part/output_file_base/nonexistent", &["part", &path_in_tests("partition_test1.txt"), &path_in_tests("partition_test2.txt"), "does_not_exist/part"])?;
 
+    create_path_and_file("tests/expected/part/output_file_exists/outfiles/test_full_match_pairs", "");
+    run_test("part/output_file_exists", &["part", &path_in_tests("part_files/1_full_match_pair_file1"), &path_in_tests("part_files/1_full_match_pair_file2"), "test"])?;
+
     create_path_and_copy_file("tests/part_files/general_test_file1", "tests/expected/part/output_file_base/is_input_file1/outfiles/test");
     run_test("part/output_file_base/is_input_file1", &["part", "test", &path_in_tests("part_files/general_test_file2"), "test"])?;
 

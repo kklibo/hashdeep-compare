@@ -1,4 +1,4 @@
-use std::fs::{File,read_to_string};
+use std::fs::{File,OpenOptions,read_to_string};
 use std::io::{Write,Error};
 
 use crate::log_entry::LogEntry;
@@ -44,7 +44,7 @@ fn write_log_entry_to_file(label: &str, log_entry_str: &str, file: &mut File) ->
 pub fn write_log_entries_to_file<T>(log_entries: T, filename: &str) -> Result<(), Error>
     where T: IntoIterator, <T as ::std::iter::IntoIterator>::Item : ::std::string::ToString
 {
-    let mut file = File::create(filename)?;
+    let mut file = OpenOptions::new().write(true).create_new(true).open(filename)?;
 
     for log_entry in log_entries {
         write_log_entry_to_file("", &log_entry.to_string(), &mut file)?;
@@ -55,7 +55,7 @@ pub fn write_log_entries_to_file<T>(log_entries: T, filename: &str) -> Result<()
 
 pub fn write_match_pairs_to_file(match_pairs: &[MatchPair], filename: &str) -> Result<(), Error>
 {
-    let mut file = File::create(filename)?;
+    let mut file = OpenOptions::new().write(true).create_new(true).open(filename)?;
 
     for match_pair in match_pairs {
         write_log_entry_to_file("file1: ", &match_pair.from_file1.to_string(), &mut file)?;
@@ -68,7 +68,7 @@ pub fn write_match_pairs_to_file(match_pairs: &[MatchPair], filename: &str) -> R
 
 pub fn write_match_groups_to_file(match_groups: &[MatchGroup], filename: &str) -> Result<(), Error>
 {
-    let mut file = File::create(filename)?;
+    let mut file = OpenOptions::new().write(true).create_new(true).open(filename)?;
 
     for match_group in match_groups {
 
@@ -90,7 +90,7 @@ pub fn write_match_groups_to_file(match_groups: &[MatchGroup], filename: &str) -
 
 pub fn write_single_file_match_groups_to_file(single_file_match_groups: &[SingleFileMatchGroup], filename: &str) -> Result<(), Error>
 {
-    let mut file = File::create(filename)?;
+    let mut file = OpenOptions::new().write(true).create_new(true).open(filename)?;
 
     for single_file_match_group in single_file_match_groups {
 
