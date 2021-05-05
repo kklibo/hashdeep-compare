@@ -57,9 +57,14 @@ pub fn main_io_wrapper(
         Err(err) => {
 
             //conditionally use Display output for thiserror-based error types
-            match err.downcast::<command::RunHashdeepCommandError>() {
-                Ok(err) => writeln! (stderr, "Error: \"{}\"", err)?,
-                Err(err) => writeln! (stderr, "Error: {:?}", err)?,
+            if let Some(err) = err.downcast_ref::<command::RunHashdeepCommandError>() {
+                writeln! (stderr, "Error: \"{}\"", err)?;
+            }
+            else if let Some(err) = err.downcast_ref::<common::WriteToFileError>() {
+                writeln! (stderr, "Error: \"{}\"", err)?;
+            }
+            else {
+                writeln! (stderr, "Error: {:?}", err)?;
             }
 
             1

@@ -21,7 +21,7 @@ use crate::partitioner;
 ///
 /// Each log entry is guaranteed to be represented in exactly one group.
 ///
-pub fn partition_log(filename1: &str, filename2: &str, output_filename_base: &str) -> ::std::io::Result<String> {
+pub fn partition_log(filename1: &str, filename2: &str, output_filename_base: &str) -> Result<String, Box<dyn std::error::Error>> {
 
     let log_file1 = common::read_log_entries_from_file::<Vec<LogEntry>>(filename1)?;
     assert_eq!(0, log_file1.invalid_lines.len());//todo: remove this
