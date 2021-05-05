@@ -230,6 +230,14 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
 
     run_test("part/input_file1_is_input_file2", &["part", &path_in_tests("test1.txt"), &path_in_tests("test1.txt"), "part"])?;
 
+
+    run_test("part/output_path_includes_subdir/nonexistent", &["part", &path_in_tests("part_files/1_full_match_pair_file1"), &path_in_tests("part_files/1_full_match_pair_file2"), "subdir/test"])?;
+
+    create_dir("tests/expected/part/output_path_includes_subdir/existing/outfiles/subdir");
+    run_test("part/output_path_includes_subdir/existing", &["part", &path_in_tests("part_files/1_full_match_pair_file1"), &path_in_tests("part_files/1_full_match_pair_file2"), "subdir/test"])?;
+
+
+
     let part_test = |testname: &str| -> Result<(), Box<dyn std::error::Error>> {
         run_test(format!("part/{}", testname).as_str(), &["part",
             &path_in_tests(&format!("part_files/{}_file1", testname)),
@@ -305,6 +313,10 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
         *invocation_path_line = "## Invoked from: [path removed by hashdeep-compare test]";
 
         std::fs::write(target_path, lines.join("\n")).unwrap();
+    }
+
+    fn create_dir(target_path: &str) {
+        std::fs::create_dir_all( Path::new(target_path) ).unwrap();
     }
 
     fn create_path_and_file(target_path: &str, contents: &str) {
