@@ -86,7 +86,12 @@ pub fn help_part_string() -> String {
 
         Notes:
             The output file base path will be used to name the output files by adding
-            suffixes that describe the log entries represented within.
+            suffixes that describe the log entries represented within; it may include
+            subdirectories. Nonexistent subdirectories will not be created; if one is
+            specified, the command will be aborted.
+
+            Note that if any of the resulting output files already exist, the command
+            will be aborted (hashdeep-compare will not overwrite existing files).
         "
     )
 }
