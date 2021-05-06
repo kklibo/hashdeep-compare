@@ -1,5 +1,5 @@
 use std::fs::{File,OpenOptions,read_to_string};
-use std::io::Write;
+use std::io::{Write, ErrorKind};
 
 use thiserror::Error;
 
@@ -20,6 +20,17 @@ pub enum WriteToFileError {
 
     #[error(transparent)]
     Other(#[from] anyhow::Error),
+}
+
+impl WriteToFileError {
+
+    fn new(e: std::io::Error, path: &str) -> Self {
+
+        match e.kind() {
+            ErrorKind::AlreadyExists => WriteToFileError::OutputFileExists(path.to_string()),
+            _ => e.into(),
+        }
+    }
 }
 
 pub struct LogFile<T>
@@ -51,12 +62,8 @@ pub fn read_log_entries_from_file<T>(filename: &str) -> Result<LogFile<T>, std::
 
 fn open_writable_file(filename: &str) -> Result<File, WriteToFileError>
 {
-    match OpenOptions::new().write(true).create_new(true).open(filename) {
-        Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => {
-            Err(WriteToFileError::OutputFileExists(filename.to_string()))
-        },
-        a => Ok(a?),
-    }
+    OpenOptions::new().write(true).create_new(true).open(filename)
+        .map_err(|e| WriteToFileError::new(e, filename).into())
 }
 
 fn write_log_entry_to_file(label: &str, log_entry_str: &str, file: &mut File) -> Result<(), WriteToFileError>
