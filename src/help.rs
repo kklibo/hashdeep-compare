@@ -41,7 +41,7 @@ pub fn help_hash_string() -> String {
                   > path/to/output_log.txt \\
                   2> path/to/output_log.txt.errors
 
-            Note that if the output file or the error file already exist, the command
+            Note that if the output file or the error file already exists, the command
             will be aborted (hashdeep-compare will not overwrite existing files).
         "
     )
