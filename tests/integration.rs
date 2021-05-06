@@ -455,7 +455,7 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
 #[cfg(feature = "integration_test_helpful_outputs")]
 fn error_message_summary_to_file() -> Result<(), Box<dyn std::error::Error>> {
 
-    use std::fs::{File, read_to_string};
+    use std::fs::read_to_string;
     use walkdir::WalkDir;
 
     let mut outfile = File::create("tests/error_message_summary")?;

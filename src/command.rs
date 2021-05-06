@@ -28,6 +28,17 @@ pub enum RunHashdeepCommandError {
     Other(#[from] anyhow::Error),
 }
 
+impl RunHashdeepCommandError {
+
+    fn new(e: std::io::Error, path: &str) -> Self {
+
+        match e.kind() == ErrorKind::AlreadyExists {
+            true  => RunHashdeepCommandError::OutputFileExists(path.to_string()),
+            false => e.into(),
+        }
+    }
+}
+
 pub fn run_hashdeep_command(
     target_directory: &str,
     output_path_base: &str,
@@ -47,8 +58,13 @@ pub fn run_hashdeep_command(
 
 
     //try to open both output files
-    let maybe_output_file = OpenOptions::new().write(true).create_new(true).open(&output_path_base);
-    let maybe_error_file  = OpenOptions::new().write(true).create_new(true).open(&output_error_path);
+    let maybe_output_file =
+        OpenOptions::new().write(true).create_new(true).open(&output_path_base)
+            .map_err(|e| RunHashdeepCommandError::new(e, output_path_base));
+
+    let maybe_error_file  =
+        OpenOptions::new().write(true).create_new(true).open(&output_error_path)
+            .map_err(|e| RunHashdeepCommandError::new(e, &output_error_path));
 
 
     let (output_file, error_file) =
@@ -65,10 +81,7 @@ pub fn run_hashdeep_command(
             //delete the file that was successfully created
             std::fs::remove_file(&output_error_path)?;
 
-            return match output_file_error.kind() == ErrorKind::AlreadyExists {
-                true  => Err(RunHashdeepCommandError::OutputFileExists(output_path_base.into())),
-                false => Err(output_file_error.into()),
-            }
+            return Err(output_file_error);
         },
 
         (Ok(_), Err(error_file_error)) => {
@@ -76,24 +89,24 @@ pub fn run_hashdeep_command(
             //delete the file that was successfully created
             std::fs::remove_file(&output_path_base)?;
 
-            return match error_file_error.kind() == ErrorKind::AlreadyExists {
-                true  => Err(RunHashdeepCommandError::OutputFileExists(output_error_path.into())),
-                false => Err(error_file_error.into()),
-            }
+            return Err(error_file_error);
         },
 
         (Err(output_file_error), Err(error_file_error)) => {
 
-            return match ( output_file_error.kind() == ErrorKind::AlreadyExists,
-                            error_file_error.kind() == ErrorKind::AlreadyExists ) {
-
-                (true,  false) => Err(RunHashdeepCommandError::OutputFileExists(output_path_base.into())),
-                (false, true ) => Err(RunHashdeepCommandError::OutputFileExists(output_error_path.into())),
-                (true,  true ) => Err(RunHashdeepCommandError::OutputFilesExist(output_path_base.into(), output_error_path.into())),
-
-                //just return the output file's error (todo: do something more useful here?)
-                (false, false) => Err(output_file_error.into()),
-            };
+            //if present, combine 2 OutputFileExists errors into 1 OutputFilesExist error
+            return Err(
+                if let ( RunHashdeepCommandError::OutputFileExists(file1),
+                         RunHashdeepCommandError::OutputFileExists(file2) )
+                        = (&output_file_error, &error_file_error)
+                {
+                    RunHashdeepCommandError::OutputFilesExist(file1.clone(), file2.clone())
+                }
+                else {
+                    //otherwise, just return the output file's error (todo: do something more useful here?)
+                    output_file_error
+                }
+            );
         }
     };
 
