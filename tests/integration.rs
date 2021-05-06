@@ -117,7 +117,8 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     */
 
 
-    run_test("version", &["version"])?;
+    run_test("version/success",    &["version"])?;
+    run_test("version/1_argument", &["version", "arg1"])?;
 
 
     //invalid subcommand tests
@@ -126,9 +127,19 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("invalid/nonexistent_subcommand",  &["nonexistent_subcommand"])?;
 
 
+    //help subcommand tests
+    run_test("help/no_subcommand",          &["help"])?;
+    run_test("help/nonexistent_subcommand", &["help", "nonexistent_subcommand"])?;
+    run_test("help/hash",                   &["help", "hash"])?;
+    run_test("help/sort",                   &["help", "sort"])?;
+    run_test("help/part",                   &["help", "part"])?;
+    run_test("help/extra_argument",         &["help", "part", "extra"])?;
+
+
     //hash subcommand tests
     run_test("hash/0_arguments",    &["hash"])?;
     run_test("hash/1_argument",     &["hash", "arg1"])?;
+    run_test("hash/3_arguments",    &["hash", "arg1", "arg2", "arg3"])?;
 
     run_test("hash/target_dir/empty",           &["hash", "",               "./hashlog"])?;
     run_test("hash/target_dir/invalid",         &["hash", "/dev/null",      "./hashlog"])?;
@@ -174,6 +185,7 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     //sort subcommand tests
     run_test("sort/0_arguments",    &["sort"])?;
     run_test("sort/1_argument",     &["sort", "arg1"])?;
+    run_test("sort/3_arguments",    &["sort", "arg1", "arg2", "arg3"])?;
 
     run_test("sort/input_file/empty",           &["sort", "",                   "sorted"])?;
     run_test("sort/input_file/invalid",         &["sort", "/dev/null/invalid",  "sorted"])?;
@@ -198,6 +210,7 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("part/0_arguments",    &["part"])?;
     run_test("part/1_argument",     &["part", "arg1"])?;
     run_test("part/2_arguments",    &["part", "arg1", "arg2"])?;
+    run_test("part/4_arguments",    &["part", "arg1", "arg2", "arg3", "arg4"])?;
 
     run_test("part/input_file1/empty",              &["part", "",                  &path_in_tests("partition_test2.txt"), "part"])?;
     run_test("part/input_file1/invalid",            &["part", "/dev/null/invalid", &path_in_tests("partition_test2.txt"), "part"])?;
@@ -215,6 +228,9 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("part/output_file_base/invalid",     &["part", &path_in_tests("partition_test1.txt"), &path_in_tests("partition_test2.txt"), "/dev/null/invalid"])?;
     run_test("part/output_file_base/nonexistent", &["part", &path_in_tests("partition_test1.txt"), &path_in_tests("partition_test2.txt"), "does_not_exist/part"])?;
 
+    create_path_and_file("tests/expected/part/output_file_exists/outfiles/test_full_match_pairs", "");
+    run_test("part/output_file_exists", &["part", &path_in_tests("part_files/1_full_match_pair_file1"), &path_in_tests("part_files/1_full_match_pair_file2"), "test"])?;
+
     create_path_and_copy_file("tests/part_files/general_test_file1", "tests/expected/part/output_file_base/is_input_file1/outfiles/test");
     run_test("part/output_file_base/is_input_file1", &["part", "test", &path_in_tests("part_files/general_test_file2"), "test"])?;
 
@@ -222,6 +238,14 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("part/output_file_base/is_input_file2", &["part", &path_in_tests("part_files/general_test_file1"), "test", "test"])?;
 
     run_test("part/input_file1_is_input_file2", &["part", &path_in_tests("test1.txt"), &path_in_tests("test1.txt"), "part"])?;
+
+
+    run_test("part/output_path_includes_subdir/nonexistent", &["part", &path_in_tests("part_files/1_full_match_pair_file1"), &path_in_tests("part_files/1_full_match_pair_file2"), "subdir/test"])?;
+
+    create_dir("tests/expected/part/output_path_includes_subdir/existing/outfiles/subdir");
+    run_test("part/output_path_includes_subdir/existing", &["part", &path_in_tests("part_files/1_full_match_pair_file1"), &path_in_tests("part_files/1_full_match_pair_file2"), "subdir/test"])?;
+
+
 
     let part_test = |testname: &str| -> Result<(), Box<dyn std::error::Error>> {
         run_test(format!("part/{}", testname).as_str(), &["part",
@@ -298,6 +322,10 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
         *invocation_path_line = "## Invoked from: [path removed by hashdeep-compare test]";
 
         std::fs::write(target_path, lines.join("\n")).unwrap();
+    }
+
+    fn create_dir(target_path: &str) {
+        std::fs::create_dir_all( Path::new(target_path) ).unwrap();
     }
 
     fn create_path_and_file(target_path: &str, contents: &str) {

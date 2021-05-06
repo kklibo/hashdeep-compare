@@ -57,9 +57,14 @@ pub fn main_io_wrapper(
         Err(err) => {
 
             //conditionally use Display output for thiserror-based error types
-            match err.downcast::<command::RunHashdeepCommandError>() {
-                Ok(err) => writeln! (stderr, "Error: \"{}\"", err)?,
-                Err(err) => writeln! (stderr, "Error: {:?}", err)?,
+            if let Some(err) = err.downcast_ref::<command::RunHashdeepCommandError>() {
+                writeln! (stderr, "Error: \"{}\"", err)?;
+            }
+            else if let Some(err) = err.downcast_ref::<common::WriteToFileError>() {
+                writeln! (stderr, "Error: \"{}\"", err)?;
+            }
+            else {
+                writeln! (stderr, "Error: {:?}", err)?;
             }
 
             1
@@ -76,49 +81,52 @@ fn main_impl(args: &[&str], mut stdout: Box<dyn Write>) -> Result<(), Box<dyn Er
 
     const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-    let mut show_help = || -> Result<(), Box<dyn Error>> {
-        writeln!(stdout, "hashdeep-compare version {}", VERSION)?;
-        writeln!(stdout, " arguments")?;
-        writeln!(stdout, "  version")?;
-        writeln!(stdout, "  hash target_directory output_path_base")?;
-        writeln!(stdout, "  sort input_file output_file")?;
-        writeln!(stdout, "  part input_file1 input_file2 output_file_base")?;
-        Ok(())
-    };
+    match args.get(1) {
 
-    if args.len() < 2 {
-        show_help()?;
-        return Ok(());
-    }
+        None | Some(&"help") => {
 
+            let help_string =
+            match args.get(2) {
+                Some(&"hash") => help::help_hash_string(),
+                Some(&"sort") => help::help_sort_string(),
+                Some(&"part") => help::help_part_string(),
+                _ => help::help_string(VERSION),
+            };
 
-    match args[1] {
-        "hash" => {
+            writeln!(stdout, "{}", help_string)?;
+
+        },
+        Some(&"hash") => {
             if args.len() < 4 {return Err("hash: not enough arguments".into());}
+            if args.len() > 4 {return Err("hash: too many arguments".into());}
 
             command::run_hashdeep_command(
                 args[2],
                 args[3],
                 "hashdeep")?;
         },
-        "sort" => {
+        Some(&"sort") => {
             if args.len() < 4 {return Err("sort: not enough arguments".into());}
+            if args.len() > 4 {return Err("sort: too many arguments".into());}
 
             sort::sort_log(args[2], args[3])?;
         },
-        "part" => {
+        Some(&"part") => {
             if args.len() < 5 {return Err("part: not enough arguments".into());}
+            if args.len() > 5 {return Err("part: too many arguments".into());}
 
             let partition_stats =
             partition::partition_log(args[2], args[3], args[4])?;
 
             writeln!(stdout, "{}", partition_stats)?;
         },
-        "version" => {
+        Some(&"version") => {
+            if args.len() > 2 {return Err("version: does not accept arguments".into());}
+
             writeln!(stdout, "hashdeep-compare version {}", VERSION)?;
         },
 
-        x => return Err(format!("invalid command: {}", x).into())
+        Some(x) => return Err(format!("invalid command: {}", x).into())
     }
 
     Ok(())

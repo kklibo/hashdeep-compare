@@ -1,0 +1,16 @@
+hashdeep-compare function: sort
+
+Sorts the entries in a hashdeep log by file path.
+
+Syntax:
+    hashdeep-compare sort path/to/unsorted_input.txt path/to/sorted_output.txt
+
+Notes:
+    hashdeep does not guarantee ordering of log entries, and ordering tends to
+    be inconsistent between runs in practice. Sorting allows comparison of
+    hashdeep logs in a text-diff tool, which may be the easiest way to compare
+    logs with uncomplicated differences.
+
+    Note that if the output file already exists, the command will be aborted
+    (hashdeep-compare will not overwrite existing files).
+

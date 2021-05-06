@@ -10,23 +10,23 @@ If you're concerned about file archive bit-rot or just want to compare archived 
 
 ### How to use hashdeep-compare
 hashdeep-compare is a command-line tool with three functions:
-* `hash`: invokes Hashdeep and generates a log file compatible with hashdeep-compare.
+* `hash`: invokes hashdeep and generates a log file compatible with hashdeep-compare.
     
     `hashdeep-compare hash path/to/target_dir path/to/output_log.txt`
     
     This function is optional, but recommended to ensure log compatibility. The above function call is equivalent to directly calling 
-    `hashdeep -l -r -o f path/to/target_dir > path/to/output_log.txt 2> path/to/output_log.txt.errors`. Note that if the output file or the associated error file already exist, they will be overwritten.
+    `hashdeep -l -r -o f path/to/target_dir > path/to/output_log.txt 2> path/to/output_log.txt.errors`. Note that if the output file or the error file already exists, the command will be aborted (hashdeep-compare will not overwrite existing files).
     
-* `sort`: sorts the entries in a Hashdeep log by file path.
+* `sort`: sorts the entries in a hashdeep log by file path.
 
     `hashdeep-compare sort path/to/unsorted_input.txt path/to/sorted_output.txt`
     
-    Hashdeep does not guarantee ordering of log entries, and ordering tends to be inconsistent between runs in practice. Sorting allows comparison of Hashdeep logs in a text-diff tool, which may be the easiest way to compare logs with uncomplicated changes. Note that if the output file already exists, it will be overwritten.
+    hashdeep does not guarantee ordering of log entries, and ordering tends to be inconsistent between runs in practice. Sorting allows comparison of hashdeep logs in a text-diff tool, which may be the easiest way to compare logs with uncomplicated differences. Note that if the output file already exists, the command will be aborted (hashdeep-compare will not overwrite existing files).
 * `part`: the real power of hashdeep-compare: all entries will be partitioned into sets that efficiently describe the similarities and differences of the two log files.
 
     `hashdeep-compare part path/to/first_log.txt path/to/second_log.txt path/to/output_file_base`
     
-    The output file base path will be used to name the output files by adding suffixes that describe the log entries represented within.
+    The output file base path will be used to name the output files by adding suffixes that describe the log entries represented within; it may include subdirectories. Nonexistent subdirectories will not be created; if one is specified, the command will be aborted. Note that if any of the resulting output files already exist, the command will be aborted (hashdeep-compare will not overwrite existing files).
 
 ### The partitioning algorithm
 

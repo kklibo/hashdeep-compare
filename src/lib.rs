@@ -2,6 +2,7 @@
 //!
 
 pub mod main_impl;
+pub mod help;
 pub mod sort;
 mod common;
 mod log_entry;

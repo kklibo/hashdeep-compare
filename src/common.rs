@@ -1,10 +1,26 @@
-use std::fs::{File,read_to_string};
-use std::io::{Write,Error};
+use std::fs::{File,OpenOptions,read_to_string};
+use std::io::Write;
+
+use thiserror::Error;
 
 use crate::log_entry::LogEntry;
 use crate::partitioner::match_pair::MatchPair;
 use crate::partitioner::match_group::{SingleFileMatchGroup,MatchGroup};
 use crate::some_vec::SomeVec;
+
+
+#[derive(Error, Debug)]
+pub enum WriteToFileError {
+
+    #[error("{0} exists (will not overwrite existing files)")]
+    OutputFileExists(String),
+
+    #[error(transparent)]
+    Io(#[from] std::io::Error),
+
+    #[error(transparent)]
+    Other(#[from] anyhow::Error),
+}
 
 pub struct LogFile<T>
     where T: Extend<LogEntry> + Default + IntoIterator
@@ -13,7 +29,7 @@ pub struct LogFile<T>
     pub invalid_lines: Vec<String>,
 }
 
-pub fn read_log_entries_from_file<T>(filename: &str) -> Result<LogFile<T>, Error>
+pub fn read_log_entries_from_file<T>(filename: &str) -> Result<LogFile<T>, std::io::Error>
     where T: Extend<LogEntry> + Default + IntoIterator
 {
     let contents = read_to_string(filename)?;
@@ -33,7 +49,17 @@ pub fn read_log_entries_from_file<T>(filename: &str) -> Result<LogFile<T>, Error
     Ok(LogFile{entries, invalid_lines})
 }
 
-fn write_log_entry_to_file(label: &str, log_entry_str: &str, file: &mut File) -> Result<(), Error>
+fn open_writable_file(filename: &str) -> Result<File, WriteToFileError>
+{
+    match OpenOptions::new().write(true).create_new(true).open(filename) {
+        Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => {
+            Err(WriteToFileError::OutputFileExists(filename.to_string()))
+        },
+        a => Ok(a?),
+    }
+}
+
+fn write_log_entry_to_file(label: &str, log_entry_str: &str, file: &mut File) -> Result<(), WriteToFileError>
 {
     let line = format!("{}{}\n", label, log_entry_str);
 
@@ -41,10 +67,10 @@ fn write_log_entry_to_file(label: &str, log_entry_str: &str, file: &mut File) ->
     Ok(())
 }
 
-pub fn write_log_entries_to_file<T>(log_entries: T, filename: &str) -> Result<(), Error>
+pub fn write_log_entries_to_file<T>(log_entries: T, filename: &str) -> Result<(), WriteToFileError>
     where T: IntoIterator, <T as ::std::iter::IntoIterator>::Item : ::std::string::ToString
 {
-    let mut file = File::create(filename)?;
+    let mut file = open_writable_file(filename)?;
 
     for log_entry in log_entries {
         write_log_entry_to_file("", &log_entry.to_string(), &mut file)?;
@@ -53,9 +79,9 @@ pub fn write_log_entries_to_file<T>(log_entries: T, filename: &str) -> Result<()
     Ok(())
 }
 
-pub fn write_match_pairs_to_file(match_pairs: &[MatchPair], filename: &str) -> Result<(), Error>
+pub fn write_match_pairs_to_file(match_pairs: &[MatchPair], filename: &str) -> Result<(), WriteToFileError>
 {
-    let mut file = File::create(filename)?;
+    let mut file = open_writable_file(filename)?;
 
     for match_pair in match_pairs {
         write_log_entry_to_file("file1: ", &match_pair.from_file1.to_string(), &mut file)?;
@@ -66,13 +92,13 @@ pub fn write_match_pairs_to_file(match_pairs: &[MatchPair], filename: &str) -> R
     Ok(())
 }
 
-pub fn write_match_groups_to_file(match_groups: &[MatchGroup], filename: &str) -> Result<(), Error>
+pub fn write_match_groups_to_file(match_groups: &[MatchGroup], filename: &str) -> Result<(), WriteToFileError>
 {
-    let mut file = File::create(filename)?;
+    let mut file = open_writable_file(filename)?;
 
     for match_group in match_groups {
 
-        fn write_entries(entries: &SomeVec<&LogEntry>, label: &str, file: &mut File) -> Result<(), Error>
+        fn write_entries(entries: &SomeVec<&LogEntry>, label: &str, file: &mut File) -> Result<(), WriteToFileError>
         {
             for &log_entry in entries.inner_ref() {
                 write_log_entry_to_file(label, &log_entry.to_string(), file)?;
@@ -88,9 +114,9 @@ pub fn write_match_groups_to_file(match_groups: &[MatchGroup], filename: &str) -
     Ok(())
 }
 
-pub fn write_single_file_match_groups_to_file(single_file_match_groups: &[SingleFileMatchGroup], filename: &str) -> Result<(), Error>
+pub fn write_single_file_match_groups_to_file(single_file_match_groups: &[SingleFileMatchGroup], filename: &str) -> Result<(), WriteToFileError>
 {
-    let mut file = File::create(filename)?;
+    let mut file = open_writable_file(filename)?;
 
     for single_file_match_group in single_file_match_groups {
 

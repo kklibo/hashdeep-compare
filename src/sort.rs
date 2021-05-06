@@ -4,7 +4,7 @@ use crate::log_entry::LogEntry;
 pub fn sort_log(filename: &str, out_filename: &str) -> Result<(), Box<dyn std::error::Error>>{
 
     if std::path::Path::exists(out_filename.as_ref()) {
-        return Err(format!("{} exists (will not overwrite existing files)", out_filename).into());
+        return Err(common::WriteToFileError::OutputFileExists(out_filename.to_string()).into());
     }
 
     let mut log_file = common::read_log_entries_from_file::<Vec<LogEntry>>(filename)?;

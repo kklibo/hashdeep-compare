@@ -1,1 +1,1 @@
-Error: Os { code: 21, kind: Other, message: "Is a directory" }
+Error: "Is a directory (os error 21)"
