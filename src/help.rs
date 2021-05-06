@@ -3,12 +3,12 @@ use indoc::formatdoc;
 pub fn help_string(version: &str) -> String {
 
     formatdoc!("
-        hashdeep-compare v{}
-
-          Options:
-
+        hashdeep-compare v{} options:
             version
               Display version string
+
+            help <hash|sort|part>
+              Display subcommand help
 
             hash <target_directory> <output_path_base>
               Invoke hashdeep on a target directory

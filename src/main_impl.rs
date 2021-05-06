@@ -81,20 +81,22 @@ fn main_impl(args: &[&str], mut stdout: Box<dyn Write>) -> Result<(), Box<dyn Er
 
     const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-    let mut show_help = || -> Result<(), Box<dyn Error>> {
+    match args.get(1) {
 
-        writeln!(stdout, "{}", help::help_string(VERSION))?;
-        Ok(())
-    };
+        None | Some(&"help") => {
 
-    if args.len() < 2 {
-        show_help()?;
-        return Ok(());
-    }
+            let help_string =
+            match args.get(2) {
+                Some(&"hash") => help::help_hash_string(),
+                Some(&"sort") => help::help_sort_string(),
+                Some(&"part") => help::help_part_string(),
+                _ => help::help_string(VERSION),
+            };
 
+            writeln!(stdout, "{}", help_string)?;
 
-    match args[1] {
-        "hash" => {
+        },
+        Some(&"hash") => {
             if args.len() < 4 {return Err("hash: not enough arguments".into());}
             if args.len() > 4 {return Err("hash: too many arguments".into());}
 
@@ -103,13 +105,13 @@ fn main_impl(args: &[&str], mut stdout: Box<dyn Write>) -> Result<(), Box<dyn Er
                 args[3],
                 "hashdeep")?;
         },
-        "sort" => {
+        Some(&"sort") => {
             if args.len() < 4 {return Err("sort: not enough arguments".into());}
             if args.len() > 4 {return Err("sort: too many arguments".into());}
 
             sort::sort_log(args[2], args[3])?;
         },
-        "part" => {
+        Some(&"part") => {
             if args.len() < 5 {return Err("part: not enough arguments".into());}
             if args.len() > 5 {return Err("part: too many arguments".into());}
 
@@ -118,13 +120,13 @@ fn main_impl(args: &[&str], mut stdout: Box<dyn Write>) -> Result<(), Box<dyn Er
 
             writeln!(stdout, "{}", partition_stats)?;
         },
-        "version" => {
+        Some(&"version") => {
             if args.len() > 2 {return Err("version: does not accept arguments".into());}
 
             writeln!(stdout, "hashdeep-compare version {}", VERSION)?;
         },
 
-        x => return Err(format!("invalid command: {}", x).into())
+        Some(x) => return Err(format!("invalid command: {}", x).into())
     }
 
     Ok(())

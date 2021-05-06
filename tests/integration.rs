@@ -127,6 +127,15 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("invalid/nonexistent_subcommand",  &["nonexistent_subcommand"])?;
 
 
+    //help subcommand tests
+    run_test("help/no_subcommand",          &["help"])?;
+    run_test("help/nonexistent_subcommand", &["help", "nonexistent_subcommand"])?;
+    run_test("help/hash",                   &["help", "hash"])?;
+    run_test("help/sort",                   &["help", "sort"])?;
+    run_test("help/part",                   &["help", "part"])?;
+    run_test("help/extra_argument",         &["help", "part", "extra"])?;
+
+
     //hash subcommand tests
     run_test("hash/0_arguments",    &["hash"])?;
     run_test("hash/1_argument",     &["hash", "arg1"])?;

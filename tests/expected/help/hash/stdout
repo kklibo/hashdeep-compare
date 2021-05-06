@@ -1,0 +1,18 @@
+hashdeep-compare function: hash
+
+Invokes hashdeep and generates a log file compatible with hashdeep-compare.
+
+Syntax:
+    hashdeep-compare hash path/to/target_dir path/to/output_log.txt
+
+Notes:
+    This function is optional, but recommended to ensure log compatibility.
+
+    The above function call is equivalent to directly calling
+        hashdeep -l -r -o f path/to/target_dir \
+          > path/to/output_log.txt \
+          2> path/to/output_log.txt.errors
+
+    Note that if the output file or the error file already exist, the command
+    will be aborted (hashdeep-compare will not overwrite existing files).
+
