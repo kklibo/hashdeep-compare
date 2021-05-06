@@ -15,6 +15,12 @@ pub enum WriteToFileError {
     #[error("{0} exists (will not overwrite existing files)")]
     OutputFileExists(String),
 
+    #[error("\"{0}\" cannot be opened for writing (does the directory exist?)")]
+    OutputFileNotFound(String),
+
+    #[error("\"{0}\" cannot be opened for writing (invalid path or unknown error)")]
+    OutputFileOtherError(String),
+
     #[error(transparent)]
     Io(#[from] std::io::Error),
 
@@ -28,6 +34,8 @@ impl WriteToFileError {
 
         match e.kind() {
             ErrorKind::AlreadyExists => WriteToFileError::OutputFileExists(path.to_string()),
+            ErrorKind::NotFound      => WriteToFileError::OutputFileNotFound(path.to_string()),
+            ErrorKind::Other         => WriteToFileError::OutputFileOtherError(path.to_string()),
             _ => e.into(),
         }
     }

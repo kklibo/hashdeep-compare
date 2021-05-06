@@ -1,1 +1,1 @@
-Error: "No such file or directory (os error 2)"
+Error: """ cannot be opened for writing (does the directory exist?)"
