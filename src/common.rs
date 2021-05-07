@@ -41,6 +41,17 @@ impl WriteToFileError {
     }
 }
 
+
+#[derive(Error, Debug)]
+pub enum ReadLogEntriesFromFileError {
+
+    #[error(transparent)]
+    Io(#[from] std::io::Error),
+
+    #[error(transparent)]
+    Other(#[from] anyhow::Error),
+}
+
 pub struct LogFile<T>
     where T: Extend<LogEntry> + Default + IntoIterator
 {
@@ -48,7 +59,7 @@ pub struct LogFile<T>
     pub invalid_lines: Vec<String>,
 }
 
-pub fn read_log_entries_from_file<T>(filename: &str) -> Result<LogFile<T>, std::io::Error>
+pub fn read_log_entries_from_file<T>(filename: &str) -> Result<LogFile<T>, ReadLogEntriesFromFileError>
     where T: Extend<LogEntry> + Default + IntoIterator
 {
     let contents = read_to_string(filename)?;
