@@ -2,6 +2,7 @@ use std::fs::{File,OpenOptions,read_to_string};
 use std::io::{Write, ErrorKind};
 
 use thiserror::Error;
+use peeking_take_while::PeekableExt;
 
 use crate::log_entry::LogEntry;
 use crate::partitioner::match_pair::MatchPair;
@@ -71,10 +72,52 @@ impl ReadLogEntriesFromFileError {
 }
 
 
+#[derive(Debug, Eq, PartialEq)]
+pub enum HashdeepLogHeaderWarning {
+    UnexpectedVersionString(String),
+    HeaderNotFound,
+    UntestedLogFormat(String),
+    UnexpectedHeaderLineCount(usize),
+}
+
+fn check_hashdeep_log_header(header_lines: &[String]) -> Vec<HashdeepLogHeaderWarning> {
+
+    //  example header (should always be 5 lines):
+    //
+    //  %%%% HASHDEEP-1.0
+    //  %%%% size,md5,sha256,filename
+    //  ## Invoked from: /home/user
+    //  ## $ hashdeep -lr hashdeepComp/
+    //  ##
+
+    let mut warnings: Vec<HashdeepLogHeaderWarning> = Vec::new();
+
+    match header_lines.get(0) {
+        Some(x) if x == "%%%% HASHDEEP-1.0" => {},
+        Some(x) => warnings.push(HashdeepLogHeaderWarning::UnexpectedVersionString(x.clone())),
+        None => return [HashdeepLogHeaderWarning::HeaderNotFound].into(),
+    }
+
+    match header_lines.get(1) {
+        Some(x) if x == "%%%% size,md5,sha256,filename" => {},
+        Some(x) => warnings.push(HashdeepLogHeaderWarning::UntestedLogFormat(x.clone())),
+        None => {}
+    }
+
+    match header_lines.len() {
+        5 => {},
+        x => warnings.push(HashdeepLogHeaderWarning::UnexpectedHeaderLineCount(x))
+    };
+
+    warnings
+}
+
+
 pub struct LogFile<T>
     where T: Extend<LogEntry> + Default + IntoIterator
 {
     pub entries: T,
+    pub header_warnings: Vec<HashdeepLogHeaderWarning>,
     pub invalid_lines: Vec<String>,
 }
 
@@ -87,7 +130,17 @@ pub fn read_log_entries_from_file<T>(filename: &str) -> Result<LogFile<T>, ReadL
     let mut entries = T::default();
     let mut invalid_lines = Vec::<String>::new();
 
-    entries.extend(contents.lines().skip(5).filter_map(|line| {
+    let mut lines = contents.lines().peekable();
+
+    //collect the header lines based on expected prefix symbols
+    let header_lines: Vec<String> = lines.peeking_take_while(|x: &&str| {
+        x.starts_with("%%%%") ||
+        x.starts_with("##")
+    }).map(|s| s.to_string() ).collect();
+
+    let header_warnings = check_hashdeep_log_header(&header_lines);
+
+    entries.extend(lines.filter_map(|line| {
 
         LogEntry::from_str(line).or_else( || {
             invalid_lines.push(line.to_owned());
@@ -96,7 +149,7 @@ pub fn read_log_entries_from_file<T>(filename: &str) -> Result<LogFile<T>, ReadL
     }));
 
 
-    Ok(LogFile{entries, invalid_lines})
+    Ok(LogFile{entries, header_warnings, invalid_lines})
 }
 
 fn open_writable_file(filename: &str) -> Result<File, WriteToFileError>
@@ -173,4 +226,111 @@ pub fn write_single_file_match_groups_to_file(single_file_match_groups: &[Single
     };
 
     Ok(())
+}
+
+#[cfg(test)]
+mod test
+{
+    use super::*;
+
+    #[test]
+    fn check_hashdeep_log_header_test() {
+
+        use HashdeepLogHeaderWarning::*;
+
+        fn to_vec_string(x: &[&str]) -> Vec<String> {
+            x.iter().map(|x|x.to_string()).collect::<Vec<String>>()
+        }
+
+        //success
+        {
+            let header_lines = [
+                "%%%% HASHDEEP-1.0",
+                "%%%% size,md5,sha256,filename",
+                "## Invoked from: /home/user",
+                "## $ hashdeep -lr hashdeepComp/",
+                "## ",
+            ];
+
+            let expected = [];
+
+            let warnings = check_hashdeep_log_header(&to_vec_string(&header_lines));
+
+            assert_eq!(warnings, expected);
+        }
+
+        {
+            let header_lines = [
+                "%%%% HASHDEEP-2.0",
+                "%%%% size,md5,sha256,filename",
+                "## Invoked from: /home/user",
+                "## $ hashdeep -lr hashdeepComp/",
+                "## ",
+            ];
+
+            let expected = [UnexpectedVersionString("%%%% HASHDEEP-2.0".into())];
+
+            let warnings = check_hashdeep_log_header(&to_vec_string(&header_lines));
+
+            assert_eq!(warnings, expected);
+        }
+
+        {
+            let header_lines = [];
+
+            let expected = [HeaderNotFound];
+
+            let warnings = check_hashdeep_log_header(&to_vec_string(&header_lines));
+
+            assert_eq!(warnings, expected);
+        }
+
+        {
+            let header_lines = [
+                "%%%% HASHDEEP-1.0",
+                "%%%% size,md5,filename",
+                "## Invoked from: /home/user",
+                "## $ hashdeep -lr hashdeepComp/",
+                "## ",
+            ];
+
+            let expected = [UntestedLogFormat("%%%% size,md5,filename".into())];
+
+            let warnings = check_hashdeep_log_header(&to_vec_string(&header_lines));
+
+            assert_eq!(warnings, expected);
+        }
+
+        {
+            let header_lines = [
+                "%%%% HASHDEEP-1.0",
+                "%%%% size,md5,sha256,filename",
+                "## Invoked from: /home/user",
+                "## $ hashdeep -lr hashdeepComp/",
+            ];
+
+            let expected = [UnexpectedHeaderLineCount(4)];
+
+            let warnings = check_hashdeep_log_header(&to_vec_string(&header_lines));
+
+            assert_eq!(warnings, expected);
+        }
+
+        {
+            let header_lines = [
+                "%%%% HASHDEEP-3.0",
+                "%%%% size,sha256,filename",
+            ];
+
+            let expected = [
+                UnexpectedVersionString("%%%% HASHDEEP-3.0".into()),
+                UntestedLogFormat("%%%% size,sha256,filename".into()),
+                UnexpectedHeaderLineCount(2),
+            ];
+
+            let warnings = check_hashdeep_log_header(&to_vec_string(&header_lines));
+
+            assert_eq!(warnings, expected);
+        }
+    }
 }

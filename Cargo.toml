@@ -9,6 +9,7 @@ thiserror = "1.0.24"
 anyhow = "1.0.40"
 indoc = "1.0.3"
 which = "4.1.0"
+peeking_take_while = "0.1.2"
 walkdir = { version = "2.3.2", optional = true }
 
 [dev-dependencies]
