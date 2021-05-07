@@ -45,12 +45,31 @@ impl WriteToFileError {
 #[derive(Error, Debug)]
 pub enum ReadLogEntriesFromFileError {
 
+    #[error("\"{0}\" cannot be opened for reading (not found)")]
+    FileNotFound(String),
+
+    #[error("\"{0}\" cannot be opened for reading (invalid path or unknown error)")]
+    OtherIoError(String),
+
     #[error(transparent)]
     Io(#[from] std::io::Error),
 
     #[error(transparent)]
     Other(#[from] anyhow::Error),
 }
+
+impl ReadLogEntriesFromFileError {
+
+    fn new(e: std::io::Error, path: &str) -> Self {
+
+        match e.kind() {
+            ErrorKind::NotFound => ReadLogEntriesFromFileError::FileNotFound(path.to_string()),
+            ErrorKind::Other    => ReadLogEntriesFromFileError::OtherIoError(path.to_string()),
+            _ => e.into(),
+        }
+    }
+}
+
 
 pub struct LogFile<T>
     where T: Extend<LogEntry> + Default + IntoIterator
@@ -62,7 +81,8 @@ pub struct LogFile<T>
 pub fn read_log_entries_from_file<T>(filename: &str) -> Result<LogFile<T>, ReadLogEntriesFromFileError>
     where T: Extend<LogEntry> + Default + IntoIterator
 {
-    let contents = read_to_string(filename)?;
+    let contents = read_to_string(filename)
+        .map_err(|e| ReadLogEntriesFromFileError::new(e, filename))?;
 
     let mut entries = T::default();
     let mut invalid_lines = Vec::<String>::new();

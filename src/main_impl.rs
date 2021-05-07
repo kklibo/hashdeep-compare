@@ -60,6 +60,9 @@ pub fn main_io_wrapper(
             if let Some(err) = err.downcast_ref::<command::RunHashdeepCommandError>() {
                 writeln! (stderr, "Error: \"{}\"", err)?;
             }
+            else if let Some(err) = err.downcast_ref::<common::ReadLogEntriesFromFileError>() {
+                writeln! (stderr, "Error: \"{}\"", err)?;
+            }
             else if let Some(err) = err.downcast_ref::<common::WriteToFileError>() {
                 writeln! (stderr, "Error: \"{}\"", err)?;
             }

@@ -1,1 +1,1 @@
-Error: Io(Os { code: 21, kind: Other, message: "Is a directory" })
+Error: ""." cannot be opened for reading (invalid path or unknown error)"
