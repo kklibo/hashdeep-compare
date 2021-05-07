@@ -1,1 +1,1 @@
-Error: ""/dev/null/invalid" cannot be opened for writing (invalid path or unknown error)"
+Error: ""/dev/null/invalid" cannot be opened for writing (Not a directory (os error 20))"

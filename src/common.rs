@@ -18,8 +18,8 @@ pub enum WriteToFileError {
     #[error("\"{0}\" cannot be opened for writing (does the directory exist?)")]
     OutputFileNotFound(String),
 
-    #[error("\"{0}\" cannot be opened for writing (invalid path or unknown error)")]
-    OutputFileOtherError(String),
+    #[error("\"{0}\" cannot be opened for writing ({})", .1)]
+    OutputFileOtherError(String, #[source] std::io::Error),
 
     #[error(transparent)]
     Io(#[from] std::io::Error),
@@ -35,7 +35,7 @@ impl WriteToFileError {
         match e.kind() {
             ErrorKind::AlreadyExists => WriteToFileError::OutputFileExists(path.to_string()),
             ErrorKind::NotFound      => WriteToFileError::OutputFileNotFound(path.to_string()),
-            ErrorKind::Other         => WriteToFileError::OutputFileOtherError(path.to_string()),
+            ErrorKind::Other         => WriteToFileError::OutputFileOtherError(path.to_string(), e),
             _ => e.into(),
         }
     }
@@ -48,8 +48,8 @@ pub enum ReadLogEntriesFromFileError {
     #[error("\"{0}\" cannot be opened for reading (not found)")]
     FileNotFound(String),
 
-    #[error("\"{0}\" cannot be opened for reading (invalid path or unknown error)")]
-    OtherIoError(String),
+    #[error("\"{0}\" cannot be opened for reading ({})", .1)]
+    OtherIoError(String, #[source] std::io::Error),
 
     #[error(transparent)]
     Io(#[from] std::io::Error),
@@ -64,7 +64,7 @@ impl ReadLogEntriesFromFileError {
 
         match e.kind() {
             ErrorKind::NotFound => ReadLogEntriesFromFileError::FileNotFound(path.to_string()),
-            ErrorKind::Other    => ReadLogEntriesFromFileError::OtherIoError(path.to_string()),
+            ErrorKind::Other    => ReadLogEntriesFromFileError::OtherIoError(path.to_string(), e),
             _ => e.into(),
         }
     }

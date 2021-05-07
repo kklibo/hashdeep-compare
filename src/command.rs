@@ -24,8 +24,8 @@ pub enum RunHashdeepCommandError {
     #[error("\"{0}\" cannot be opened for writing (does the directory exist?)")]
     OutputFileNotFound(String),
 
-    #[error("\"{0}\" cannot be opened for writing (invalid path or unknown error)")]
-    OutputFileOtherError(String),
+    #[error("\"{0}\" cannot be opened for writing ({})", .1)]
+    OutputFileOtherError(String, #[source] std::io::Error),
 
     #[error(transparent)]
     Io(#[from] std::io::Error),
@@ -41,7 +41,7 @@ impl RunHashdeepCommandError {
         match e.kind() {
             ErrorKind::AlreadyExists => RunHashdeepCommandError::OutputFileExists(path.to_string()),
             ErrorKind::NotFound      => RunHashdeepCommandError::OutputFileNotFound(path.to_string()),
-            ErrorKind::Other         => RunHashdeepCommandError::OutputFileOtherError(path.to_string()),
+            ErrorKind::Other         => RunHashdeepCommandError::OutputFileOtherError(path.to_string(), e),
             _ => e.into(),
         }
     }

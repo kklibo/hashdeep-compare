@@ -1,1 +1,1 @@
-Error: ""/dev/null/invalid" cannot be opened for reading (invalid path or unknown error)"
+Error: ""/dev/null/invalid" cannot be opened for reading (Not a directory (os error 20))"
