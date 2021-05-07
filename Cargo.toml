@@ -9,6 +9,7 @@ thiserror = "1.0.24"
 anyhow = "1.0.40"
 indoc = "1.0.3"
 which = "4.1.0"
+walkdir = { version = "2.3.2", optional = true }
 
 [dev-dependencies]
 assert_cmd = "1.0.1"
@@ -18,3 +19,4 @@ pathdiff = "0.2.0"
 
 [features]
 integration_test_coverage = []
+integration_test_helpful_outputs = ["walkdir"]

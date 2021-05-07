@@ -1,1 +1,1 @@
-Error: "Not a directory (os error 20)"
+Error: ""/dev/null/invalid" cannot be opened for writing (Not a directory (os error 20))"

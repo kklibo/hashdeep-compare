@@ -1,1 +1,1 @@
-Error: "Not a directory (os error 20)"
+Error: ""/dev/null/invalid_full_match_pairs" cannot be opened for writing (Not a directory (os error 20))"

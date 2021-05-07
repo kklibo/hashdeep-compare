@@ -1,5 +1,5 @@
 use std::fs::{File,OpenOptions,read_to_string};
-use std::io::Write;
+use std::io::{Write, ErrorKind};
 
 use thiserror::Error;
 
@@ -15,12 +15,61 @@ pub enum WriteToFileError {
     #[error("{0} exists (will not overwrite existing files)")]
     OutputFileExists(String),
 
+    #[error("\"{0}\" cannot be opened for writing (does the directory exist?)")]
+    OutputFileNotFound(String),
+
+    #[error("\"{0}\" cannot be opened for writing ({})", .1)]
+    OutputFileOtherError(String, #[source] std::io::Error),
+
     #[error(transparent)]
     Io(#[from] std::io::Error),
 
     #[error(transparent)]
     Other(#[from] anyhow::Error),
 }
+
+impl WriteToFileError {
+
+    fn new(e: std::io::Error, path: &str) -> Self {
+
+        match e.kind() {
+            ErrorKind::AlreadyExists => WriteToFileError::OutputFileExists(path.to_string()),
+            ErrorKind::NotFound      => WriteToFileError::OutputFileNotFound(path.to_string()),
+            ErrorKind::Other         => WriteToFileError::OutputFileOtherError(path.to_string(), e),
+            _ => e.into(),
+        }
+    }
+}
+
+
+#[derive(Error, Debug)]
+pub enum ReadLogEntriesFromFileError {
+
+    #[error("\"{0}\" cannot be opened for reading (not found)")]
+    FileNotFound(String),
+
+    #[error("\"{0}\" cannot be opened for reading ({})", .1)]
+    OtherIoError(String, #[source] std::io::Error),
+
+    #[error(transparent)]
+    Io(#[from] std::io::Error),
+
+    #[error(transparent)]
+    Other(#[from] anyhow::Error),
+}
+
+impl ReadLogEntriesFromFileError {
+
+    fn new(e: std::io::Error, path: &str) -> Self {
+
+        match e.kind() {
+            ErrorKind::NotFound => ReadLogEntriesFromFileError::FileNotFound(path.to_string()),
+            ErrorKind::Other    => ReadLogEntriesFromFileError::OtherIoError(path.to_string(), e),
+            _ => e.into(),
+        }
+    }
+}
+
 
 pub struct LogFile<T>
     where T: Extend<LogEntry> + Default + IntoIterator
@@ -29,10 +78,11 @@ pub struct LogFile<T>
     pub invalid_lines: Vec<String>,
 }
 
-pub fn read_log_entries_from_file<T>(filename: &str) -> Result<LogFile<T>, std::io::Error>
+pub fn read_log_entries_from_file<T>(filename: &str) -> Result<LogFile<T>, ReadLogEntriesFromFileError>
     where T: Extend<LogEntry> + Default + IntoIterator
 {
-    let contents = read_to_string(filename)?;
+    let contents = read_to_string(filename)
+        .map_err(|e| ReadLogEntriesFromFileError::new(e, filename))?;
 
     let mut entries = T::default();
     let mut invalid_lines = Vec::<String>::new();
@@ -51,12 +101,8 @@ pub fn read_log_entries_from_file<T>(filename: &str) -> Result<LogFile<T>, std::
 
 fn open_writable_file(filename: &str) -> Result<File, WriteToFileError>
 {
-    match OpenOptions::new().write(true).create_new(true).open(filename) {
-        Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => {
-            Err(WriteToFileError::OutputFileExists(filename.to_string()))
-        },
-        a => Ok(a?),
-    }
+    OpenOptions::new().write(true).create_new(true).open(filename)
+        .map_err(|e| WriteToFileError::new(e, filename).into())
 }
 
 fn write_log_entry_to_file(label: &str, log_entry_str: &str, file: &mut File) -> Result<(), WriteToFileError>

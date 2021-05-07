@@ -445,5 +445,33 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
         Ok(())
     }
 
+    #[cfg(feature = "integration_test_helpful_outputs")]
+    error_message_summary_to_file()?;
+
+
+    Ok(())
+}
+
+#[cfg(feature = "integration_test_helpful_outputs")]
+fn error_message_summary_to_file() -> Result<(), Box<dyn std::error::Error>> {
+
+    use std::fs::read_to_string;
+    use walkdir::WalkDir;
+
+    let mut outfile = File::create("tests/error_message_summary")?;
+
+    for entry in WalkDir::new("tests/expected") {
+
+        if let Ok(x) = entry {
+
+            if x.file_type().is_file() && x.file_name() == "stderr" {
+                writeln!(outfile, "{:?}", x.path())?;
+                writeln!(outfile, "  {}", read_to_string(x.path())?)?;
+            }
+
+        }
+
+    }
+
     Ok(())
 }
