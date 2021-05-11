@@ -1,0 +1,2 @@
+Warnings emitted for hashdeep log at: test1_sorted.txt
+  Unexpected version string: "%%%% HASHDEEP fake version string"

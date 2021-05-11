@@ -1,5 +1,6 @@
 use std::fs::{File,OpenOptions,read_to_string};
 use std::io::{Write, ErrorKind};
+use std::fmt::{Display, Formatter};
 
 use thiserror::Error;
 use peeking_take_while::PeekableExt;
@@ -80,6 +81,20 @@ pub enum HashdeepLogHeaderWarning {
     UnexpectedHeaderLineCount(usize),
 }
 
+impl Display for HashdeepLogHeaderWarning {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+
+        use HashdeepLogHeaderWarning::*;
+
+        match self {
+            UnexpectedVersionString(s) => write!(f, "Unexpected version string: \"{}\"", s),
+            HeaderNotFound => write!(f, "Header not found"),
+            UntestedLogFormat(s) => write!(f, "Untested log format: \"{}\"", s),
+            UnexpectedHeaderLineCount(n) => write!(f, "Unexpected header line count: {} (expected: 5)", n),
+        }
+    }
+}
+
 fn check_hashdeep_log_header(header_lines: &[String]) -> Vec<HashdeepLogHeaderWarning> {
 
     //  example header (should always be 5 lines):
@@ -119,6 +134,24 @@ pub struct LogFile<T>
     pub entries: T,
     pub header_warnings: Vec<HashdeepLogHeaderWarning>,
     pub invalid_lines: Vec<String>,
+}
+
+impl<T> LogFile<T>
+    where T: Extend<LogEntry> + Default + IntoIterator
+{
+
+    pub fn warning_report(&self) -> Option<Vec<String>> {
+
+        if self.header_warnings.is_empty() {
+            return None;
+        }
+
+        let lines = self.header_warnings.iter().map(
+            |w| w.to_string()
+        ).collect::<Vec<String>>();
+
+        Some(lines)
+    }
 }
 
 pub fn read_log_entries_from_file<T>(filename: &str) -> Result<LogFile<T>, ReadLogEntriesFromFileError>

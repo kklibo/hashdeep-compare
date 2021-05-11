@@ -1,7 +1,8 @@
 use crate::common;
 use crate::log_entry::LogEntry;
 
-pub fn sort_log(filename: &str, out_filename: &str) -> Result<(), Box<dyn std::error::Error>>{
+/// on success: returns log file parse warning strings, if any warnings were emitted
+pub fn sort_log(filename: &str, out_filename: &str) -> Result<Option<Vec<String>>, Box<dyn std::error::Error>>{
 
     if std::path::Path::exists(out_filename.as_ref()) {
         return Err(common::WriteToFileError::OutputFileExists(out_filename.to_string()).into());
@@ -15,8 +16,8 @@ pub fn sort_log(filename: &str, out_filename: &str) -> Result<(), Box<dyn std::e
         v1.filename.cmp(&v2.filename)
     });
 
-    common::write_log_entries_to_file(log_file.entries, out_filename)?;
-    Ok(())
+    common::write_log_entries_to_file(&log_file.entries, out_filename)?;
+    Ok(log_file.warning_report())
 }
 
 #[cfg(test)]

@@ -205,6 +205,11 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
 
     run_test("sort/success", &["sort", &path_in_tests("test1.txt"), "test1_sorted.txt"])?;
 
+    run_test("sort/success_with_log_warnings/unexpected_version_string",
+             &["sort", &path_in_tests("sort_files/test1_unexpected_version_string.txt"), "test1_sorted.txt"])?;
+
+
+
 
     //part subcommand tests
     run_test("part/0_arguments",    &["part"])?;

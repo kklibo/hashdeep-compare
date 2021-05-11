@@ -51,7 +51,7 @@ pub fn main_io_wrapper(
 ) -> Result<i32, Box<dyn Error>> {
 
     let exit_code =
-    match main_impl(args, stdout)
+    match main_impl(args, stdout, &mut stderr)
     {
         Ok(()) => 0,
         Err(err) => {
@@ -80,7 +80,7 @@ pub fn main_io_wrapper(
 /// Called by main_io_wrapper: Accepts program arguments and runs the program
 ///
 /// (This was the main() function before the **integration_test_coverage** feature was added)
-fn main_impl(args: &[&str], mut stdout: Box<dyn Write>) -> Result<(), Box<dyn Error>> {
+fn main_impl(args: &[&str], mut stdout: Box<dyn Write>, stderr: &mut Box<dyn Write>) -> Result<(), Box<dyn Error>> {
 
     const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -112,7 +112,12 @@ fn main_impl(args: &[&str], mut stdout: Box<dyn Write>) -> Result<(), Box<dyn Er
             if args.len() < 4 {return Err("sort: not enough arguments".into());}
             if args.len() > 4 {return Err("sort: too many arguments".into());}
 
-            sort::sort_log(args[2], args[3])?;
+            if let Some(s) = sort::sort_log(args[2], args[3])? {
+                writeln!(stderr, "Warnings emitted for hashdeep log at: {}", args[3])?;
+                for line in s {
+                    writeln!(stderr, "  {}", line)?;
+                }
+            }
         },
         Some(&"part") => {
             if args.len() < 5 {return Err("part: not enough arguments".into());}
