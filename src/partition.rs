@@ -32,10 +32,7 @@ pub struct PartitionLogSuccess
 pub fn partition_log(filename1: &str, filename2: &str, output_filename_base: &str) -> Result<PartitionLogSuccess, Box<dyn std::error::Error>> {
 
     let log_file1 = common::read_log_entries_from_file::<Vec<LogEntry>>(filename1)?;
-    assert_eq!(0, log_file1.invalid_lines.len());//todo: remove this
-
     let log_file2 = common::read_log_entries_from_file::<Vec<LogEntry>>(filename2)?;
-    assert_eq!(0, log_file2.invalid_lines.len());//todo: remove this
 
     let from_file1: Vec<&LogEntry> = log_file1.entries.iter().collect::<Vec<&LogEntry>>();
     let from_file2: Vec<&LogEntry> = log_file2.entries.iter().collect::<Vec<&LogEntry>>();

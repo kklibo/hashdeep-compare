@@ -3,6 +3,7 @@
 ## Invoked from: /home/user
 ## $ hashdeep -lr hashdeepComp/
 ## 
+invalid log entry
 4,4692d489b0638e49682df4f46dacd3c3,0c47cda934d53d7ca29d822a59531dcf6d36cbd9740a4fd0b867a0343910a715,hashdeepComp/full_match_pair.txt
 5,4692d489b0638e49682df4f46dacd3c3,0c47cda934d53d7ca29d822a59531dcf6d36cbd9740a4fd0b867a0343910a715,hashdeepComp/another full_match_pair.txt,,,
 6,00000000000000000000000000000000,1111111111111111111111111111111111111111111111111111111111111111,hashdeepComp/full_match_anomaly, file1.txt
