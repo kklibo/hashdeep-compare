@@ -113,7 +113,7 @@ fn main_impl(args: &[&str], mut stdout: Box<dyn Write>, stderr: &mut Box<dyn Wri
             if args.len() > 4 {return Err("sort: too many arguments".into());}
 
             if let Some(s) = sort::sort_log(args[2], args[3])? {
-                writeln!(stderr, "Warnings emitted for hashdeep log at: {}", args[3])?;
+                writeln!(stderr, "Warnings emitted for hashdeep log at: {}", args[2])?;
                 for line in s {
                     writeln!(stderr, "  {}", line)?;
                 }
