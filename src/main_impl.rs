@@ -128,7 +128,7 @@ fn main_impl(args: &[&str], mut stdout: Box<dyn Write>, stderr: &mut Box<dyn Wri
             if args.len() > 4 {return Err("sort: too many arguments".into());}
 
             let warning_lines = sort::sort_log(args[2], args[3])?;
-            print_hashdeep_log_warnings(args[2], warning_lines, stderr);
+            print_hashdeep_log_warnings(args[2], warning_lines, stderr)?;
         },
         Some(&"part") => {
             if args.len() < 5 {return Err("part: not enough arguments".into());}
@@ -138,8 +138,8 @@ fn main_impl(args: &[&str], mut stdout: Box<dyn Write>, stderr: &mut Box<dyn Wri
             partition::partition_log(args[2], args[3], args[4])?;
 
             writeln!(stdout, "{}", partition_stats.stats_string)?;
-            print_hashdeep_log_warnings(args[2], partition_stats.file1_warning_lines, stderr);
-            print_hashdeep_log_warnings(args[3], partition_stats.file2_warning_lines, stderr);
+            print_hashdeep_log_warnings(args[2], partition_stats.file1_warning_lines, stderr)?;
+            print_hashdeep_log_warnings(args[3], partition_stats.file2_warning_lines, stderr)?;
         },
         Some(&"version") => {
             if args.len() > 2 {return Err("version: does not accept arguments".into());}

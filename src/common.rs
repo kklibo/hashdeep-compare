@@ -142,15 +142,20 @@ impl<T> LogFile<T>
 
     pub fn warning_report(&self) -> Option<Vec<String>> {
 
-        if self.header_warnings.is_empty() {
-            return None;
-        }
-
-        let lines = self.header_warnings.iter().map(
+        let mut lines = self.header_warnings.iter().map(
             |w| w.to_string()
         ).collect::<Vec<String>>();
 
-        Some(lines)
+        match self.invalid_lines.len() {
+            0 => {},
+            1 => lines.push(format!("1 invalid log entry detected")),
+            x => lines.push(format!("{} invalid log entries detected", x))
+        }
+
+        match lines.is_empty() {
+            true => None,
+            false => Some(lines)
+        }
     }
 }
 
