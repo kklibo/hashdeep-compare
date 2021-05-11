@@ -93,3 +93,14 @@ The results are stored in separate files for each match rule, plus two files for
 * _no_match_entries_file1
 * _no_match_entries_file2
 
+
+### Supplemental: handling of partially-invalid input logs
+When reading a hashdeep log, hashdeep-compare performs two content checks:
+* In the log header: the line count, hashdeep version, and recorded log format are confirmed. If these are not identical to what the hashdeep-compare test suite uses, a warning is issued. This is intended to warn the user if a different version of hashdeep (or something else) may have generated a log file that might lead to unexpected results.
+* Each log entry line is checked for correct formatting: incorrectly-formatted lines are ignored by hashdeep-compare. If any are found, the number of these ignored lines is reported in a warning message.
+  
+(Note: These checks are here for extra safety. I've never seen hashdeep generate an invalid line: if you have one of these, you should probably figure out why before you rely on the output.)
+
+Regardless of how many warnings are generated, hashdeep-compare will always use all of the correctly-formatted entries to produce the requested output. Warnings, by themselves, will never prevent hashdeep-compare from running to successful completion.
+
+
