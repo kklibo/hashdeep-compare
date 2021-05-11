@@ -215,6 +215,8 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
              &["sort", &path_in_tests("sort_files/test1_unexpected_header_line_count.txt"), "test1_sorted.txt"])?;
     run_test("sort/success_with_log_warnings/multiple_warnings",
              &["sort", &path_in_tests("sort_files/test1_multiple_warnings.txt"), "test1_sorted.txt"])?;
+    run_test("sort/success_with_log_warnings/invalid_log_entry",
+             &["sort", &path_in_tests("sort_files/test1_invalid_log_entry.txt"), "test1_sorted.txt"])?;
 
 
     //part subcommand tests
