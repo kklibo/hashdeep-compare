@@ -205,6 +205,19 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
 
     run_test("sort/success", &["sort", &path_in_tests("test1.txt"), "test1_sorted.txt"])?;
 
+    run_test("sort/success_with_log_warnings/unexpected_version_string",
+             &["sort", &path_in_tests("sort_files/test1_unexpected_version_string.txt"), "test1_sorted.txt"])?;
+    run_test("sort/success_with_log_warnings/header_not_found",
+             &["sort", &path_in_tests("sort_files/test1_header_not_found.txt"), "test1_sorted.txt"])?;
+    run_test("sort/success_with_log_warnings/untested_log_format",
+             &["sort", &path_in_tests("sort_files/test1_untested_log_format.txt"), "test1_sorted.txt"])?;
+    run_test("sort/success_with_log_warnings/unexpected_header_line_count",
+             &["sort", &path_in_tests("sort_files/test1_unexpected_header_line_count.txt"), "test1_sorted.txt"])?;
+    run_test("sort/success_with_log_warnings/multiple_warnings",
+             &["sort", &path_in_tests("sort_files/test1_multiple_warnings.txt"), "test1_sorted.txt"])?;
+    run_test("sort/success_with_log_warnings/invalid_log_entry",
+             &["sort", &path_in_tests("sort_files/test1_invalid_log_entry.txt"), "test1_sorted.txt"])?;
+
 
     //part subcommand tests
     run_test("part/0_arguments",    &["part"])?;
@@ -256,6 +269,7 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     part_test("general_test")?;
+    part_test("general_test_with_log_warnings")?;
 
     part_test("1_full_match_pair")?;
     part_test("1_full_match_group_in_file1_only")?;

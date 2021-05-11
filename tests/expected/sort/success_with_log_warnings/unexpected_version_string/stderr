@@ -1,0 +1,2 @@
+Warnings emitted for hashdeep log at: /media/sf_RustDevVM_Shared/projects/hashdeep-compare/tests/sort_files/test1_unexpected_version_string.txt
+  Unexpected version string: "%%%% HASHDEEP fake version string"

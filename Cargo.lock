@@ -92,6 +92,7 @@ dependencies = [
  "assert_cmd",
  "indoc",
  "pathdiff",
+ "peeking_take_while",
  "predicates",
  "tempfile",
  "thiserror",
@@ -146,6 +147,12 @@ name = "pathdiff"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "877630b3de15c0b64cc52f659345724fbf6bdad9bd9566699fc53688f3c34a34"
+
+[[package]]
+name = "peeking_take_while"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "19b17cddbe7ec3f8bc800887bab5e717348c95ea2ca0b1bf0837fb964dc67099"
 
 [[package]]
 name = "ppv-lite86"

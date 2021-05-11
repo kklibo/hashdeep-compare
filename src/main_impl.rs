@@ -51,7 +51,7 @@ pub fn main_io_wrapper(
 ) -> Result<i32, Box<dyn Error>> {
 
     let exit_code =
-    match main_impl(args, stdout)
+    match main_impl(args, stdout, &mut stderr)
     {
         Ok(()) => 0,
         Err(err) => {
@@ -77,10 +77,25 @@ pub fn main_io_wrapper(
     Ok(exit_code)
 }
 
+
+fn print_hashdeep_log_warnings (
+    filename: &str,
+    warning_lines: Option<Vec<String>>,
+    stderr: &mut Box<dyn Write>) -> Result<(), Box<dyn Error>>
+{
+    if let Some(v) = warning_lines {
+        writeln!(stderr, "Warnings emitted for hashdeep log at: {}", filename)?;
+        for line in v {
+            writeln!(stderr, "  {}", line)?;
+        }
+    }
+    Ok(())
+}
+
 /// Called by main_io_wrapper: Accepts program arguments and runs the program
 ///
 /// (This was the main() function before the **integration_test_coverage** feature was added)
-fn main_impl(args: &[&str], mut stdout: Box<dyn Write>) -> Result<(), Box<dyn Error>> {
+fn main_impl(args: &[&str], mut stdout: Box<dyn Write>, stderr: &mut Box<dyn Write>) -> Result<(), Box<dyn Error>> {
 
     const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -112,7 +127,8 @@ fn main_impl(args: &[&str], mut stdout: Box<dyn Write>) -> Result<(), Box<dyn Er
             if args.len() < 4 {return Err("sort: not enough arguments".into());}
             if args.len() > 4 {return Err("sort: too many arguments".into());}
 
-            sort::sort_log(args[2], args[3])?;
+            let warning_lines = sort::sort_log(args[2], args[3])?;
+            print_hashdeep_log_warnings(args[2], warning_lines, stderr)?;
         },
         Some(&"part") => {
             if args.len() < 5 {return Err("part: not enough arguments".into());}
@@ -121,7 +137,9 @@ fn main_impl(args: &[&str], mut stdout: Box<dyn Write>) -> Result<(), Box<dyn Er
             let partition_stats =
             partition::partition_log(args[2], args[3], args[4])?;
 
-            writeln!(stdout, "{}", partition_stats)?;
+            writeln!(stdout, "{}", partition_stats.stats_string)?;
+            print_hashdeep_log_warnings(args[2], partition_stats.file1_warning_lines, stderr)?;
+            print_hashdeep_log_warnings(args[3], partition_stats.file2_warning_lines, stderr)?;
         },
         Some(&"version") => {
             if args.len() > 2 {return Err("version: does not accept arguments".into());}

@@ -1,0 +1,2 @@
+Warnings emitted for hashdeep log at: /media/sf_RustDevVM_Shared/projects/hashdeep-compare/tests/sort_files/test1_untested_log_format.txt
+  Untested log format: "%%%% size,md5,fake_hash,filename"
