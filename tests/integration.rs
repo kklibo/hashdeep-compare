@@ -207,7 +207,12 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
 
     run_test("sort/success_with_log_warnings/unexpected_version_string",
              &["sort", &path_in_tests("sort_files/test1_unexpected_version_string.txt"), "test1_sorted.txt"])?;
-
+    run_test("sort/success_with_log_warnings/header_not_found",
+             &["sort", &path_in_tests("sort_files/test1_header_not_found.txt"), "test1_sorted.txt"])?;
+    run_test("sort/success_with_log_warnings/untested_log_format",
+             &["sort", &path_in_tests("sort_files/test1_untested_log_format.txt"), "test1_sorted.txt"])?;
+    run_test("sort/success_with_log_warnings/unexpected_header_line_count",
+             &["sort", &path_in_tests("sort_files/test1_unexpected_header_line_count.txt"), "test1_sorted.txt"])?;
 
 
 
