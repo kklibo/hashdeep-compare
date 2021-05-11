@@ -267,6 +267,7 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     part_test("general_test")?;
+    part_test("general_test_with_log_warnings")?;
 
     part_test("1_full_match_pair")?;
     part_test("1_full_match_group_in_file1_only")?;
