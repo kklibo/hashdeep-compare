@@ -148,7 +148,7 @@ impl<T> LogFile<T>
 
         match self.invalid_lines.len() {
             0 => {},
-            1 => lines.push(format!("1 invalid log entry detected")),
+            1 => lines.push("1 invalid log entry detected".to_string()),
             x => lines.push(format!("{} invalid log entries detected", x))
         }
 
@@ -193,7 +193,7 @@ pub fn read_log_entries_from_file<T>(filename: &str) -> Result<LogFile<T>, ReadL
 fn open_writable_file(filename: &str) -> Result<File, WriteToFileError>
 {
     OpenOptions::new().write(true).create_new(true).open(filename)
-        .map_err(|e| WriteToFileError::new(e, filename).into())
+        .map_err(|e| WriteToFileError::new(e, filename))
 }
 
 fn write_log_entry_to_file(label: &str, log_entry_str: &str, file: &mut File) -> Result<(), WriteToFileError>

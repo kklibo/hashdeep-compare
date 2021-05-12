@@ -48,9 +48,6 @@ impl<'a> MatchPartition<'a> {
                 acc.checked_add(x.log_entries.len())
             })
         }
-        fn vec_sum(v: &[&LogEntry]) -> Option<usize> {
-            Some(v.len())
-        }
 
         (vec!{
             pairs_sum(&self.full_match_pairs),
@@ -65,8 +62,8 @@ impl<'a> MatchPartition<'a> {
             single_file_groups_sum(&self.hashes_match_groups_file1),
             single_file_groups_sum(&self.hashes_match_groups_file2),
             groups_sum(&self.hashes_match_groups),
-            vec_sum(&self.no_match_file1),
-            vec_sum(&self.no_match_file2),
+            Some(self.no_match_file1.len()),
+            Some(self.no_match_file2.len()),
         }).iter()
             .try_fold(0usize, |acc: usize, x: &Option<usize>| {
                 x.and_then(|y| acc.checked_add(y))
