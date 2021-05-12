@@ -1,9 +1,11 @@
 pub mod match_pair;
 pub mod match_group;
 
+use std::collections::BTreeMap;
+use thiserror::Error;
+
 use self::match_pair::MatchPair;
 use self::match_group::{MatchGroup,SingleFileMatchGroup};
-use std::collections::BTreeMap;
 use crate::log_entry::LogEntry;
 use crate::some_vec::SomeVec;
 
@@ -72,9 +74,11 @@ impl<'a> MatchPartition<'a> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Error, Debug)]
 pub enum MatchPartitionError {
+    #[error("Serious error: Match partition checksum failed (this should never happen)")]
     ChecksumFailure,
+    #[error("addition overflow in match partition checksum calculation")]
     ChecksumAdditionOverflow,
 }
 

@@ -37,7 +37,7 @@ pub fn partition_log(filename1: &str, filename2: &str, output_filename_base: &st
     let from_file1: Vec<&LogEntry> = log_file1.entries.iter().collect::<Vec<&LogEntry>>();
     let from_file2: Vec<&LogEntry> = log_file2.entries.iter().collect::<Vec<&LogEntry>>();
 
-    let mp = partitioner::match_partition(&from_file1, &from_file2).unwrap(); //todo: remove unwrap
+    let mp = partitioner::match_partition(&from_file1, &from_file2)?;
 
     common::write_match_pairs_to_file(&mp.full_match_pairs, format!("{}_full_match_pairs", output_filename_base).as_str())?;
     common::write_single_file_match_groups_to_file(&mp.full_match_groups_file1, format!("{}_full_match_groups_file1_only", output_filename_base).as_str())?;
