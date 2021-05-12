@@ -111,7 +111,7 @@ pub fn run_hashdeep_command(
                     RunHashdeepCommandError::OutputFilesExist(file1.clone(), file2.clone())
                 }
                 else {
-                    //otherwise, just return the output file's error (todo: do something more useful here?)
+                    //otherwise, just return the output file's error
                     output_file_error
                 }
             );

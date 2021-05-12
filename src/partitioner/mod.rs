@@ -125,7 +125,7 @@ pub fn match_partition<'b>(from_file1: &[&'b LogEntry], from_file2: &[&'b LogEnt
 
         for (_, v) in matches {
             match v.len() {
-                //no check for 0 needed: SomeVec.len() is always positive (todo (optional): add non-zero usize type for len() return value? std::num::NonZeroUsize?)
+                0 => unreachable!(), //SomeVec.len() is always positive
                 1 => match v.at(0) {
                     LogEntryFrom::File1(x) => no_match_file1.push(x),
                     LogEntryFrom::File2(x) => no_match_file2.push(x),
@@ -151,7 +151,7 @@ pub fn match_partition<'b>(from_file1: &[&'b LogEntry], from_file2: &[&'b LogEnt
                         (Some(log_entries), None) => match_groups_file1.push(SingleFileMatchGroup{log_entries}),
                         (None, Some(log_entries)) => match_groups_file2.push(SingleFileMatchGroup{log_entries}),
                         (Some(from_file1), Some(from_file2)) => match_groups.push(MatchGroup{from_file1, from_file2}),
-                        (None, None) => panic!("empty SomeVec in sort_matches"), //todo: remove this
+                        (None, None) => unreachable!("empty SomeVec in sort_matches"),
                     }
                 }
             }
@@ -199,7 +199,6 @@ pub fn match_partition<'b>(from_file1: &[&'b LogEntry], from_file2: &[&'b LogEnt
         });
 
         x.sort_by(|a, b| {
-            //todo (optional): make this sorting decision user-controllable (could also sort by from_file2)
             a.from_file1.first().filename.cmp(&b.from_file1.first().filename)
         });
     }
