@@ -1,12 +1,15 @@
 pub mod match_pair;
 pub mod match_group;
 
+use std::collections::BTreeMap;
+use thiserror::Error;
+
 use self::match_pair::MatchPair;
 use self::match_group::{MatchGroup,SingleFileMatchGroup};
-use std::collections::BTreeMap;
 use crate::log_entry::LogEntry;
 use crate::some_vec::SomeVec;
 
+#[derive(PartialEq, Debug, Default)]
 pub struct MatchPartition<'a> {
 
     pub full_match_pairs: Vec<MatchPair<'a>>,
@@ -46,9 +49,6 @@ impl<'a> MatchPartition<'a> {
                 acc.checked_add(x.log_entries.len())
             })
         }
-        fn vec_sum(v: &[&LogEntry]) -> Option<usize> {
-            Some(v.len())
-        }
 
         (vec!{
             pairs_sum(&self.full_match_pairs),
@@ -63,8 +63,8 @@ impl<'a> MatchPartition<'a> {
             single_file_groups_sum(&self.hashes_match_groups_file1),
             single_file_groups_sum(&self.hashes_match_groups_file2),
             groups_sum(&self.hashes_match_groups),
-            vec_sum(&self.no_match_file1),
-            vec_sum(&self.no_match_file2),
+            Some(self.no_match_file1.len()),
+            Some(self.no_match_file2.len()),
         }).iter()
             .try_fold(0usize, |acc: usize, x: &Option<usize>| {
                 x.and_then(|y| acc.checked_add(y))
@@ -72,9 +72,11 @@ impl<'a> MatchPartition<'a> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Error, Debug)]
 pub enum MatchPartitionError {
+    #[error("Serious error: Match partition checksum failed (this should never happen)")]
     ChecksumFailure,
+    #[error("addition overflow in match partition checksum calculation")]
     ChecksumAdditionOverflow,
 }
 
@@ -121,7 +123,7 @@ pub fn match_partition<'b>(from_file1: &[&'b LogEntry], from_file2: &[&'b LogEnt
 
         for (_, v) in matches {
             match v.len() {
-                //no check for 0 needed: SomeVec.len() is always positive (todo (optional): add non-zero usize type for len() return value? std::num::NonZeroUsize?)
+                0 => unreachable!(), //SomeVec.len() is always positive
                 1 => match v.at(0) {
                     LogEntryFrom::File1(x) => no_match_file1.push(x),
                     LogEntryFrom::File2(x) => no_match_file2.push(x),
@@ -147,7 +149,7 @@ pub fn match_partition<'b>(from_file1: &[&'b LogEntry], from_file2: &[&'b LogEnt
                         (Some(log_entries), None) => match_groups_file1.push(SingleFileMatchGroup{log_entries}),
                         (None, Some(log_entries)) => match_groups_file2.push(SingleFileMatchGroup{log_entries}),
                         (Some(from_file1), Some(from_file2)) => match_groups.push(MatchGroup{from_file1, from_file2}),
-                        (None, None) => panic!("empty SomeVec in sort_matches"), //todo: remove this
+                        (None, None) => unreachable!("empty SomeVec in sort_matches"),
                     }
                 }
             }
@@ -195,7 +197,6 @@ pub fn match_partition<'b>(from_file1: &[&'b LogEntry], from_file2: &[&'b LogEnt
         });
 
         x.sort_by(|a, b| {
-            //todo (optional): make this sorting decision user-controllable (could also sort by from_file2)
             a.from_file1.first().filename.cmp(&b.from_file1.first().filename)
         });
     }

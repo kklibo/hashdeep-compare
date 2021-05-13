@@ -66,6 +66,9 @@ pub fn main_io_wrapper(
             else if let Some(err) = err.downcast_ref::<common::WriteToFileError>() {
                 writeln! (stderr, "Error: \"{}\"", err)?;
             }
+            else if let Some(err) = err.downcast_ref::<partitioner::MatchPartitionError>() {
+                writeln! (stderr, "Error: \"{}\"", err)?;
+            }
             else {
                 writeln! (stderr, "Error: {:?}", err)?;
             }
