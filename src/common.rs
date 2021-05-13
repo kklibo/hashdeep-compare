@@ -73,7 +73,8 @@ impl ReadLogEntriesFromFileError {
 }
 
 
-#[derive(Debug, Eq, PartialEq)]
+//#[derive(Debug, Eq, PartialEq)]//
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub enum HashdeepLogHeaderWarning {
     UnexpectedVersionString(String),
     HeaderNotFound,
@@ -127,7 +128,7 @@ fn check_hashdeep_log_header(header_lines: &[String]) -> Vec<HashdeepLogHeaderWa
     warnings
 }
 
-
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct LogFile<T>
     where T: Extend<LogEntry> + Default + IntoIterator
 {
@@ -241,7 +242,7 @@ pub fn write_match_groups_to_file(match_groups: &[MatchGroup], filename: &str) -
                 write_log_entry_to_file(label, &log_entry.to_string(), file)?;
             };
             Ok(())
-        };
+        }
         write_entries(&match_group.from_file1, "file1: ", &mut file)?;
         write_entries(&match_group.from_file2, "file2: ", &mut file)?;
 

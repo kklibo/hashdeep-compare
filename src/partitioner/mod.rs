@@ -9,6 +9,7 @@ use self::match_group::{MatchGroup,SingleFileMatchGroup};
 use crate::log_entry::LogEntry;
 use crate::some_vec::SomeVec;
 
+#[derive(PartialEq, Debug, Default)]
 pub struct MatchPartition<'a> {
 
     pub full_match_pairs: Vec<MatchPair<'a>>,

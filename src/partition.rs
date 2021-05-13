@@ -22,6 +22,7 @@ use crate::partitioner;
 /// Each log entry is guaranteed to be represented in exactly one group.
 ///
 
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct PartitionLogSuccess
 {
     pub file1_warning_lines: Option<Vec<String>>,
