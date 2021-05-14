@@ -9,6 +9,8 @@ use self::match_group::{MatchGroup,SingleFileMatchGroup};
 use crate::log_entry::LogEntry;
 use crate::some_vec::SomeVec;
 
+/// Represents the contents of two hashdeep logs partitioned
+/// by match type, allowing inference of intervening file changes.
 #[derive(PartialEq, Debug, Default)]
 pub struct MatchPartition<'a> {
 
@@ -80,6 +82,15 @@ pub enum MatchPartitionError {
     ChecksumAdditionOverflow,
 }
 
+/// The main implementation function for the `part` command:
+/// Partitions entries into a structure of match pairs and groupings, allowing
+/// comparison of the two source hashdeep log files in terms of inferred
+/// intervening file changes.
+///
+/// # Errors
+///
+/// An integrity check is run on the results of the partitioning operation.
+/// An error will be issued if this check fails (this is extremely unlikely).
 pub fn match_partition<'b>(from_file1: &[&'b LogEntry], from_file2: &[&'b LogEntry]) -> Result<MatchPartition<'b>, MatchPartitionError> {
 
     struct SortedMatches<'a> {

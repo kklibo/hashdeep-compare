@@ -1,8 +1,17 @@
 use std::fmt;
 
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+/// Represents the content of a single hashdeep file entry line.
+///
+/// Constructing a string with the form
+///
+/// >`hashes` + "," + `filename`
+///
+/// is expected to recreate the source line exactly.
 pub struct LogEntry {
+    /// The content section of the line: its size and hash values (excluding the trailing comma)
     pub hashes: String,
+    /// The filename/path section of the line: its location in the filesystem
     pub filename: String,
 }
 
@@ -10,6 +19,7 @@ impl LogEntry {
 
     const HASHCOUNT: usize = 3;
 
+    /// Creates a LogEntry from a hashdeep log line, or returns None on failure.
     pub fn from_str(s: &str) -> Option<LogEntry> {
 
         let sections: Vec<&str> = s.split(',').collect();

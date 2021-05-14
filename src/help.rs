@@ -1,5 +1,6 @@
 use indoc::formatdoc;
 
+/// Gets the main program help string
 pub fn help_string(version: &str) -> String {
 
     formatdoc!("
@@ -23,6 +24,7 @@ pub fn help_string(version: &str) -> String {
     )
 }
 
+/// Gets the hash function help string
 pub fn help_hash_string() -> String {
 
     formatdoc!("
@@ -47,6 +49,7 @@ pub fn help_hash_string() -> String {
     )
 }
 
+/// Gets the sort function help string
 pub fn help_sort_string() -> String {
 
     formatdoc!("
@@ -69,6 +72,7 @@ pub fn help_sort_string() -> String {
     )
 }
 
+/// Gets the part function help string
 pub fn help_part_string() -> String {
 
     formatdoc!("
