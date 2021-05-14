@@ -1,7 +1,13 @@
 use crate::common;
 use crate::log_entry::LogEntry;
 
-/// on success: returns log file parse warning strings, if any warnings were emitted
+/// Reads a hashdeep log file and writes its entries to a new file, sorted by name.
+///
+/// On success, returns a Vec of warning strings, if any warnings were emitted while reading the file.
+///
+/// # Errors
+///
+/// Any error emitted while reading or writing the files will be returned.
 pub fn sort_log(filename: &str, out_filename: &str) -> Result<Option<Vec<String>>, Box<dyn std::error::Error>>{
 
     if std::path::Path::exists(out_filename.as_ref()) {

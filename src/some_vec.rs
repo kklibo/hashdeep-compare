@@ -1,5 +1,7 @@
 use std::cmp::Ordering;
 
+
+/// A Vec-based container that is guaranteed to never be empty.
 #[derive(Debug, PartialEq)]
 pub struct SomeVec<T> {
     v: Vec<T>
@@ -7,6 +9,7 @@ pub struct SomeVec<T> {
 
 impl<T> SomeVec<T> {
 
+    /// Creates a new SomeVec from a Vec if non-empty, or returns None.
     pub fn from_vec(v: Vec<T>) -> Option<SomeVec<T>> {
 
         match v.is_empty() {
@@ -15,36 +18,48 @@ impl<T> SomeVec<T> {
         }
     }
 
+    /// Creates a SomeVec from its first value.
     pub fn from_first_value(value: T) -> SomeVec<T> {
         SomeVec{v: vec!{value}}
     }
 
+    /// Creates a SomeVec from its first two values.
     pub fn from_values(value1: T, value2: T) -> SomeVec<T> {
         SomeVec{v: vec!{value1, value2}}
     }
 
+    /// Returns the length of the SomeVec (guaranteed to be > 0).
     pub fn len(&self) -> usize {
         self.v.len()
     }
 
+    /// Returns a reference to the first element.
     pub fn first(&self) -> &T {
         &self.v[0]
     }
 
+    /// Returns a reference to the element at an index.
+    ///
+    /// # Panics
+    ///
+    /// Panics if index >= this SomeVec's length.
     pub fn at(&self, index: usize) -> &T {
         &self.v[index]
     }
 
+    /// Adds value to the end of this SomeVec, increasing its length by 1.
     pub fn push(&mut self, value: T) {
         self.v.push(value);
     }
 
+    /// Returns an immutable reference to this SomeVec's inner Vec.
     pub fn inner_ref(&self) -> &Vec<T> {
         &self.v
     }
 
-    pub fn sort_by<F>(&mut self, compare: F) where
-        F: FnMut(&T, &T) -> Ordering,
+    /// Sorts this SomeVec with comparison function F.
+    pub fn sort_by<F>(&mut self, compare: F)
+        where F: FnMut(&T, &T) -> Ordering
     {
         self.v.sort_by(compare);
     }

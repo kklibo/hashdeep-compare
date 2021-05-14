@@ -3,33 +3,47 @@ use crate::log_entry::LogEntry;
 use crate::partitioner;
 
 
-/// Partition entries from two hashdeep logs by content and name matches
-///
-/// Loads hashdeep logs from filename1 and filename2.
-/// Entries in the loaded logs will be grouped in this order:
-///
-/// 1. full match
-///     1 in each file: no change
-///     anomalies (invalid file)
-/// 2. only name match
-///     1 in each file: changed file
-///     anomalies (invalid file)
-/// 3. only content match
-///     1 in each file: move/rename
-///     match groups (unknown cause)
-/// 4. no match (list by origin)
-///
-/// Each log entry is guaranteed to be represented in exactly one group.
-///
-
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct PartitionLogSuccess
 {
+    /// Printable warning lines about the first hashdeep log file, if any were emitted
     pub file1_warning_lines: Option<Vec<String>>,
+    /// Printable warning lines about the second hashdeep log file, if any were emitted
     pub file2_warning_lines: Option<Vec<String>>,
+    /// Printable statistics about the partitioning results
     pub stats_string: String,
 }
 
+/// Partitions entries from two hashdeep logs by content and name matches.
+///
+/// hashdeep logs are loaded from filename1 and filename2, and output groups
+/// are based on the output_filename_base path prefix.
+///
+/// Entries in the loaded logs will be grouped in this order:
+///
+/// 1. full match
+///     1. 1 in each file: no change between logs
+///     2. anomalies (invalid file)
+/// 2. only name match
+///     1. 1 in each file: file content changed between logs
+///     2. anomalies (invalid file)
+/// 3. only content match
+///     1. 1 in each file: file moved/renamed between logs
+///     2. match groups (unknown cause)
+/// 4. no match (listed by origin)
+///
+/// Each log entry is guaranteed to be represented in exactly one group.
+///
+/// On success, returns a statistics string about the successful operation,
+/// plus warning strings if any were emitted while loading the hashdeep logs.
+///
+/// # Errors
+///
+/// Any error emitted while reading or writing the files will be returned.
+///
+/// An integrity check is run on the partitioning results after calculation:
+///  an error will be emitted if this fails (this is extremely unlikely).
+///
 pub fn partition_log(filename1: &str, filename2: &str, output_filename_base: &str) -> Result<PartitionLogSuccess, Box<dyn std::error::Error>> {
 
     let log_file1 = common::read_log_entries_from_file::<Vec<LogEntry>>(filename1)?;

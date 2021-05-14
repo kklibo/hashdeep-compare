@@ -128,6 +128,9 @@ fn check_hashdeep_log_header(header_lines: &[String]) -> Vec<HashdeepLogHeaderWa
     warnings
 }
 
+
+/// The result of successfully reading a hashdeep log:
+/// its entries, plus load-time header warnings and entry parse failures (if any)
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct LogFile<T>
     where T: Extend<LogEntry> + Default + IntoIterator
@@ -140,7 +143,7 @@ pub struct LogFile<T>
 impl<T> LogFile<T>
     where T: Extend<LogEntry> + Default + IntoIterator
 {
-
+    ///Returns a Vec of printable warning lines (or None, if no warnings or invalid lines exist)
     pub fn warning_report(&self) -> Option<Vec<String>> {
 
         let mut lines = self.header_warnings.iter().map(
@@ -160,6 +163,11 @@ impl<T> LogFile<T>
     }
 }
 
+/// Reads a hashdeep log: checks the header, then collects entries + parse failures
+///
+/// # Errors
+///
+/// Any error encountered while reading the file will be returned.
 pub fn read_log_entries_from_file<T>(filename: &str) -> Result<LogFile<T>, ReadLogEntriesFromFileError>
     where T: Extend<LogEntry> + Default + IntoIterator
 {
@@ -205,6 +213,12 @@ fn write_log_entry_to_file(label: &str, log_entry_str: &str, file: &mut File) ->
     Ok(())
 }
 
+/// Writes log entries to a new file (will not overwrite an existing file).
+///
+/// # Errors
+///
+/// Will return an error if the file at `filename` already exists, or
+/// if an error occurs while writing to the file.
 pub fn write_log_entries_to_file<T>(log_entries: T, filename: &str) -> Result<(), WriteToFileError>
     where T: IntoIterator, <T as ::std::iter::IntoIterator>::Item : ::std::string::ToString
 {
@@ -217,6 +231,12 @@ pub fn write_log_entries_to_file<T>(log_entries: T, filename: &str) -> Result<()
     Ok(())
 }
 
+/// Writes match pairs of log entries to a new file (will not overwrite an existing file).
+///
+/// # Errors
+///
+/// Will return an error if the file at `filename` already exists, or
+/// if an error occurs while writing to the file.
 pub fn write_match_pairs_to_file(match_pairs: &[MatchPair], filename: &str) -> Result<(), WriteToFileError>
 {
     let mut file = open_writable_file(filename)?;
@@ -230,6 +250,12 @@ pub fn write_match_pairs_to_file(match_pairs: &[MatchPair], filename: &str) -> R
     Ok(())
 }
 
+/// Writes match groups of log entries to a new file (will not overwrite an existing file).
+///
+/// # Errors
+///
+/// Will return an error if the file at `filename` already exists, or
+/// if an error occurs while writing to the file.
 pub fn write_match_groups_to_file(match_groups: &[MatchGroup], filename: &str) -> Result<(), WriteToFileError>
 {
     let mut file = open_writable_file(filename)?;
@@ -252,6 +278,13 @@ pub fn write_match_groups_to_file(match_groups: &[MatchGroup], filename: &str) -
     Ok(())
 }
 
+/// Writes match groups (from a single source file) of log entries to a new file
+/// (will not overwrite an existing file).
+///
+/// # Errors
+///
+/// Will return an error if the file at `filename` already exists, or
+/// if an error occurs while writing to the file.
 pub fn write_single_file_match_groups_to_file(single_file_match_groups: &[SingleFileMatchGroup], filename: &str) -> Result<(), WriteToFileError>
 {
     let mut file = open_writable_file(filename)?;

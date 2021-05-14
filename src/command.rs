@@ -47,6 +47,19 @@ impl RunHashdeepCommandError {
     }
 }
 
+/// Runs hashdeep with the settings recommended for hashdeep-compare.
+///
+/// The log includes (recursively) all files and directories in `target_directory`,
+/// and is written to `output_path_base`, with hashdeep's stderr
+/// written to `output_path_base` + ".errors".
+///
+/// # Errors
+///
+/// An error will be returned if
+/// * the `hashdeep` command is not available
+/// * the output log file or error file already exist (will not overwrite existing files)
+/// * any other error occurs while creating the output files
+/// * any other error occurs when running `hashdeep`
 pub fn run_hashdeep_command(
     target_directory: &str,
     output_path_base: &str,
