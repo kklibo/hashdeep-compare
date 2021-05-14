@@ -3,6 +3,15 @@ use crate::log_entry::LogEntry;
 use crate::partitioner;
 
 
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+pub struct PartitionLogSuccess
+{
+    pub file1_warning_lines: Option<Vec<String>>,
+    pub file2_warning_lines: Option<Vec<String>>,
+    pub stats_string: String,
+}
+
+
 /// Partition entries from two hashdeep logs by content and name matches
 ///
 /// Loads hashdeep logs from filename1 and filename2.
@@ -21,15 +30,6 @@ use crate::partitioner;
 ///
 /// Each log entry is guaranteed to be represented in exactly one group.
 ///
-
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
-pub struct PartitionLogSuccess
-{
-    pub file1_warning_lines: Option<Vec<String>>,
-    pub file2_warning_lines: Option<Vec<String>>,
-    pub stats_string: String,
-}
-
 pub fn partition_log(filename1: &str, filename2: &str, output_filename_base: &str) -> Result<PartitionLogSuccess, Box<dyn std::error::Error>> {
 
     let log_file1 = common::read_log_entries_from_file::<Vec<LogEntry>>(filename1)?;
