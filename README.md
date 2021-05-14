@@ -44,17 +44,7 @@ This is a comma-separated string of the file's attributes: its size in bytes, th
 * match pair: a match of exactly one entry from each of the two input files
 * match group: a match of entries from either or both input files, but not a match pair
 
-
-
-
-
-
-
-
 The hashdeep-compare partitioning algorithm compares all of the file entries from the two input logs and organizes them based on matching hashes and/or names. 
-
-
-
 
 When the partitioning algorithm starts, all of the entries in both input logs are loaded into a working set. Match rules are applied in a fixed order, and as matches are identified, the matched entries are removed from the working set. When the algorithm finishes, every entry will have been partitioned into exactly one match, or into one of two special sets of unmatched leftover entries.
 
@@ -93,6 +83,7 @@ The results are stored in separate files for each match rule, plus two files for
 * _no_match_entries_file1
 * _no_match_entries_file2
 
+Because each category is written to its own output file, you can use any text editor to analyze the results, and quickly confirm that any category that should be empty actually is (i.e.: has an empty output file).
 
 ### Supplemental: handling of partially-invalid input logs
 When reading a hashdeep log, hashdeep-compare performs two content checks:
