@@ -1,4 +1,4 @@
-Warnings emitted for hashdeep log at: /media/sf_RustDevVM_Shared/projects/hashdeep-compare/tests/sort_files/test1_multiple_warnings.txt
+Warnings emitted for hashdeep log at: /media/sf_RustDevVM02_Shared/projects/hashdeep-compare/tests/sort_files/test1_multiple_warnings.txt
   Unexpected version string: "%%%% fake version string"
   Untested log format: "%%%% fake format string"
   Unexpected header line count: 4 (expected: 5)
