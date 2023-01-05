@@ -41,8 +41,7 @@ impl RunHashdeepCommandError {
         match e.kind() {
             ErrorKind::AlreadyExists => RunHashdeepCommandError::OutputFileExists(path.to_string()),
             ErrorKind::NotFound      => RunHashdeepCommandError::OutputFileNotFound(path.to_string()),
-            ErrorKind::Other         => RunHashdeepCommandError::OutputFileOtherError(path.to_string(), e),
-            _ => e.into(),
+            _                        => RunHashdeepCommandError::OutputFileOtherError(path.to_string(), e),
         }
     }
 }

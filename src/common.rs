@@ -37,8 +37,7 @@ impl WriteToFileError {
         match e.kind() {
             ErrorKind::AlreadyExists => WriteToFileError::OutputFileExists(path.to_string()),
             ErrorKind::NotFound      => WriteToFileError::OutputFileNotFound(path.to_string()),
-            ErrorKind::Other         => WriteToFileError::OutputFileOtherError(path.to_string(), e),
-            _ => e.into(),
+            _                        => WriteToFileError::OutputFileOtherError(path.to_string(), e),
         }
     }
 }
@@ -66,8 +65,7 @@ impl ReadLogEntriesFromFileError {
 
         match e.kind() {
             ErrorKind::NotFound => ReadLogEntriesFromFileError::FileNotFound(path.to_string()),
-            ErrorKind::Other    => ReadLogEntriesFromFileError::OtherIoError(path.to_string(), e),
-            _ => e.into(),
+            _                   => ReadLogEntriesFromFileError::OtherIoError(path.to_string(), e),
         }
     }
 }
