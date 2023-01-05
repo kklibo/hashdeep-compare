@@ -29,10 +29,7 @@ pub fn sort_log(filename: &str, out_filename: &str) -> Result<Option<Vec<String>
 mod test {
     use super::*;
 
-    extern crate tempfile;
-    extern crate predicates;
-
-    use self::predicates::prelude::*;
+    use predicates::prelude::*;
 
     #[test]
     fn sort_log_test() {

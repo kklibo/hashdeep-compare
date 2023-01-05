@@ -47,6 +47,10 @@
 //! the **hash** and **sort** options together: a hash log is generated, and then sorted, thus
 //! rendering it deterministic.
 //!
+//! Also, tests can generate outputs (or hashdeep log headers) which contain paths in the local
+//! development environment's filesystem. These paths must be removed from test results to preserve
+//! consistency.
+//!
 //! ## Special handling: the **integration_test_coverage** feature
 //!
 //! When the **integration_test_coverage** feature is enabled, the *run_test* function runs tests

@@ -78,8 +78,8 @@ impl<'a> MatchPartition<'a> {
 pub enum MatchPartitionError {
     #[error("Serious error: Match partition checksum failed (this should never happen)")]
     ChecksumFailure,
-    #[error("addition overflow in match partition checksum calculation")]
-    ChecksumAdditionOverflow,
+    #[error("arithmetic overflow in match partition checksum calculation")]
+    ChecksumArithmeticOverflow,
 }
 
 /// The main implementation function for the `part` command:
@@ -171,9 +171,9 @@ pub fn match_partition<'b>(from_file1: &[&'b LogEntry], from_file2: &[&'b LogEnt
 
     let full_matches = sort_matches(from_file1, from_file2, |x| x.to_string());
 
-    let name_matches = sort_matches(&full_matches.no_match_file1, &full_matches.no_match_file2, |ref x| x.filename.clone());
+    let name_matches = sort_matches(&full_matches.no_match_file1, &full_matches.no_match_file2, |x| x.filename.clone());
 
-    let hashes_matches = sort_matches(&name_matches.no_match_file1, &name_matches.no_match_file2, |ref x| x.hashes.clone());
+    let hashes_matches = sort_matches(&name_matches.no_match_file1, &name_matches.no_match_file2, |x| x.hashes.clone());
 
     let mut mp = MatchPartition {
 
@@ -250,7 +250,7 @@ pub fn match_partition<'b>(from_file1: &[&'b LogEntry], from_file2: &[&'b LogEnt
     match (mp.total_log_entries(), total_from_both_files) {
         (Some(x), Some(y)) if x == y => Ok(mp),
         (Some(_), Some(_)) => Err(MatchPartitionError::ChecksumFailure),
-        _ => Err(MatchPartitionError::ChecksumAdditionOverflow),
+        _ => Err(MatchPartitionError::ChecksumArithmeticOverflow),
     }
 }
 
