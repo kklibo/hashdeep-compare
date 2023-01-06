@@ -22,6 +22,7 @@ impl LogEntry {
     /// Creates a LogEntry from a hashdeep log line, or returns None on failure.
     pub fn from_str(s: &str) -> Option<LogEntry> {
 
+        // Note: Commas in the filename will make `sections` longer than `LogEntry::HASHCOUNT + 1`.
         let sections: Vec<&str> = s.split(',').collect();
         if sections.len() < LogEntry::HASHCOUNT + 1 {return None;}
 

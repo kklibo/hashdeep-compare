@@ -3,6 +3,7 @@ use std::cmp::Ordering;
 
 /// A Vec-based container that is guaranteed to never be empty.
 #[derive(Debug, PartialEq)]
+// Warning: This should never derive `Default`. This would create an empty `SomeVec::v`!
 pub struct SomeVec<T> {
     v: Vec<T>
 }

@@ -47,6 +47,10 @@
 //! the **hash** and **sort** options together: a hash log is generated, and then sorted, thus
 //! rendering it deterministic.
 //!
+//! Also, tests can generate outputs (or hashdeep log headers) which contain paths in the local
+//! development environment's filesystem. These paths must be removed from test results to preserve
+//! consistency.
+//!
 //! ## Special handling: the **integration_test_coverage** feature
 //!
 //! When the **integration_test_coverage** feature is enabled, the *run_test* function runs tests
@@ -160,6 +164,7 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("hash/output_path_base/invalid",         &["hash", ".", "/dev/null/invalid"])?;
     run_test("hash/output_path_base/nonexistent_dir", &["hash", ".", "does_not_exist/hash"])?;
     run_test("hash/output_path_base/in_target_dir",   &["hash", ".", "hashlog"])?;
+    remove_hashdeep_log_header_invocation_path("tests/expected/hash/output_path_base/in_target_dir/outfiles/hashlog");
 
     create_path_and_file("tests/expected/hash/output_path_base/log_file_exists/outfiles/hashlog", "");
     run_test("hash/output_path_base/log_file_exists", &["hash", ".", "hashlog"])?;

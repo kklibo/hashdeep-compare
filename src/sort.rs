@@ -16,7 +16,7 @@ pub fn sort_log(filename: &str, out_filename: &str) -> Result<Option<Vec<String>
 
     let mut log_file = common::read_log_entries_from_file::<Vec<LogEntry>>(filename)?;
 
-    log_file.entries.sort_by(|ref v1, ref v2| {
+    log_file.entries.sort_by(|v1, v2| {
 
         v1.filename.cmp(&v2.filename)
     });
@@ -29,10 +29,7 @@ pub fn sort_log(filename: &str, out_filename: &str) -> Result<Option<Vec<String>
 mod test {
     use super::*;
 
-    extern crate tempfile;
-    extern crate predicates;
-
-    use self::predicates::prelude::*;
+    use predicates::prelude::*;
 
     #[test]
     fn sort_log_test() {

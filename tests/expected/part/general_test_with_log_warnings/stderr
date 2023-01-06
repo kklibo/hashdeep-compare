@@ -1,7 +1,7 @@
-Warnings emitted for hashdeep log at: /media/sf_RustDevVM_Shared/projects/hashdeep-compare/tests/part_files/general_test_with_log_warnings_file1
+Warnings emitted for hashdeep log at: /media/sf_RustDevVM02_Shared/projects/hashdeep-compare/tests/part_files/general_test_with_log_warnings_file1
   Unexpected version string: "%%%% fake version string"
   1 invalid log entry detected
-Warnings emitted for hashdeep log at: /media/sf_RustDevVM_Shared/projects/hashdeep-compare/tests/part_files/general_test_with_log_warnings_file2
+Warnings emitted for hashdeep log at: /media/sf_RustDevVM02_Shared/projects/hashdeep-compare/tests/part_files/general_test_with_log_warnings_file2
   Untested log format: "%%%% fake format string"
   Unexpected header line count: 6 (expected: 5)
   2 invalid log entries detected
