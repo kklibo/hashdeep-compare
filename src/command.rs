@@ -79,7 +79,7 @@ pub fn run_hashdeep_command(
 
     //try to open both output files
     let maybe_output_file =
-        OpenOptions::new().write(true).create_new(true).open(&output_path_base)
+        OpenOptions::new().write(true).create_new(true).open(output_path_base)
             .map_err(|e| RunHashdeepCommandError::new(e, output_path_base));
 
     let maybe_error_file  =
@@ -107,7 +107,7 @@ pub fn run_hashdeep_command(
         (Ok(_), Err(error_file_error)) => {
 
             //delete the file that was successfully created
-            std::fs::remove_file(&output_path_base)?;
+            std::fs::remove_file(output_path_base)?;
 
             return Err(error_file_error);
         },

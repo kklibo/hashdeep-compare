@@ -218,7 +218,7 @@ fn write_log_entry_to_file(label: &str, log_entry_str: &str, file: &mut File) ->
 /// Will return an error if the file at `filename` already exists, or
 /// if an error occurs while writing to the file.
 pub fn write_log_entries_to_file<T>(log_entries: T, filename: &str) -> Result<(), WriteToFileError>
-    where T: IntoIterator, <T as ::std::iter::IntoIterator>::Item : ::std::string::ToString
+    where T: IntoIterator, <T as IntoIterator>::Item : ToString
 {
     let mut file = open_writable_file(filename)?;
 

@@ -41,13 +41,13 @@ impl<'a> MatchPartition<'a> {
             pairs.len().checked_mul(2)
         }
         fn groups_sum(groups: &[MatchGroup]) -> Option<usize> {
-            groups.iter().try_fold(0usize, |acc, ref x| {
+            groups.iter().try_fold(0usize, |acc, x| {
                 x.from_file1.len().checked_add(x.from_file2.len())
                     .and_then(|x| acc.checked_add(x))
             })
         }
         fn single_file_groups_sum(groups: &[SingleFileMatchGroup]) -> Option<usize> {
-            groups.iter().try_fold(0usize, |acc, ref x| {
+            groups.iter().try_fold(0usize, |acc, x| {
                 acc.checked_add(x.log_entries.len())
             })
         }
@@ -196,11 +196,11 @@ pub fn match_partition<'b>(from_file1: &[&'b LogEntry], from_file2: &[&'b LogEnt
         no_match_file2: hashes_matches.no_match_file2,
     };
 
-    fn sort_match_pairs_by_filename(x: &mut Vec<MatchPair>) {
+    fn sort_match_pairs_by_filename(x: &mut [MatchPair]) {
         x.sort_by(|a, b| a.from_file1.filename.cmp(&b.from_file1.filename));
     }
 
-    fn sort_match_groups_by_filename(x: &mut Vec<MatchGroup>) {
+    fn sort_match_groups_by_filename(x: &mut [MatchGroup]) {
 
         x.iter_mut().for_each(|x| {
             sort_log_entries_somevec_by_filename(&mut x.from_file1);
@@ -212,7 +212,7 @@ pub fn match_partition<'b>(from_file1: &[&'b LogEntry], from_file2: &[&'b LogEnt
         });
     }
 
-    fn sort_single_file_match_groups_by_filename(x: &mut Vec<SingleFileMatchGroup>) {
+    fn sort_single_file_match_groups_by_filename(x: &mut [SingleFileMatchGroup]) {
 
         x.iter_mut().for_each(|x| {
             sort_log_entries_somevec_by_filename(&mut x.log_entries);
@@ -223,7 +223,7 @@ pub fn match_partition<'b>(from_file1: &[&'b LogEntry], from_file2: &[&'b LogEnt
         });
     }
 
-    fn sort_log_entries_by_filename(x: &mut Vec<&LogEntry>) {
+    fn sort_log_entries_by_filename(x: &mut [&LogEntry]) {
         x.sort_by(|a, b| a.filename.cmp(&b.filename));
     }
     fn sort_log_entries_somevec_by_filename(x: &mut SomeVec<&LogEntry>) {
