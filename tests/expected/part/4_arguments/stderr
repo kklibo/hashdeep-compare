@@ -1,1 +1,3 @@
-Error: "part: too many arguments"
+error: unexpected argument 'arg4' found
+
+Usage: hashdeep-compare part <path/to/first_log.txt> <path/to/second_log.txt> <path/to/output_file_base>

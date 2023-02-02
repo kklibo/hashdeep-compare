@@ -1,1 +1,4 @@
-Error: "hash: not enough arguments"
+error: the following required arguments were not provided:
+  <path/to/output_log.txt>
+
+Usage: hashdeep-compare hash <path/to/target_dir> <path/to/output_log.txt>
