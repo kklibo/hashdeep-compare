@@ -36,6 +36,7 @@
 use crate::*;
 use std::error::Error;
 use std::io::Write;
+use clap::{Parser, Subcommand};
 
 /// Specifies program arguments and (re)direction of stdout/stderr, then runs the program
 ///
@@ -101,6 +102,53 @@ fn print_hashdeep_log_warnings (
 fn main_impl(args: &[&str], mut stdout: Box<dyn Write>, stderr: &mut Box<dyn Write>) -> Result<(), Box<dyn Error>> {
 
     const VERSION: &str = env!("CARGO_PKG_VERSION");
+
+    #[derive(Parser, Debug)]
+    #[command(about = help::help_string(VERSION))]
+    struct CliArgs {
+        #[command(subcommand)]
+        command: Commands,
+    }
+
+    #[derive(Subcommand, Debug)]
+    #[command(disable_help_flag = true)]
+    enum Commands {
+        /// Display version string
+        Version,
+        #[command(after_long_help = help::help_hash_string())]
+        #[command(long_about = help::long_about_hash_string())]
+        /// Invoke hashdeep on a target directory
+        Hash {
+            #[arg(hide_long_help = true, id="path/to/target_dir")]
+            target_directory: String,
+            #[arg(hide_long_help = true, id="path/to/output_log.txt")]
+            output_path_base: String,
+        },
+        #[command(after_long_help = help::help_sort_string())]
+        #[command(long_about = help::long_about_sort_string())]
+        /// Sort a hashdeep log (by file path)
+        Sort {
+            #[arg(hide_long_help = true, id="path/to/unsorted_input.txt")]
+            input_file: String,
+            #[arg(hide_long_help = true, id="path/to/sorted_output.txt")]
+            output_file: String,
+        },
+        #[command(after_long_help = help::help_part_string())]
+        #[command(long_about = help::long_about_part_string())]
+        /// Partition contents of two hashdeep logs into category files
+        Part {
+            #[arg(hide_long_help = true, id="path/to/first_log.txt")]
+            input_file1: String,
+            #[arg(hide_long_help = true, id="path/to/second_log.txt")]
+            input_file2: String,
+            #[arg(hide_long_help = true, id="path/to/output_file_base")]
+            output_file_base: String,
+        },
+    }
+
+    // This will quit the program with appropriate help text output if the parse fails
+    // On failure, exit code = 2
+    let _cli_args = CliArgs::parse_from(args);
 
     match args.get(1) {
 
