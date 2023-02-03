@@ -148,57 +148,37 @@ fn main_impl(args: &[&str], mut stdout: Box<dyn Write>, stderr: &mut Box<dyn Wri
 
     // This will quit the program with appropriate help text output if the parse fails
     // On failure, exit code = 2
-    let _cli_args = CliArgs::parse_from(args);
+    let cli_args = CliArgs::parse_from(args);
 
-    match args.get(1) {
-
-        None | Some(&"help") => {
-
-            let help_string =
-            match args.get(2) {
-                Some(&"hash") => help::help_hash_string(),
-                Some(&"sort") => help::help_sort_string(),
-                Some(&"part") => help::help_part_string(),
-                _ => help::help_string(VERSION),
-            };
-
-            writeln!(stdout, "{}", help_string)?;
-
-        },
-        Some(&"hash") => {
-            if args.len() < 4 {return Err("hash: not enough arguments".into());}
-            if args.len() > 4 {return Err("hash: too many arguments".into());}
-
+    match cli_args.command {
+        Commands::Hash {target_directory, output_path_base} => {
             command::run_hashdeep_command(
-                args[2],
-                args[3],
+                target_directory.as_str(),
+                output_path_base.as_str(),
                 "hashdeep")?;
         },
-        Some(&"sort") => {
-            if args.len() < 4 {return Err("sort: not enough arguments".into());}
-            if args.len() > 4 {return Err("sort: too many arguments".into());}
-
-            let warning_lines = sort::sort_log(args[2], args[3])?;
-            print_hashdeep_log_warnings(args[2], warning_lines, stderr)?;
+        Commands::Sort {input_file, output_file} => {
+            let warning_lines = sort::sort_log(
+                input_file.as_str(),
+                output_file.as_str()
+            )?;
+            print_hashdeep_log_warnings(input_file.as_str(), warning_lines, stderr)?;
         },
-        Some(&"part") => {
-            if args.len() < 5 {return Err("part: not enough arguments".into());}
-            if args.len() > 5 {return Err("part: too many arguments".into());}
-
+        Commands::Part {input_file1, input_file2, output_file_base} => {
             let partition_stats =
-            partition::partition_log(args[2], args[3], args[4])?;
+            partition::partition_log(
+                input_file1.as_str(),
+                input_file2.as_str(),
+                output_file_base.as_str()
+            )?;
 
             writeln!(stdout, "{}", partition_stats.stats_string)?;
-            print_hashdeep_log_warnings(args[2], partition_stats.file1_warning_lines, stderr)?;
-            print_hashdeep_log_warnings(args[3], partition_stats.file2_warning_lines, stderr)?;
+            print_hashdeep_log_warnings(input_file1.as_str(), partition_stats.file1_warning_lines, stderr)?;
+            print_hashdeep_log_warnings(input_file2.as_str(), partition_stats.file2_warning_lines, stderr)?;
         },
-        Some(&"version") => {
-            if args.len() > 2 {return Err("version: does not accept arguments".into());}
-
+        Commands::Version => {
             writeln!(stdout, "hashdeep-compare version {}", VERSION)?;
-        },
-
-        Some(x) => return Err(format!("invalid command: {}", x).into())
+        }
     }
 
     Ok(())
