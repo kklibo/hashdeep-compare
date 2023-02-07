@@ -47,34 +47,46 @@ use clap::{Parser, Subcommand};
 /// - integration.rs when the **integration_test_coverage** feature is enabled
 pub fn main_io_wrapper(
     args: &[&str],
-    stdout: Box<dyn Write>,
+    mut stdout: Box<dyn Write>,
     mut stderr: Box<dyn Write>,
 ) -> Result<i32, Box<dyn Error>> {
 
     let exit_code =
-    match main_impl(args, stdout, &mut stderr)
+    match main_impl(args, &mut stdout, &mut stderr)
     {
         Ok(()) => 0,
         Err(err) => {
-
-            //conditionally use Display output for thiserror-based error types
-            if let Some(err) = err.downcast_ref::<command::RunHashdeepCommandError>() {
-                writeln! (stderr, "Error: \"{}\"", err)?;
-            }
-            else if let Some(err) = err.downcast_ref::<common::ReadLogEntriesFromFileError>() {
-                writeln! (stderr, "Error: \"{}\"", err)?;
-            }
-            else if let Some(err) = err.downcast_ref::<common::WriteToFileError>() {
-                writeln! (stderr, "Error: \"{}\"", err)?;
-            }
-            else if let Some(err) = err.downcast_ref::<partitioner::MatchPartitionError>() {
-                writeln! (stderr, "Error: \"{}\"", err)?;
+            if let Some(err) = err.downcast_ref::<clap::Error>() {
+                if err.use_stderr() {
+                    write! (stderr, "{err}")?;
+                    // Code 2 on error matches `clap`'s behavior.
+                    2
+                }
+                else {
+                    write! (stdout, "{err}")?;
+                    0
+                }
             }
             else {
-                writeln! (stderr, "Error: {:?}", err)?;
-            }
+                //conditionally use Display output for thiserror-based error types
+                if let Some(err) = err.downcast_ref::<command::RunHashdeepCommandError>() {
+                    writeln! (stderr, "Error: \"{}\"", err)?;
+                }
+                else if let Some(err) = err.downcast_ref::<common::ReadLogEntriesFromFileError>() {
+                    writeln! (stderr, "Error: \"{}\"", err)?;
+                }
+                else if let Some(err) = err.downcast_ref::<common::WriteToFileError>() {
+                    writeln! (stderr, "Error: \"{}\"", err)?;
+                }
+                else if let Some(err) = err.downcast_ref::<partitioner::MatchPartitionError>() {
+                    writeln! (stderr, "Error: \"{}\"", err)?;
+                }
+                else {
+                    writeln! (stderr, "Error: {:?}", err)?;
+                }
 
-            1
+                1
+            }
         }
     };
 
@@ -99,7 +111,7 @@ fn print_hashdeep_log_warnings (
 /// Called by main_io_wrapper: Accepts program arguments and runs the program
 ///
 /// (This was the main() function before the **integration_test_coverage** feature was added)
-fn main_impl(args: &[&str], mut stdout: Box<dyn Write>, stderr: &mut Box<dyn Write>) -> Result<(), Box<dyn Error>> {
+fn main_impl(args: &[&str], stdout: &mut Box<dyn Write>, stderr: &mut Box<dyn Write>) -> Result<(), Box<dyn Error>> {
 
     const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -146,9 +158,7 @@ fn main_impl(args: &[&str], mut stdout: Box<dyn Write>, stderr: &mut Box<dyn Wri
         },
     }
 
-    // This will quit the program with appropriate help text output if the parse fails
-    // On failure, exit code = 2
-    let cli_args = CliArgs::parse_from(args);
+    let cli_args = CliArgs::try_parse_from(args)?;
 
     match cli_args.command {
         Commands::Hash {target_directory, output_path_base} => {

@@ -418,7 +418,7 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
         //prepend an element to shift the indices to the right:
         // main_io_wrapper expects arguments to start at index 1
         let mut padded_args = args.to_vec();
-            padded_args.insert(0, "");
+            padded_args.insert(0, "hashdeep-compare");
 
         let args = &padded_args;
 
