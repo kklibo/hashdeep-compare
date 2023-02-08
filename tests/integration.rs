@@ -266,9 +266,9 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
 
 
     let part_test = |testname: &str| -> Result<(), Box<dyn std::error::Error>> {
-        run_test(format!("part/{}", testname).as_str(), &["part",
-            &path_in_tests(&format!("part_files/{}_file1", testname)),
-            &path_in_tests(&format!("part_files/{}_file2", testname)),
+        run_test(format!("part/{testname}").as_str(), &["part",
+            &path_in_tests(&format!("part_files/{testname}_file1")),
+            &path_in_tests(&format!("part_files/{testname}_file2")),
             "part"
         ])
     };
@@ -332,7 +332,7 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     fn remove_hashdeep_log_header_invocation_path(target_path: &str) {
 
         let file_string= std::fs::read_to_string(target_path).unwrap();
-        let mut lines: Vec<_> = file_string.split("\n").collect();
+        let mut lines: Vec<_> = file_string.split('\n').collect();
 
         let invocation_path_line = lines.get_mut(2).unwrap();
 

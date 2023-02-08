@@ -47,8 +47,8 @@ use clap::{Parser, Subcommand};
 /// - integration.rs when the **integration_test_coverage** feature is enabled
 pub fn main_io_wrapper(
     args: &[&str],
-    mut stdout: Box<dyn Write>,
-    mut stderr: Box<dyn Write>,
+    mut stdout: impl Write,
+    mut stderr: impl Write,
 ) -> Result<i32, Box<dyn Error>> {
 
     let exit_code =
@@ -70,19 +70,19 @@ pub fn main_io_wrapper(
             else {
                 //conditionally use Display output for thiserror-based error types
                 if let Some(err) = err.downcast_ref::<command::RunHashdeepCommandError>() {
-                    writeln! (stderr, "Error: \"{}\"", err)?;
+                    writeln! (stderr, "Error: \"{err}\"")?;
                 }
                 else if let Some(err) = err.downcast_ref::<common::ReadLogEntriesFromFileError>() {
-                    writeln! (stderr, "Error: \"{}\"", err)?;
+                    writeln! (stderr, "Error: \"{err}\"")?;
                 }
                 else if let Some(err) = err.downcast_ref::<common::WriteToFileError>() {
-                    writeln! (stderr, "Error: \"{}\"", err)?;
+                    writeln! (stderr, "Error: \"{err}\"")?;
                 }
                 else if let Some(err) = err.downcast_ref::<partitioner::MatchPartitionError>() {
-                    writeln! (stderr, "Error: \"{}\"", err)?;
+                    writeln! (stderr, "Error: \"{err}\"")?;
                 }
                 else {
-                    writeln! (stderr, "Error: {:?}", err)?;
+                    writeln! (stderr, "Error: {err:?}")?;
                 }
 
                 1
@@ -97,12 +97,12 @@ pub fn main_io_wrapper(
 fn print_hashdeep_log_warnings (
     filename: &str,
     warning_lines: Option<Vec<String>>,
-    stderr: &mut Box<dyn Write>) -> Result<(), Box<dyn Error>>
+    stderr: &mut impl Write) -> Result<(), Box<dyn Error>>
 {
     if let Some(v) = warning_lines {
-        writeln!(stderr, "Warnings emitted for hashdeep log at: {}", filename)?;
+        writeln!(stderr, "Warnings emitted for hashdeep log at: {filename}")?;
         for line in v {
-            writeln!(stderr, "  {}", line)?;
+            writeln!(stderr, "  {line}")?;
         }
     }
     Ok(())
@@ -111,7 +111,7 @@ fn print_hashdeep_log_warnings (
 /// Called by main_io_wrapper: Accepts program arguments and runs the program
 ///
 /// (This was the main() function before the **integration_test_coverage** feature was added)
-fn main_impl(args: &[&str], stdout: &mut Box<dyn Write>, stderr: &mut Box<dyn Write>) -> Result<(), Box<dyn Error>> {
+fn main_impl(args: &[&str], stdout: &mut impl Write, stderr: &mut impl Write) -> Result<(), Box<dyn Error>> {
 
     const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -187,7 +187,7 @@ fn main_impl(args: &[&str], stdout: &mut Box<dyn Write>, stderr: &mut Box<dyn Wr
             print_hashdeep_log_warnings(input_file2.as_str(), partition_stats.file2_warning_lines, stderr)?;
         },
         Commands::Version => {
-            writeln!(stdout, "hashdeep-compare version {}", VERSION)?;
+            writeln!(stdout, "hashdeep-compare version {VERSION}")?;
         }
     }
 

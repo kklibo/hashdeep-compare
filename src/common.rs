@@ -86,10 +86,10 @@ impl Display for HashdeepLogHeaderWarning {
         use HashdeepLogHeaderWarning::*;
 
         match self {
-            UnexpectedVersionString(s) => write!(f, "Unexpected version string: \"{}\"", s),
+            UnexpectedVersionString(s) => write!(f, "Unexpected version string: \"{s}\""),
             HeaderNotFound => write!(f, "Header not found"),
-            UntestedLogFormat(s) => write!(f, "Untested log format: \"{}\"", s),
-            UnexpectedHeaderLineCount(n) => write!(f, "Unexpected header line count: {} (expected: 5)", n),
+            UntestedLogFormat(s) => write!(f, "Untested log format: \"{s}\""),
+            UnexpectedHeaderLineCount(n) => write!(f, "Unexpected header line count: {n} (expected: 5)"),
         }
     }
 }
@@ -151,7 +151,7 @@ impl<T> LogFile<T>
         match self.invalid_lines.len() {
             0 => {},
             1 => lines.push("1 invalid log entry detected".to_string()),
-            x => lines.push(format!("{} invalid log entries detected", x))
+            x => lines.push(format!("{x} invalid log entries detected"))
         }
 
         match lines.is_empty() {
@@ -205,7 +205,7 @@ fn open_writable_file(filename: &str) -> Result<File, WriteToFileError>
 
 fn write_log_entry_to_file(label: &str, log_entry_str: &str, file: &mut File) -> Result<(), WriteToFileError>
 {
-    let line = format!("{}{}\n", label, log_entry_str);
+    let line = format!("{label}{log_entry_str}\n");
 
     file.write_all(line.as_bytes())?;
     Ok(())

@@ -54,20 +54,20 @@ pub fn partition_log(filename1: &str, filename2: &str, output_filename_base: &st
 
     let mp = partitioner::match_partition(&from_file1, &from_file2)?;
 
-    common::write_match_pairs_to_file(&mp.full_match_pairs, format!("{}_full_match_pairs", output_filename_base).as_str())?;
-    common::write_single_file_match_groups_to_file(&mp.full_match_groups_file1, format!("{}_full_match_groups_file1_only", output_filename_base).as_str())?;
-    common::write_single_file_match_groups_to_file(&mp.full_match_groups_file2, format!("{}_full_match_groups_file2_only", output_filename_base).as_str())?;
-    common::write_match_groups_to_file(&mp.full_match_groups, format!("{}_full_match_groups_file1_and_file2", output_filename_base).as_str())?;
-    common::write_match_pairs_to_file(&mp.name_match_pairs, format!("{}_name_match_pairs", output_filename_base).as_str())?;
-    common::write_single_file_match_groups_to_file(&mp.name_match_groups_file1, format!("{}_name_match_groups_file1_only", output_filename_base).as_str())?;
-    common::write_single_file_match_groups_to_file(&mp.name_match_groups_file2, format!("{}_name_match_groups_file2_only", output_filename_base).as_str())?;
-    common::write_match_groups_to_file(&mp.name_match_groups, format!("{}_name_match_groups_file1_and_file2", output_filename_base).as_str())?;
-    common::write_match_pairs_to_file(&mp.hashes_match_pairs, format!("{}_hashes_match_pairs", output_filename_base).as_str())?;
-    common::write_single_file_match_groups_to_file(&mp.hashes_match_groups_file1, format!("{}_hashes_match_groups_file1_only", output_filename_base).as_str())?;
-    common::write_single_file_match_groups_to_file(&mp.hashes_match_groups_file2, format!("{}_hashes_match_groups_file2_only", output_filename_base).as_str())?;
-    common::write_match_groups_to_file(&mp.hashes_match_groups, format!("{}_hashes_match_groups_file1_and_file2", output_filename_base).as_str())?;
-    common::write_log_entries_to_file(&mp.no_match_file1, format!("{}_no_match_entries_file1", output_filename_base).as_str())?;
-    common::write_log_entries_to_file(&mp.no_match_file2, format!("{}_no_match_entries_file2", output_filename_base).as_str())?;
+    common::write_match_pairs_to_file(&mp.full_match_pairs, format!("{output_filename_base}_full_match_pairs").as_str())?;
+    common::write_single_file_match_groups_to_file(&mp.full_match_groups_file1, format!("{output_filename_base}_full_match_groups_file1_only").as_str())?;
+    common::write_single_file_match_groups_to_file(&mp.full_match_groups_file2, format!("{output_filename_base}_full_match_groups_file2_only").as_str())?;
+    common::write_match_groups_to_file(&mp.full_match_groups, format!("{output_filename_base}_full_match_groups_file1_and_file2").as_str())?;
+    common::write_match_pairs_to_file(&mp.name_match_pairs, format!("{output_filename_base}_name_match_pairs").as_str())?;
+    common::write_single_file_match_groups_to_file(&mp.name_match_groups_file1, format!("{output_filename_base}_name_match_groups_file1_only").as_str())?;
+    common::write_single_file_match_groups_to_file(&mp.name_match_groups_file2, format!("{output_filename_base}_name_match_groups_file2_only").as_str())?;
+    common::write_match_groups_to_file(&mp.name_match_groups, format!("{output_filename_base}_name_match_groups_file1_and_file2").as_str())?;
+    common::write_match_pairs_to_file(&mp.hashes_match_pairs, format!("{output_filename_base}_hashes_match_pairs").as_str())?;
+    common::write_single_file_match_groups_to_file(&mp.hashes_match_groups_file1, format!("{output_filename_base}_hashes_match_groups_file1_only").as_str())?;
+    common::write_single_file_match_groups_to_file(&mp.hashes_match_groups_file2, format!("{output_filename_base}_hashes_match_groups_file2_only").as_str())?;
+    common::write_match_groups_to_file(&mp.hashes_match_groups, format!("{output_filename_base}_hashes_match_groups_file1_and_file2").as_str())?;
+    common::write_log_entries_to_file(&mp.no_match_file1, format!("{output_filename_base}_no_match_entries_file1").as_str())?;
+    common::write_log_entries_to_file(&mp.no_match_file2, format!("{output_filename_base}_no_match_entries_file2").as_str())?;
 
 
     let mut stats_string = String::new();

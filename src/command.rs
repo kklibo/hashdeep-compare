@@ -74,7 +74,7 @@ pub fn run_hashdeep_command(
 
     let error_log_suffix = ".errors";
 
-    let output_error_path = format!("{}{}", output_path_base, error_log_suffix);
+    let output_error_path = format!("{output_path_base}{error_log_suffix}");
 
 
     //try to open both output files
