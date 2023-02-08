@@ -1,1 +1,5 @@
-Error: "part: not enough arguments"
+error: the following required arguments were not provided:
+  <path/to/second_log.txt>
+  <path/to/output_file_base>
+
+Usage: hashdeep-compare part <path/to/first_log.txt> <path/to/second_log.txt> <path/to/output_file_base>

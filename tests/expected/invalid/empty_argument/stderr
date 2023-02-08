@@ -1,1 +1,5 @@
-Error: "invalid command: "
+error: unrecognized subcommand ''
+
+Usage: hashdeep-compare <COMMAND>
+
+For more information, try 'help'.

@@ -1,1 +1,3 @@
-Error: "version: does not accept arguments"
+error: unexpected argument 'arg1' found
+
+Usage: hashdeep-compare version

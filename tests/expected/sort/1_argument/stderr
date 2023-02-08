@@ -1,1 +1,4 @@
-Error: "sort: not enough arguments"
+error: the following required arguments were not provided:
+  <path/to/sorted_output.txt>
+
+Usage: hashdeep-compare sort <path/to/unsorted_input.txt> <path/to/sorted_output.txt>

@@ -36,6 +36,7 @@
 use crate::*;
 use std::error::Error;
 use std::io::Write;
+use clap::{Parser, Subcommand};
 
 /// Specifies program arguments and (re)direction of stdout/stderr, then runs the program
 ///
@@ -46,34 +47,46 @@ use std::io::Write;
 /// - integration.rs when the **integration_test_coverage** feature is enabled
 pub fn main_io_wrapper(
     args: &[&str],
-    stdout: Box<dyn Write>,
+    mut stdout: Box<dyn Write>,
     mut stderr: Box<dyn Write>,
 ) -> Result<i32, Box<dyn Error>> {
 
     let exit_code =
-    match main_impl(args, stdout, &mut stderr)
+    match main_impl(args, &mut stdout, &mut stderr)
     {
         Ok(()) => 0,
         Err(err) => {
-
-            //conditionally use Display output for thiserror-based error types
-            if let Some(err) = err.downcast_ref::<command::RunHashdeepCommandError>() {
-                writeln! (stderr, "Error: \"{}\"", err)?;
-            }
-            else if let Some(err) = err.downcast_ref::<common::ReadLogEntriesFromFileError>() {
-                writeln! (stderr, "Error: \"{}\"", err)?;
-            }
-            else if let Some(err) = err.downcast_ref::<common::WriteToFileError>() {
-                writeln! (stderr, "Error: \"{}\"", err)?;
-            }
-            else if let Some(err) = err.downcast_ref::<partitioner::MatchPartitionError>() {
-                writeln! (stderr, "Error: \"{}\"", err)?;
+            if let Some(err) = err.downcast_ref::<clap::Error>() {
+                if err.use_stderr() {
+                    write! (stderr, "{err}")?;
+                    // Code 2 on error matches `clap`'s behavior.
+                    2
+                }
+                else {
+                    write! (stdout, "{err}")?;
+                    0
+                }
             }
             else {
-                writeln! (stderr, "Error: {:?}", err)?;
-            }
+                //conditionally use Display output for thiserror-based error types
+                if let Some(err) = err.downcast_ref::<command::RunHashdeepCommandError>() {
+                    writeln! (stderr, "Error: \"{}\"", err)?;
+                }
+                else if let Some(err) = err.downcast_ref::<common::ReadLogEntriesFromFileError>() {
+                    writeln! (stderr, "Error: \"{}\"", err)?;
+                }
+                else if let Some(err) = err.downcast_ref::<common::WriteToFileError>() {
+                    writeln! (stderr, "Error: \"{}\"", err)?;
+                }
+                else if let Some(err) = err.downcast_ref::<partitioner::MatchPartitionError>() {
+                    writeln! (stderr, "Error: \"{}\"", err)?;
+                }
+                else {
+                    writeln! (stderr, "Error: {:?}", err)?;
+                }
 
-            1
+                1
+            }
         }
     };
 
@@ -98,59 +111,84 @@ fn print_hashdeep_log_warnings (
 /// Called by main_io_wrapper: Accepts program arguments and runs the program
 ///
 /// (This was the main() function before the **integration_test_coverage** feature was added)
-fn main_impl(args: &[&str], mut stdout: Box<dyn Write>, stderr: &mut Box<dyn Write>) -> Result<(), Box<dyn Error>> {
+fn main_impl(args: &[&str], stdout: &mut Box<dyn Write>, stderr: &mut Box<dyn Write>) -> Result<(), Box<dyn Error>> {
 
     const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-    match args.get(1) {
+    #[derive(Parser, Debug)]
+    #[command(about = help::help_string(VERSION))]
+    struct CliArgs {
+        #[command(subcommand)]
+        command: Commands,
+    }
 
-        None | Some(&"help") => {
-
-            let help_string =
-            match args.get(2) {
-                Some(&"hash") => help::help_hash_string(),
-                Some(&"sort") => help::help_sort_string(),
-                Some(&"part") => help::help_part_string(),
-                _ => help::help_string(VERSION),
-            };
-
-            writeln!(stdout, "{}", help_string)?;
-
+    #[derive(Subcommand, Debug)]
+    #[command(disable_help_flag = true)]
+    enum Commands {
+        /// Display version string
+        Version,
+        #[command(after_long_help = help::help_hash_string())]
+        #[command(long_about = help::long_about_hash_string())]
+        /// Invoke hashdeep on a target directory
+        Hash {
+            #[arg(hide_long_help = true, id="path/to/target_dir")]
+            target_directory: String,
+            #[arg(hide_long_help = true, id="path/to/output_log.txt")]
+            output_path_base: String,
         },
-        Some(&"hash") => {
-            if args.len() < 4 {return Err("hash: not enough arguments".into());}
-            if args.len() > 4 {return Err("hash: too many arguments".into());}
+        #[command(after_long_help = help::help_sort_string())]
+        #[command(long_about = help::long_about_sort_string())]
+        /// Sort a hashdeep log (by file path)
+        Sort {
+            #[arg(hide_long_help = true, id="path/to/unsorted_input.txt")]
+            input_file: String,
+            #[arg(hide_long_help = true, id="path/to/sorted_output.txt")]
+            output_file: String,
+        },
+        #[command(after_long_help = help::help_part_string())]
+        #[command(long_about = help::long_about_part_string())]
+        /// Partition contents of two hashdeep logs into category files
+        Part {
+            #[arg(hide_long_help = true, id="path/to/first_log.txt")]
+            input_file1: String,
+            #[arg(hide_long_help = true, id="path/to/second_log.txt")]
+            input_file2: String,
+            #[arg(hide_long_help = true, id="path/to/output_file_base")]
+            output_file_base: String,
+        },
+    }
 
+    let cli_args = CliArgs::try_parse_from(args)?;
+
+    match cli_args.command {
+        Commands::Hash {target_directory, output_path_base} => {
             command::run_hashdeep_command(
-                args[2],
-                args[3],
+                target_directory.as_str(),
+                output_path_base.as_str(),
                 "hashdeep")?;
         },
-        Some(&"sort") => {
-            if args.len() < 4 {return Err("sort: not enough arguments".into());}
-            if args.len() > 4 {return Err("sort: too many arguments".into());}
-
-            let warning_lines = sort::sort_log(args[2], args[3])?;
-            print_hashdeep_log_warnings(args[2], warning_lines, stderr)?;
+        Commands::Sort {input_file, output_file} => {
+            let warning_lines = sort::sort_log(
+                input_file.as_str(),
+                output_file.as_str()
+            )?;
+            print_hashdeep_log_warnings(input_file.as_str(), warning_lines, stderr)?;
         },
-        Some(&"part") => {
-            if args.len() < 5 {return Err("part: not enough arguments".into());}
-            if args.len() > 5 {return Err("part: too many arguments".into());}
-
+        Commands::Part {input_file1, input_file2, output_file_base} => {
             let partition_stats =
-            partition::partition_log(args[2], args[3], args[4])?;
+            partition::partition_log(
+                input_file1.as_str(),
+                input_file2.as_str(),
+                output_file_base.as_str()
+            )?;
 
             writeln!(stdout, "{}", partition_stats.stats_string)?;
-            print_hashdeep_log_warnings(args[2], partition_stats.file1_warning_lines, stderr)?;
-            print_hashdeep_log_warnings(args[3], partition_stats.file2_warning_lines, stderr)?;
+            print_hashdeep_log_warnings(input_file1.as_str(), partition_stats.file1_warning_lines, stderr)?;
+            print_hashdeep_log_warnings(input_file2.as_str(), partition_stats.file2_warning_lines, stderr)?;
         },
-        Some(&"version") => {
-            if args.len() > 2 {return Err("version: does not accept arguments".into());}
-
+        Commands::Version => {
             writeln!(stdout, "hashdeep-compare version {}", VERSION)?;
-        },
-
-        Some(x) => return Err(format!("invalid command: {}", x).into())
+        }
     }
 
     Ok(())

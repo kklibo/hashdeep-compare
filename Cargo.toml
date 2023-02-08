@@ -17,6 +17,7 @@ indoc = "1.0.3"
 which = "4.1.0"
 peeking_take_while = "0.1.2"
 walkdir = { version = "2.3.2", optional = true }
+clap = { version = "4.1.4", features = ["derive"] }
 
 [dev-dependencies]
 assert_cmd = "1.0.1"

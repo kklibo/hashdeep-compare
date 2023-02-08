@@ -1,14 +1,8 @@
-hashdeep-compare function: part
-
 The real power of hashdeep-compare:
 All entries will be partitioned into sets that efficiently describe the
 similarities and differences of the two log files.
 
-Syntax:
-    hashdeep-compare part \
-        path/to/first_log.txt \
-        path/to/second_log.txt \
-        path/to/output_file_base
+Usage: hashdeep-compare part <path/to/first_log.txt> <path/to/second_log.txt> <path/to/output_file_base>
 
 Notes:
     The output file base path will be used to name the output files by adding
@@ -18,4 +12,3 @@ Notes:
 
     Note that if any of the resulting output files already exist, the command
     will be aborted (hashdeep-compare will not overwrite existing files).
-

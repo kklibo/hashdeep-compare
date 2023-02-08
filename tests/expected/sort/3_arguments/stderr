@@ -1,1 +1,3 @@
-Error: "sort: too many arguments"
+error: unexpected argument 'arg3' found
+
+Usage: hashdeep-compare sort <path/to/unsorted_input.txt> <path/to/sorted_output.txt>
