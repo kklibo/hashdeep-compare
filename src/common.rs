@@ -71,13 +71,13 @@ impl ReadLogEntriesFromFileError {
 }
 
 
-//#[derive(Debug, Eq, PartialEq)]//
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub enum HashdeepLogHeaderWarning {
     UnexpectedVersionString(String),
     HeaderNotFound,
     UntestedLogFormat(String),
     UnexpectedHeaderLineCount(usize),
+    Unexpected5thLineContent(String),
 }
 
 impl Display for HashdeepLogHeaderWarning {
@@ -90,6 +90,7 @@ impl Display for HashdeepLogHeaderWarning {
             HeaderNotFound => write!(f, "Header not found"),
             UntestedLogFormat(s) => write!(f, "Untested log format: \"{s}\""),
             UnexpectedHeaderLineCount(n) => write!(f, "Unexpected header line count: {n} (expected: 5)"),
+            Unexpected5thLineContent(s) => write!(f, "Unexpected 5th line content: \"{s}\""),
         }
     }
 }
@@ -118,6 +119,12 @@ fn check_hashdeep_log_header(header_lines: &[String]) -> Vec<HashdeepLogHeaderWa
         None => {}
     }
 
+    match header_lines.get(4) {
+        Some(x) if x == "## " => {},
+        Some(x) => warnings.push(HashdeepLogHeaderWarning::Unexpected5thLineContent(x.clone())),
+        None => {}
+    }
+
     match header_lines.len() {
         5 => {},
         x => warnings.push(HashdeepLogHeaderWarning::UnexpectedHeaderLineCount(x))
@@ -135,6 +142,7 @@ pub struct LogFile<T>
 {
     pub entries: T,
     pub header_warnings: Vec<HashdeepLogHeaderWarning>,
+    pub header_lines: Vec<String>,
     pub invalid_lines: Vec<String>,
 }
 
@@ -194,7 +202,7 @@ pub fn read_log_entries_from_file<T>(filename: &str) -> Result<LogFile<T>, ReadL
     }));
 
 
-    Ok(LogFile{entries, header_warnings, invalid_lines})
+    Ok(LogFile{entries, header_warnings, header_lines, invalid_lines})
 }
 
 fn open_writable_file(filename: &str) -> Result<File, WriteToFileError>
