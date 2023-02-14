@@ -121,6 +121,7 @@ fn check_hashdeep_log_header(header_lines: &[String]) -> Vec<HashdeepLogHeaderWa
 
     match header_lines.get(4) {
         Some(x) if x == "## " => {},
+        Some(x) if x.starts_with("## Sorted by hashdeep-compare") => {},
         Some(x) => warnings.push(HashdeepLogHeaderWarning::Unexpected5thLineContent(x.clone())),
         None => {}
     }
@@ -383,6 +384,23 @@ mod test
             assert_eq!(warnings, expected);
         }
 
+        //success with sort message in header
+        {
+            let header_lines = [
+                "%%%% HASHDEEP-1.0",
+                "%%%% size,md5,sha256,filename",
+                "## Invoked from: /home/user",
+                "## $ hashdeep -lr hashdeepComp/",
+                "## Sorted by hashdeep-compare v0.0.0",
+            ];
+
+            let expected = [];
+
+            let warnings = check_hashdeep_log_header(&to_vec_string(&header_lines));
+
+            assert_eq!(warnings, expected);
+        }
+
         {
             let header_lines = [
                 "%%%% HASHDEEP-2.0",
@@ -451,6 +469,22 @@ mod test
                 UntestedLogFormat("%%%% size,sha256,filename".into()),
                 UnexpectedHeaderLineCount(2),
             ];
+
+            let warnings = check_hashdeep_log_header(&to_vec_string(&header_lines));
+
+            assert_eq!(warnings, expected);
+        }
+
+        {
+            let header_lines = [
+                "%%%% HASHDEEP-1.0",
+                "%%%% size,md5,sha256,filename",
+                "## Invoked from: /home/user",
+                "## $ hashdeep -lr hashdeepComp/",
+                "## invalid 5th line content",
+            ];
+
+            let expected = [Unexpected5thLineContent("## invalid 5th line content".to_string())];
 
             let warnings = check_hashdeep_log_header(&to_vec_string(&header_lines));
 

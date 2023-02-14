@@ -1,4 +1,5 @@
 use crate::common;
+use crate::common::HashdeepLogHeaderWarning;
 use crate::log_entry::LogEntry;
 
 /// Reads a hashdeep log file and writes its entries to a new file, sorted by name.
@@ -20,6 +21,24 @@ pub fn sort_log(filename: &str, out_filename: &str) -> Result<Option<Vec<String>
 
         v1.filename.cmp(&v2.filename)
     });
+
+    fn should_skip_header_note(warning: &HashdeepLogHeaderWarning) -> bool {
+        match warning {
+            HashdeepLogHeaderWarning::HeaderNotFound => true,
+            HashdeepLogHeaderWarning::UnexpectedHeaderLineCount(_) => true,
+            HashdeepLogHeaderWarning::Unexpected5thLineContent(_) => true,
+            _ => false,
+        }
+    }
+
+    // Unless any disqualifying header warnings are found,
+    // add a note to the 5th line of the header.
+    if ! log_file.header_warnings.iter().any(should_skip_header_note) {
+        const VERSION: &str = env!("CARGO_PKG_VERSION");
+        if let Some(line) = log_file.header_lines.get_mut(4) {
+            *line = format!("## Sorted by hashdeep-compare v{VERSION}");
+        }
+    }
 
     let warning_report = log_file.warning_report();
 
