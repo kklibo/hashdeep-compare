@@ -208,7 +208,8 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     create_path_and_file("tests/expected/sort/input_file_is_output_file/outfiles/same_file", "");
     run_test("sort/input_file_is_output_file", &["sort", "same_file", "same_file"])?;
 
-    run_test("sort/success", &["sort", &path_in_tests("test1.txt"), "test1_sorted.txt"])?;
+    run_test("sort/success",                &["sort", &path_in_tests("test1.txt"),        "test1_sorted.txt"])?;
+    run_test("sort/success_already_sorted", &["sort", &path_in_tests("test1 sorted.txt"), "test1_sorted.txt"])?;
 
     run_test("sort/success_with_log_warnings/unexpected_version_string",
              &["sort", &path_in_tests("sort_files/test1_unexpected_version_string.txt"), "test1_sorted.txt"])?;
@@ -222,6 +223,8 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
              &["sort", &path_in_tests("sort_files/test1_multiple_warnings.txt"), "test1_sorted.txt"])?;
     run_test("sort/success_with_log_warnings/invalid_log_entry",
              &["sort", &path_in_tests("sort_files/test1_invalid_log_entry.txt"), "test1_sorted.txt"])?;
+    run_test("sort/success_with_log_warnings/unexpected_5th_line_content",
+             &["sort", &path_in_tests("sort_files/test1_unexpected_5th_line_content.txt"), "test1_sorted.txt"])?;
 
 
     //part subcommand tests
