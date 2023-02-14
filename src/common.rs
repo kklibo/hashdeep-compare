@@ -221,7 +221,7 @@ fn write_log_entry_to_file(label: &str, log_entry_str: &str, file: &mut File) ->
 }
 
 /// Writes a `LogFile` to a new file (will not overwrite an existing file).
-/// This will replicate a `LogFile`'s source file if
+/// Conceptually, this should replicate a `LogFile`'s source file if
 /// * it loaded without warnings about invalid content
 /// * it hasn't been modified since loading
 ///

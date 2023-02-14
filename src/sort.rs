@@ -23,12 +23,11 @@ pub fn sort_log(filename: &str, out_filename: &str) -> Result<Option<Vec<String>
     });
 
     fn should_skip_header_note(warning: &HashdeepLogHeaderWarning) -> bool {
-        match warning {
-            HashdeepLogHeaderWarning::HeaderNotFound => true,
-            HashdeepLogHeaderWarning::UnexpectedHeaderLineCount(_) => true,
-            HashdeepLogHeaderWarning::Unexpected5thLineContent(_) => true,
-            _ => false,
-        }
+        matches!(warning,
+            HashdeepLogHeaderWarning::HeaderNotFound |
+            HashdeepLogHeaderWarning::UnexpectedHeaderLineCount(_) |
+            HashdeepLogHeaderWarning::Unexpected5thLineContent(_)
+        )
     }
 
     // Unless any disqualifying header warnings are found,
