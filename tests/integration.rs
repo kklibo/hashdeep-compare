@@ -311,6 +311,7 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("multi/hash_then_sort/success",       &["sort", "hashlog", "hashlog_sorted"])?;
     //remove nondeterministic intermediate result
     std::fs::remove_file("tests/expected/multi/hash_then_sort/success/outfiles/hashlog")?;
+    remove_hashdeep_log_header_invocation_path("tests/expected/multi/hash_then_sort/success/outfiles/hashlog_sorted");
 
 
 

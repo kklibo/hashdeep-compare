@@ -21,8 +21,10 @@ pub fn sort_log(filename: &str, out_filename: &str) -> Result<Option<Vec<String>
         v1.filename.cmp(&v2.filename)
     });
 
-    common::write_log_entries_to_file(&log_file.entries, out_filename)?;
-    Ok(log_file.warning_report())
+    let warning_report = log_file.warning_report();
+
+    common::write_log_file_to_file(log_file, out_filename)?;
+    Ok(warning_report)
 }
 
 #[cfg(test)]

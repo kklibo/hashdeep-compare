@@ -1,3 +1,8 @@
+%%%% HASHDEEP-1.0
+%%%% size,md5,sha256,filename
+## Invoked from: [path removed by hashdeep-compare test]
+## $ hashdeep -l -r -o f ../../../../../hashdeep_target_nontrivial
+## 
 4,ba1f2511fc30423bdbb183fe33f3dd0f,181210f8f9c779c26da1d9b2075bde0127302ee0e3fca38c9a83f5b1dd8e5d3b,../../../../../hashdeep_target_nontrivial/123.txt
 4,aa3f5bb8c988fa9b75a1cdb1dc4d93fc,d928266e89b1da2263838e86df3a430548ca1768bedbc9d4b20f9e370d5518df,../../../../../hashdeep_target_nontrivial/789.txt
 4,ba1f2511fc30423bdbb183fe33f3dd0f,181210f8f9c779c26da1d9b2075bde0127302ee0e3fca38c9a83f5b1dd8e5d3b,../../../../../hashdeep_target_nontrivial/sub1/123.txt
