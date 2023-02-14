@@ -71,13 +71,13 @@ impl ReadLogEntriesFromFileError {
 }
 
 
-//#[derive(Debug, Eq, PartialEq)]//
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub enum HashdeepLogHeaderWarning {
     UnexpectedVersionString(String),
     HeaderNotFound,
     UntestedLogFormat(String),
     UnexpectedHeaderLineCount(usize),
+    Unexpected5thLineContent(String),
 }
 
 impl Display for HashdeepLogHeaderWarning {
@@ -90,6 +90,7 @@ impl Display for HashdeepLogHeaderWarning {
             HeaderNotFound => write!(f, "Header not found"),
             UntestedLogFormat(s) => write!(f, "Untested log format: \"{s}\""),
             UnexpectedHeaderLineCount(n) => write!(f, "Unexpected header line count: {n} (expected: 5)"),
+            Unexpected5thLineContent(s) => write!(f, "Unexpected 5th line content: \"{s}\""),
         }
     }
 }
@@ -118,6 +119,13 @@ fn check_hashdeep_log_header(header_lines: &[String]) -> Vec<HashdeepLogHeaderWa
         None => {}
     }
 
+    match header_lines.get(4) {
+        Some(x) if x == "## " => {},
+        Some(x) if x.starts_with("## Sorted by hashdeep-compare") => {},
+        Some(x) => warnings.push(HashdeepLogHeaderWarning::Unexpected5thLineContent(x.clone())),
+        None => {}
+    }
+
     match header_lines.len() {
         5 => {},
         x => warnings.push(HashdeepLogHeaderWarning::UnexpectedHeaderLineCount(x))
@@ -135,6 +143,7 @@ pub struct LogFile<T>
 {
     pub entries: T,
     pub header_warnings: Vec<HashdeepLogHeaderWarning>,
+    pub header_lines: Vec<String>,
     pub invalid_lines: Vec<String>,
 }
 
@@ -194,7 +203,7 @@ pub fn read_log_entries_from_file<T>(filename: &str) -> Result<LogFile<T>, ReadL
     }));
 
 
-    Ok(LogFile{entries, header_warnings, invalid_lines})
+    Ok(LogFile{entries, header_warnings, header_lines, invalid_lines})
 }
 
 fn open_writable_file(filename: &str) -> Result<File, WriteToFileError>
@@ -208,6 +217,32 @@ fn write_log_entry_to_file(label: &str, log_entry_str: &str, file: &mut File) ->
     let line = format!("{label}{log_entry_str}\n");
 
     file.write_all(line.as_bytes())?;
+    Ok(())
+}
+
+/// Writes a `LogFile` to a new file (will not overwrite an existing file).
+/// Conceptually, this should replicate a `LogFile`'s source file if
+/// * it loaded without warnings about invalid content
+/// * it hasn't been modified since loading
+///
+/// # Errors
+///
+/// Will return an error if the file at `filename` already exists, or
+/// if an error occurs while writing to the file.
+pub fn write_log_file_to_file<T>(log_file: LogFile<T>, filename: &str) -> Result<(), WriteToFileError>
+    where T: Extend<LogEntry> + Default + IntoIterator, <T as IntoIterator>::Item : ToString
+{
+    let mut file = open_writable_file(filename)?;
+
+    for header_line in log_file.header_lines {
+        let header_line = format!("{header_line}\n");
+        file.write_all(header_line.as_bytes())?;
+    }
+
+    for log_entry in log_file.entries {
+        write_log_entry_to_file("", &log_entry.to_string(), &mut file)?;
+    };
+
     Ok(())
 }
 
@@ -302,6 +337,26 @@ pub fn write_single_file_match_groups_to_file(single_file_match_groups: &[Single
 mod test
 {
     use super::*;
+    use predicates::prelude::*;
+    use test_case::test_case;
+
+    #[test_case("tests/test1.txt")]
+    #[test_case("tests/sort_files/test1_header_not_found.txt")]
+    #[test_case("tests/sort_files/test1_multiple_warnings.txt")]
+    #[test_case("tests/sort_files/test1_unexpected_header_line_count.txt")]
+    #[test_case("tests/sort_files/test1_unexpected_version_string.txt")]
+    #[test_case("tests/sort_files/test1_untested_log_format.txt")]
+    fn write_log_file_to_file_round_trip(filename: &str) {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let temp_file = temp_dir.path().join("temp_file");
+        let temp_file_path_str = temp_file.to_str().unwrap();
+
+        let log_file = read_log_entries_from_file::<Vec<LogEntry>>(filename).unwrap();
+        write_log_file_to_file(log_file, temp_file_path_str).unwrap();
+
+        let p = predicates::path::eq_file(filename);
+        assert!(p.eval(temp_file.as_path()));
+    }
 
     #[test]
     fn check_hashdeep_log_header_test() {
@@ -320,6 +375,23 @@ mod test
                 "## Invoked from: /home/user",
                 "## $ hashdeep -lr hashdeepComp/",
                 "## ",
+            ];
+
+            let expected = [];
+
+            let warnings = check_hashdeep_log_header(&to_vec_string(&header_lines));
+
+            assert_eq!(warnings, expected);
+        }
+
+        //success with sort message in header
+        {
+            let header_lines = [
+                "%%%% HASHDEEP-1.0",
+                "%%%% size,md5,sha256,filename",
+                "## Invoked from: /home/user",
+                "## $ hashdeep -lr hashdeepComp/",
+                "## Sorted by hashdeep-compare v0.0.0",
             ];
 
             let expected = [];
@@ -397,6 +469,22 @@ mod test
                 UntestedLogFormat("%%%% size,sha256,filename".into()),
                 UnexpectedHeaderLineCount(2),
             ];
+
+            let warnings = check_hashdeep_log_header(&to_vec_string(&header_lines));
+
+            assert_eq!(warnings, expected);
+        }
+
+        {
+            let header_lines = [
+                "%%%% HASHDEEP-1.0",
+                "%%%% size,md5,sha256,filename",
+                "## Invoked from: /home/user",
+                "## $ hashdeep -lr hashdeepComp/",
+                "## invalid 5th line content",
+            ];
+
+            let expected = [Unexpected5thLineContent("## invalid 5th line content".to_string())];
 
             let warnings = check_hashdeep_log_header(&to_vec_string(&header_lines));
 
