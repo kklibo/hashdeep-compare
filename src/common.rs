@@ -219,6 +219,32 @@ fn write_log_entry_to_file(label: &str, log_entry_str: &str, file: &mut File) ->
     Ok(())
 }
 
+/// Writes a `LogFile` to a new file (will not overwrite an existing file).
+/// This will replicate a `LogFile`'s source file if
+/// * it loaded without warnings about invalid content
+/// * it hasn't been modified since loading
+///
+/// # Errors
+///
+/// Will return an error if the file at `filename` already exists, or
+/// if an error occurs while writing to the file.
+pub fn write_log_file_to_file<T>(log_file: LogFile<T>, filename: &str) -> Result<(), WriteToFileError>
+    where T: Extend<LogEntry> + Default + IntoIterator, <T as IntoIterator>::Item : ToString
+{
+    let mut file = open_writable_file(filename)?;
+
+    for header_line in log_file.header_lines {
+        let header_line = format!("{header_line}\n");
+        file.write_all(header_line.as_bytes())?;
+    }
+
+    for log_entry in log_file.entries {
+        write_log_entry_to_file("", &log_entry.to_string(), &mut file)?;
+    };
+
+    Ok(())
+}
+
 /// Writes log entries to a new file (will not overwrite an existing file).
 ///
 /// # Errors
@@ -310,6 +336,26 @@ pub fn write_single_file_match_groups_to_file(single_file_match_groups: &[Single
 mod test
 {
     use super::*;
+    use predicates::prelude::*;
+    use test_case::test_case;
+
+    #[test_case("tests/test1.txt")]
+    #[test_case("tests/sort_files/test1_header_not_found.txt")]
+    #[test_case("tests/sort_files/test1_multiple_warnings.txt")]
+    #[test_case("tests/sort_files/test1_unexpected_header_line_count.txt")]
+    #[test_case("tests/sort_files/test1_unexpected_version_string.txt")]
+    #[test_case("tests/sort_files/test1_untested_log_format.txt")]
+    fn write_log_file_to_file_round_trip(filename: &str) {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let temp_file = temp_dir.path().join("temp_file");
+        let temp_file_path_str = temp_file.to_str().unwrap();
+
+        let log_file = read_log_entries_from_file::<Vec<LogEntry>>(filename).unwrap();
+        write_log_file_to_file(log_file, temp_file_path_str).unwrap();
+
+        let p = predicates::path::eq_file(filename);
+        assert!(p.eval(temp_file.as_path()));
+    }
 
     #[test]
     fn check_hashdeep_log_header_test() {
