@@ -145,6 +145,17 @@ fn main_impl(args: &[&str], stdout: &mut impl Write, stderr: &mut impl Write) ->
             #[arg(hide_long_help = true, id="path/to/sorted_output.txt")]
             output_file: String,
         },
+        #[command(after_long_help = help::help_root_string())]
+        #[command(long_about = help::long_about_root_string())]
+        /// Change a hashdeep log root by removing a prefix from its filepaths
+        Root {
+            #[arg(hide_long_help = true, id="path/to/input.txt")]
+            input_file: String,
+            #[arg(hide_long_help = true, id="path/to/output.txt")]
+            output_file: String,
+            #[arg(hide_long_help = true, id="filepath prefix")]
+            file_path_prefix: String,
+        },
         #[command(after_long_help = help::help_part_string())]
         #[command(long_about = help::long_about_part_string())]
         /// Partition contents of two hashdeep logs into category files
@@ -173,6 +184,13 @@ fn main_impl(args: &[&str], stdout: &mut impl Write, stderr: &mut impl Write) ->
                 output_file.as_str()
             )?;
             print_hashdeep_log_warnings(input_file.as_str(), warning_lines, stderr)?;
+        },
+        Commands::Root {input_file, output_file, file_path_prefix} => {/*
+            let warning_lines = root::change_root(
+                input_file.as_str(),
+                output_file.as_str()
+            )?;
+            print_hashdeep_log_warnings(input_file.as_str(), warning_lines, stderr)?;*/
         },
         Commands::Part {input_file1, input_file2, output_file_base} => {
             let partition_stats =
