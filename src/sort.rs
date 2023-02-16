@@ -1,6 +1,6 @@
-use crate::common;
-use crate::common::HashdeepLogHeaderWarning;
+use crate::common::LogFile;
 use crate::log_entry::LogEntry;
+use crate::log_ops;
 
 /// Reads a hashdeep log file and writes its entries to a new file, sorted by name.
 ///
@@ -11,38 +11,13 @@ use crate::log_entry::LogEntry;
 /// Any error emitted while reading or writing the files will be returned.
 pub fn sort_log(filename: &str, out_filename: &str) -> Result<Option<Vec<String>>, Box<dyn std::error::Error>>{
 
-    if std::path::Path::exists(out_filename.as_ref()) {
-        return Err(common::WriteToFileError::OutputFileExists(out_filename.to_string()).into());
+    fn sort_entries(log_file: &mut LogFile<Vec<LogEntry>>) {
+        log_file.entries.sort_by(|v1, v2| {
+            v1.filename.cmp(&v2.filename)
+        });
     }
 
-    let mut log_file = common::read_log_entries_from_file::<Vec<LogEntry>>(filename)?;
-
-    log_file.entries.sort_by(|v1, v2| {
-
-        v1.filename.cmp(&v2.filename)
-    });
-
-    fn should_skip_header_note(warning: &HashdeepLogHeaderWarning) -> bool {
-        matches!(warning,
-            HashdeepLogHeaderWarning::HeaderNotFound |
-            HashdeepLogHeaderWarning::UnexpectedHeaderLineCount(_) |
-            HashdeepLogHeaderWarning::Unexpected5thLineContent(_)
-        )
-    }
-
-    // Unless any disqualifying header warnings are found,
-    // add a note to the 5th line of the header.
-    if ! log_file.header_warnings.iter().any(should_skip_header_note) {
-        const VERSION: &str = env!("CARGO_PKG_VERSION");
-        if let Some(line) = log_file.header_lines.get_mut(4) {
-            *line = format!("## Sorted by hashdeep-compare v{VERSION}");
-        }
-    }
-
-    let warning_report = log_file.warning_report();
-
-    common::write_log_file_to_file(log_file, out_filename)?;
-    Ok(warning_report)
+    log_ops::process_log(filename, out_filename, sort_entries)
 }
 
 #[cfg(test)]

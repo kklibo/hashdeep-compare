@@ -121,7 +121,7 @@ fn check_hashdeep_log_header(header_lines: &[String]) -> Vec<HashdeepLogHeaderWa
 
     match header_lines.get(4) {
         Some(x) if x == "## " => {},
-        Some(x) if x.starts_with("## Sorted by hashdeep-compare") => {},
+        Some(x) if x.starts_with("## Modified by hashdeep-compare") => {},
         Some(x) => warnings.push(HashdeepLogHeaderWarning::Unexpected5thLineContent(x.clone())),
         None => {}
     }
@@ -391,7 +391,7 @@ mod test
                 "%%%% size,md5,sha256,filename",
                 "## Invoked from: /home/user",
                 "## $ hashdeep -lr hashdeepComp/",
-                "## Sorted by hashdeep-compare v0.0.0",
+                "## Modified by hashdeep-compare v0.0.0",
             ];
 
             let expected = [];

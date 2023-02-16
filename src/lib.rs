@@ -10,3 +10,4 @@ mod partitioner;
 pub mod partition;
 mod some_vec;
 pub mod command;
+mod log_ops;
