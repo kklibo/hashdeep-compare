@@ -227,6 +227,7 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("sort/success_with_log_warnings/unexpected_5th_line_content",
              &["sort", &path_in_tests("sort_files/test1_unexpected_5th_line_content.txt"), "test1_sorted.txt"])?;
 
+
     //root subcommand tests
     run_test("root/0_arguments",    &["root"])?;
     run_test("root/1_argument",     &["root", "arg1"])?;
@@ -250,6 +251,21 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("root/input_file_is_output_file", &["root", "same_file", "same_file", "root_prefix/"])?;
 
     run_test("root/success", &["root", &path_in_tests("test1.txt"), "test1_root.txt", "hashdeepComp/"])?;
+
+    run_test("root/success_with_log_warnings/unexpected_version_string",
+             &["root", &path_in_tests("root_files/test1_unexpected_version_string.txt"), "test1_root.txt", "hashdeepComp/"])?;
+    run_test("root/success_with_log_warnings/header_not_found",
+             &["root", &path_in_tests("root_files/test1_header_not_found.txt"), "test1_root.txt", "hashdeepComp/"])?;
+    run_test("root/success_with_log_warnings/untested_log_format",
+             &["root", &path_in_tests("root_files/test1_untested_log_format.txt"), "test1_root.txt", "hashdeepComp/"])?;
+    run_test("root/success_with_log_warnings/unexpected_header_line_count",
+             &["root", &path_in_tests("root_files/test1_unexpected_header_line_count.txt"), "test1_root.txt", "hashdeepComp/"])?;
+    run_test("root/success_with_log_warnings/multiple_warnings",
+             &["root", &path_in_tests("root_files/test1_multiple_warnings.txt"), "test1_root.txt", "hashdeepComp/"])?;
+    run_test("root/success_with_log_warnings/invalid_log_entry",
+             &["root", &path_in_tests("root_files/test1_invalid_log_entry.txt"), "test1_root.txt", "hashdeepComp/"])?;
+    run_test("root/success_with_log_warnings/unexpected_5th_line_content",
+             &["root", &path_in_tests("root_files/test1_unexpected_5th_line_content.txt"), "test1_root.txt", "hashdeepComp/"])?;
 
 
     //part subcommand tests
