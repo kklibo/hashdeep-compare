@@ -227,6 +227,8 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("sort/success_with_log_warnings/unexpected_5th_line_content",
              &["sort", &path_in_tests("sort_files/test1_unexpected_5th_line_content.txt"), "test1_sorted.txt"])?;
 
+    //root subcommand tests
+    run_test("root/success", &["root", &path_in_tests("test1.txt"), "test1_root.txt", "hashdeepComp/"])?;
 
     //part subcommand tests
     run_test("part/0_arguments",    &["part"])?;
