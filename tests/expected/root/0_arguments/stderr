@@ -1,0 +1,6 @@
+error: the following required arguments were not provided:
+  <path/to/input.txt>
+  <path/to/output.txt>
+  <filepath prefix>
+
+Usage: hashdeep-compare root <path/to/input.txt> <path/to/output.txt> <filepath prefix>

@@ -228,7 +228,29 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
              &["sort", &path_in_tests("sort_files/test1_unexpected_5th_line_content.txt"), "test1_sorted.txt"])?;
 
     //root subcommand tests
+    run_test("root/0_arguments",    &["root"])?;
+    run_test("root/1_argument",     &["root", "arg1"])?;
+    run_test("root/2_argument",     &["root", "arg1", "arg2"])?;
+    run_test("root/4_arguments",    &["root", "arg1", "arg2", "arg3", "arg4"])?;
+
+    run_test("root/input_file/empty",           &["root", "",                   "root_output", "root_prefix/"])?;
+    run_test("root/input_file/invalid",         &["root", "/dev/null/invalid",  "root_output", "root_prefix/"])?;
+    run_test("root/input_file/nonexistent_file",&["root", "does_not_exist",     "root_output", "root_prefix/"])?;
+    run_test("root/input_file/nonexistent_dir", &["root", "does_not_exist/",    "root_output", "root_prefix/"])?;
+
+    run_test("root/output_file/empty",           &["root", &path_in_tests("test1.txt"), ""                          , "root_prefix/"])?;
+    run_test("root/output_file/invalid",         &["root", &path_in_tests("test1.txt"), "/dev/null/invalid"         , "root_prefix/"])?;
+    run_test("root/output_file/nonexistent_dir", &["root", &path_in_tests("test1.txt"), "does_not_exist/root_output", "root_prefix/"])?;
+    run_test("root/output_file/is_dir",          &["root", &path_in_tests("test1.txt"), "dir/"                      , "root_prefix/"])?;
+
+    create_path_and_file("tests/expected/root/output_file/exists/outfiles/root_output", "");
+    run_test("root/output_file/exists",          &["root", &path_in_tests("test1.txt"), "root_output", "root_prefix/"])?;
+
+    create_path_and_file("tests/expected/root/input_file_is_output_file/outfiles/same_file", "");
+    run_test("root/input_file_is_output_file", &["root", "same_file", "same_file", "root_prefix/"])?;
+
     run_test("root/success", &["root", &path_in_tests("test1.txt"), "test1_root.txt", "hashdeepComp/"])?;
+
 
     //part subcommand tests
     run_test("part/0_arguments",    &["part"])?;
