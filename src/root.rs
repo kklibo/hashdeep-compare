@@ -5,41 +5,37 @@ use crate::log_ops;
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct ChangeRootSuccess
 {
+    /// Printable info lines
+    pub info_lines: Vec<String>,
+    /// Printable warning lines
+    pub warning_lines: Vec<String>,
     /// Printable warning lines about the hashdeep log file, if any were emitted
     pub file_warning_lines: Option<Vec<String>>,
-    /// The number of entries that matched the prefix
-    pub entries_matched: usize,
-    /// The number of entries that were omitted (did not match the prefix)
-    pub entries_omitted: usize,
 }
 
-impl ChangeRootSuccess {
-    /// Printable info lines about the `change_root` operation
-    pub fn info_lines(&self) -> Vec<String> {
-        let mut v = vec![];
+fn info_lines(entries_matched: usize, entries_omitted: usize) -> Vec<String> {
+    let mut v = vec![];
 
-        let total_entries = self.entries_matched.checked_add(self.entries_omitted)
-            .expect("entry stats should not cause arithmetic overflow");
-        v.push(format!("Input file contains {total_entries} entries:"));
+    let total_entries = entries_matched.checked_add(entries_omitted)
+        .expect("entry stats should not cause arithmetic overflow");
+    v.push(format!("Input file contains {total_entries} entries:"));
 
-        match self.entries_matched {
-            0 => {},
-            x if x == total_entries => v.push(format!("  All {x} entries matched the prefix")),
-            x => {
-                v.push(format!("  {x} entries matched the prefix"));
-                v.push(format!("  {} entries did not match the prefix and were omitted", self.entries_omitted));
-            },
-        }
-        v
+    match entries_matched {
+        0 => {},
+        x if x == total_entries => v.push(format!("  All {x} entries matched the prefix")),
+        x => {
+            v.push(format!("  {x} entries matched the prefix"));
+            v.push(format!("  {entries_omitted} entries did not match the prefix and were omitted"));
+        },
     }
+    v
+}
 
-    /// Printable warning lines about the `change_root` operation
-    pub fn warning_lines(&self) -> Vec<String> {
-        if self.entries_matched == 0 {
-            vec![format!("Warning: No entries matched the prefix (All entries were omitted)")]
-        }
-        else { vec![] }
+fn warning_lines(entries_matched: usize, ) -> Vec<String> {
+    if entries_matched == 0 {
+        vec![format!("Warning: No entries matched the prefix (All entries were omitted)")]
     }
+    else { vec![] }
 }
 
 /// Reads a hashdeep log file and writes its entries to a new file, with
@@ -80,7 +76,10 @@ pub fn change_root(filename: &str, out_filename: &str, root_prefix: &str)
     let entries_omitted = entry_count_before.checked_sub(entry_count_after)
         .expect("filter should not increase entry count");
 
-    Ok(ChangeRootSuccess { file_warning_lines, entries_matched, entries_omitted })
+    let info_lines = info_lines(entries_matched, entries_omitted);
+    let warning_lines = warning_lines(entries_matched);
+
+    Ok(ChangeRootSuccess{file_warning_lines, info_lines, warning_lines})
 }
 
 #[cfg(test)]

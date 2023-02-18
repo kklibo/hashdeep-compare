@@ -195,8 +195,8 @@ fn main_impl(args: &[&str], stdout: &mut impl Write, stderr: &mut impl Write) ->
                 output_file.as_str(),
                 file_path_prefix.as_str(),
             )?;
-            write_lines(stdout, success.info_lines())?;
-            write_lines(stderr, success.warning_lines())?;
+            write_lines(stdout, success.info_lines)?;
+            write_lines(stderr, success.warning_lines)?;
             print_hashdeep_log_warnings(input_file.as_str(), success.file_warning_lines, stderr)?;
         },
         Commands::Part {input_file1, input_file2, output_file_base} => {
