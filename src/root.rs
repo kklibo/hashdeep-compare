@@ -24,6 +24,7 @@ impl ChangeRootSuccess {
 
         match self.entries_matched {
             0 => {},
+            x if x == total_entries => v.push(format!("  All {x} entries matched the prefix")),
             x => {
                 v.push(format!("  {x} entries matched the prefix"));
                 v.push(format!("  {} entries did not match the prefix and were omitted", self.entries_omitted));

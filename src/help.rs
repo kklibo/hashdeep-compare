@@ -70,7 +70,7 @@ pub fn help_root_string() -> String {
             Warning: The prefix is applied as simple text, without any rules related to paths.
             If the prefix \"test\" were used on the filepath \"testdir/file.txt\",
             the resulting filepath would be \"dir/file.txt\".
-            Splitting the text of a path section like this probably isn't what you want,
+            Splitting the text of a path component like this probably isn't what you want,
             but there may be some clever uses for it.
 
             Note that if the output file already exists, the command will be aborted

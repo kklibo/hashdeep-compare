@@ -250,7 +250,17 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     create_path_and_file("tests/expected/root/input_file_is_output_file/outfiles/same_file", "");
     run_test("root/input_file_is_output_file", &["root", "same_file", "same_file", "root_prefix/"])?;
 
-    run_test("root/success", &["root", &path_in_tests("test1.txt"), "test1_root.txt", "hashdeepComp/"])?;
+    run_test("root/success/some_entries_match", &["root", &path_in_tests("test1.txt"), "test1_root.txt", "hashdeepComp/"])?;
+    run_test("root/success/all_entries_match",
+             &["root", &path_in_tests("root_files/test1_success_all_entries_match.txt"), "test1_root.txt", "hashdeepComp/"])?;
+    run_test("root/success/no_entries_match",
+             &["root", &path_in_tests("root_files/test1_success_no_entries_match.txt"), "test1_root.txt", "hashdeepComp/"])?;
+    run_test("root/success/split_path_component",
+             &["root", &path_in_tests("root_files/test1_success_split_path_component.txt"), "test1_root.txt", "hashdeep"])?;
+    run_test("root/success/empty_prefix",
+             &["root", &path_in_tests("root_files/test1_success_empty_prefix.txt"), "test1_root.txt", ""])?;
+    run_test("root/success/no_entries_in_input",
+             &["root", &path_in_tests("root_files/test1_success_no_entries_in_input.txt"), "test1_root.txt", "hashdeepComp/"])?;
 
     run_test("root/success_with_log_warnings/unexpected_version_string",
              &["root", &path_in_tests("root_files/test1_unexpected_version_string.txt"), "test1_root.txt", "hashdeepComp/"])?;
