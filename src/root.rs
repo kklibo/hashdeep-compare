@@ -31,11 +31,20 @@ fn info_lines(entries_matched: usize, entries_omitted: usize) -> Vec<String> {
     v
 }
 
-fn warning_lines(entries_matched: usize, ) -> Vec<String> {
-    if entries_matched == 0 {
-        vec![format!("Warning: No entries matched the prefix (All entries were omitted)")]
+fn warning_lines(entries_matched: usize, entries_omitted: usize, root_prefix: &str) -> Vec<String> {
+    let mut v = vec![];
+
+    if entries_matched == 0 && entries_omitted == 0 {
+        v.push("Warning: No entries were loaded from the input file".to_string());
     }
-    else { vec![] }
+    else if entries_matched == 0 {
+        v.push("Warning: No entries matched the prefix (All entries were omitted)".to_string());
+    }
+
+    if root_prefix.is_empty() {
+        v.push("Warning: Prefix is empty (operation will have no effect)".to_string());
+    }
+    v
 }
 
 /// Reads a hashdeep log file and writes its entries to a new file, with
@@ -77,7 +86,7 @@ pub fn change_root(filename: &str, out_filename: &str, root_prefix: &str)
         .expect("filter should not increase entry count");
 
     let info_lines = info_lines(entries_matched, entries_omitted);
-    let warning_lines = warning_lines(entries_matched);
+    let warning_lines = warning_lines(entries_matched, entries_omitted, root_prefix);
 
     Ok(ChangeRootSuccess{file_warning_lines, info_lines, warning_lines})
 }
