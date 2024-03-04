@@ -1,0 +1,2 @@
+Warnings emitted for hashdeep log at: /media/sf_RustDevVM02_Shared/projects/hashdeep-compare/tests/root_files/test1_unexpected_5th_line_content.txt
+  Unexpected 5th line content: "## unexpected 5th line content"

@@ -136,6 +136,7 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
     run_test("help/nonexistent_subcommand", &["help", "nonexistent_subcommand"])?;
     run_test("help/hash",                   &["help", "hash"])?;
     run_test("help/sort",                   &["help", "sort"])?;
+    run_test("help/root",                   &["help", "root"])?;
     run_test("help/part",                   &["help", "part"])?;
     run_test("help/extra_argument",         &["help", "part", "extra"])?;
 
@@ -225,6 +226,56 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
              &["sort", &path_in_tests("sort_files/test1_invalid_log_entry.txt"), "test1_sorted.txt"])?;
     run_test("sort/success_with_log_warnings/unexpected_5th_line_content",
              &["sort", &path_in_tests("sort_files/test1_unexpected_5th_line_content.txt"), "test1_sorted.txt"])?;
+
+
+    //root subcommand tests
+    run_test("root/0_arguments",    &["root"])?;
+    run_test("root/1_argument",     &["root", "arg1"])?;
+    run_test("root/2_argument",     &["root", "arg1", "arg2"])?;
+    run_test("root/4_arguments",    &["root", "arg1", "arg2", "arg3", "arg4"])?;
+
+    run_test("root/input_file/empty",           &["root", "",                   "root_output", "root_prefix/"])?;
+    run_test("root/input_file/invalid",         &["root", "/dev/null/invalid",  "root_output", "root_prefix/"])?;
+    run_test("root/input_file/nonexistent_file",&["root", "does_not_exist",     "root_output", "root_prefix/"])?;
+    run_test("root/input_file/nonexistent_dir", &["root", "does_not_exist/",    "root_output", "root_prefix/"])?;
+
+    run_test("root/output_file/empty",           &["root", &path_in_tests("test1.txt"), ""                          , "root_prefix/"])?;
+    run_test("root/output_file/invalid",         &["root", &path_in_tests("test1.txt"), "/dev/null/invalid"         , "root_prefix/"])?;
+    run_test("root/output_file/nonexistent_dir", &["root", &path_in_tests("test1.txt"), "does_not_exist/root_output", "root_prefix/"])?;
+    run_test("root/output_file/is_dir",          &["root", &path_in_tests("test1.txt"), "dir/"                      , "root_prefix/"])?;
+
+    create_path_and_file("tests/expected/root/output_file/exists/outfiles/root_output", "");
+    run_test("root/output_file/exists",          &["root", &path_in_tests("test1.txt"), "root_output", "root_prefix/"])?;
+
+    create_path_and_file("tests/expected/root/input_file_is_output_file/outfiles/same_file", "");
+    run_test("root/input_file_is_output_file", &["root", "same_file", "same_file", "root_prefix/"])?;
+
+    run_test("root/success/some_entries_match", &["root", &path_in_tests("test1.txt"), "test1_root.txt", "hashdeepComp/"])?;
+    run_test("root/success/all_entries_match",
+             &["root", &path_in_tests("root_files/test1_success_all_entries_match.txt"), "test1_root.txt", "hashdeepComp/"])?;
+    run_test("root/success/no_entries_match",
+             &["root", &path_in_tests("root_files/test1_success_no_entries_match.txt"), "test1_root.txt", "hashdeepComp/"])?;
+    run_test("root/success/split_path_component",
+             &["root", &path_in_tests("root_files/test1_success_split_path_component.txt"), "test1_root.txt", "hashdeep"])?;
+    run_test("root/success/empty_prefix",
+             &["root", &path_in_tests("root_files/test1_success_empty_prefix.txt"), "test1_root.txt", ""])?;
+    run_test("root/success/no_entries_in_input",
+             &["root", &path_in_tests("root_files/test1_success_no_entries_in_input.txt"), "test1_root.txt", "hashdeepComp/"])?;
+
+    run_test("root/success_with_log_warnings/unexpected_version_string",
+             &["root", &path_in_tests("root_files/test1_unexpected_version_string.txt"), "test1_root.txt", "hashdeepComp/"])?;
+    run_test("root/success_with_log_warnings/header_not_found",
+             &["root", &path_in_tests("root_files/test1_header_not_found.txt"), "test1_root.txt", "hashdeepComp/"])?;
+    run_test("root/success_with_log_warnings/untested_log_format",
+             &["root", &path_in_tests("root_files/test1_untested_log_format.txt"), "test1_root.txt", "hashdeepComp/"])?;
+    run_test("root/success_with_log_warnings/unexpected_header_line_count",
+             &["root", &path_in_tests("root_files/test1_unexpected_header_line_count.txt"), "test1_root.txt", "hashdeepComp/"])?;
+    run_test("root/success_with_log_warnings/multiple_warnings",
+             &["root", &path_in_tests("root_files/test1_multiple_warnings.txt"), "test1_root.txt", "hashdeepComp/"])?;
+    run_test("root/success_with_log_warnings/invalid_log_entry",
+             &["root", &path_in_tests("root_files/test1_invalid_log_entry.txt"), "test1_root.txt", "hashdeepComp/"])?;
+    run_test("root/success_with_log_warnings/unexpected_5th_line_content",
+             &["root", &path_in_tests("root_files/test1_unexpected_5th_line_content.txt"), "test1_root.txt", "hashdeepComp/"])?;
 
 
     //part subcommand tests

@@ -1,0 +1,5 @@
+%%%% HASHDEEP-1.0
+%%%% size,md5,sha256,filename
+## Invoked from: /home/user
+## $ hashdeep -lr hashdeepComp/
+## 
