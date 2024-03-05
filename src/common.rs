@@ -107,7 +107,7 @@ fn check_hashdeep_log_header(header_lines: &[String]) -> Vec<HashdeepLogHeaderWa
 
     let mut warnings: Vec<HashdeepLogHeaderWarning> = Vec::new();
 
-    match header_lines.get(0) {
+    match header_lines.first() {
         Some(x) if x == "%%%% HASHDEEP-1.0" => {},
         Some(x) => warnings.push(HashdeepLogHeaderWarning::UnexpectedVersionString(x.clone())),
         None => return [HashdeepLogHeaderWarning::HeaderNotFound].into(),
