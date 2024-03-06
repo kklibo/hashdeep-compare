@@ -9,7 +9,7 @@ By saving log files and using hashdeep-compare, the contents of storage volumes 
 If you're concerned about file archive bit-rot or just want to compare archived records of the content of an important directory, using Hashdeep and hashdeep-compare may be a convenient solution.
 
 ### How to use hashdeep-compare
-hashdeep-compare is a command-line tool with three functions:
+hashdeep-compare is a command-line tool with four functions:
 * `hash`: invokes hashdeep and generates a log file compatible with hashdeep-compare.
     
     `hashdeep-compare hash path/to/target_dir path/to/output_log.txt`
@@ -22,6 +22,27 @@ hashdeep-compare is a command-line tool with three functions:
     `hashdeep-compare sort path/to/unsorted_input.txt path/to/sorted_output.txt`
     
     hashdeep does not guarantee ordering of log entries, and ordering tends to be inconsistent between runs in practice. Sorting allows comparison of hashdeep logs in a text-diff tool, which may be the easiest way to compare logs with uncomplicated differences. Note that if the output file already exists, the command will be aborted (hashdeep-compare will not overwrite existing files).
+
+* `root`: changes a hashdeep log root by removing a prefix from its filepaths.
+    Any entries with filepaths that do not start with the prefix will be
+    omitted from the output.
+
+    `hashdeep-compare root path/to/input.txt path/to/output.txt filepath/prefix/`
+
+    This subcommand is an easy way to recover from a hashdeep run that prepended
+    unintended parent directories on all of its filepaths because of its invocation
+    directory.
+
+    Warning: The prefix is applied as simple text, without any rules related to paths.
+    If the prefix "test" were used on the filepath "testdir/file.txt",
+    the resulting filepath would be "dir/file.txt".
+    Splitting the text of a path component like this probably isn't what you want,
+    but there may be some clever uses for it.
+
+    Note that if the output file already exists, the command will be aborted
+    (hashdeep-compare will not overwrite existing files).
+
+
 * `part`: the real power of hashdeep-compare: all entries will be partitioned into sets that efficiently describe the similarities and differences of the two log files.
 
     `hashdeep-compare part path/to/first_log.txt path/to/second_log.txt path/to/output_file_base`
@@ -90,7 +111,9 @@ When reading a hashdeep log, hashdeep-compare performs two content checks:
 * In the log header: the line count, hashdeep version, and recorded log format are confirmed. If these are not identical to what the hashdeep-compare test suite uses, a warning is issued. This is intended to warn the user if a different version of hashdeep (or something else) may have generated a log file that might lead to unexpected results.
 * Each log entry line is checked for correct formatting: incorrectly-formatted lines are ignored by hashdeep-compare. If any are found, the number of these ignored lines is reported in a warning message.
   
-(Note: These checks are here for extra safety. I've never seen hashdeep generate an invalid line: if you have one of these, you should probably figure out why before you rely on the output.)
+(Note: These checks are here for extra safety. ~~I've never seen hashdeep generate an invalid line~~: if you have one of these, you should probably figure out why before you rely on the output.)
+
+(Update 2024.3.5: hashdeep will generate an invalid line by adding newlines that occur in filenames. Because of the line-based structure of the hashdeep output format, there may not be an elegant way to add support for these files to hashdeep-compare.)
 
 Regardless of how many warnings are generated, hashdeep-compare will always use all of the correctly-formatted entries to produce the requested output. Warnings, by themselves, will never prevent hashdeep-compare from running to successful completion.
 
