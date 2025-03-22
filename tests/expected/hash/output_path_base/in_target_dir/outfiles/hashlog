@@ -3,5 +3,5 @@
 ## Invoked from: [path removed by hashdeep-compare test]
 ## $ hashdeep -l -r -o f .
 ## 
-0,d41d8cd98f00b204e9800998ecf8427e,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,./hashlog.errors
 0,d41d8cd98f00b204e9800998ecf8427e,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,./hashlog
+0,d41d8cd98f00b204e9800998ecf8427e,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,./hashlog.errors
