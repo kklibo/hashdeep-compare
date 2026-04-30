@@ -68,10 +68,11 @@
 
 use assert_cmd::prelude::*;
 
-use std::process::Command;
-use std::path::Path;
 use std::fs::File;
-use std::io::{Write, ErrorKind};
+use std::io::{ErrorKind, Write};
+use std::path::Path;
+use std::process::Command;
+
 use pathdiff::diff_paths;
 
 #[cfg(feature = "integration_test_coverage")]
@@ -80,11 +81,10 @@ use std::path::PathBuf;
 #[cfg(feature = "integration_test_coverage")]
 use hashdeep_compare::main_impl::main_io_wrapper;
 
-
 const BIN_NAME: &str = env!("CARGO_PKG_NAME");
 
-
 #[test]
+#[rustfmt::skip]
 fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
 
     #[cfg(feature = "integration_test_coverage")]
@@ -528,23 +528,18 @@ fn integration_tests() -> Result<(), Box<dyn std::error::Error>> {
 
 #[cfg(feature = "integration_test_helpful_outputs")]
 fn error_message_summary_to_file() -> Result<(), Box<dyn std::error::Error>> {
-
     use std::fs::read_to_string;
     use walkdir::WalkDir;
 
     let mut outfile = File::create("tests/error_message_summary")?;
 
     for entry in WalkDir::new("tests/expected") {
-
         if let Ok(x) = entry {
-
             if x.file_type().is_file() && x.file_name() == "stderr" {
                 writeln!(outfile, "{:?}", x.path())?;
                 writeln!(outfile, "  {}", read_to_string(x.path())?)?;
             }
-
         }
-
     }
 
     Ok(())

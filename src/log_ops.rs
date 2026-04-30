@@ -14,9 +14,13 @@ use crate::log_entry::LogEntry;
 /// # Errors
 ///
 /// Any error emitted while reading or writing the files will be returned.
-pub fn process_log<T>(filename: &str, out_filename: &str, mut f: T)
-    -> Result<Option<Vec<String>>, Box<dyn std::error::Error>>
-    where T: FnMut(&mut LogFile<Vec<LogEntry>>)
+pub fn process_log<T>(
+    filename: &str,
+    out_filename: &str,
+    mut f: T,
+) -> Result<Option<Vec<String>>, Box<dyn std::error::Error>>
+where
+    T: FnMut(&mut LogFile<Vec<LogEntry>>),
 {
     if std::path::Path::exists(out_filename.as_ref()) {
         return Err(common::WriteToFileError::OutputFileExists(out_filename.to_string()).into());
@@ -26,6 +30,7 @@ pub fn process_log<T>(filename: &str, out_filename: &str, mut f: T)
 
     f(&mut log_file);
 
+    #[rustfmt::skip]
     fn should_skip_header_note(warning: &HashdeepLogHeaderWarning) -> bool {
         matches!(warning,
             HashdeepLogHeaderWarning::HeaderNotFound |
@@ -36,7 +41,7 @@ pub fn process_log<T>(filename: &str, out_filename: &str, mut f: T)
 
     // Unless any disqualifying header warnings are found,
     // add a note to the 5th line of the header.
-    if ! log_file.header_warnings.iter().any(should_skip_header_note) {
+    if !log_file.header_warnings.iter().any(should_skip_header_note) {
         const VERSION: &str = env!("CARGO_PKG_VERSION");
         if let Some(line) = log_file.header_lines.get_mut(4) {
             *line = format!("## Modified by hashdeep-compare v{VERSION}");
