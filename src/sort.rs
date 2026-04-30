@@ -9,12 +9,14 @@ use crate::log_ops;
 /// # Errors
 ///
 /// Any error emitted while reading or writing the files will be returned.
-pub fn sort_log(filename: &str, out_filename: &str) -> Result<Option<Vec<String>>, Box<dyn std::error::Error>>{
-
+pub fn sort_log(
+    filename: &str,
+    out_filename: &str,
+) -> Result<Option<Vec<String>>, Box<dyn std::error::Error>> {
     fn sort_entries(log_file: &mut LogFile<Vec<LogEntry>>) {
-        log_file.entries.sort_by(|v1, v2| {
-            v1.filename.cmp(&v2.filename)
-        });
+        log_file
+            .entries
+            .sort_by(|v1, v2| v1.filename.cmp(&v2.filename));
     }
 
     log_ops::process_log(filename, out_filename, sort_entries)

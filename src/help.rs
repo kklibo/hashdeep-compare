@@ -12,8 +12,8 @@ pub fn long_about_hash_string() -> String {
 
 /// Gets the hash function help string
 pub fn help_hash_string() -> String {
-
-    formatdoc!("
+    formatdoc!(
+        "
         Notes:
             This function is optional, but recommended to ensure log compatibility.
 
@@ -35,8 +35,8 @@ pub fn long_about_sort_string() -> String {
 
 /// Gets the sort function help string
 pub fn help_sort_string() -> String {
-
-    formatdoc!("
+    formatdoc!(
+        "
         Notes:
             hashdeep does not guarantee ordering of log entries, and ordering tends to
             be inconsistent between runs in practice. Sorting allows comparison of
@@ -51,7 +51,8 @@ pub fn help_sort_string() -> String {
 
 /// Gets the root function's `clap` "long_about" string
 pub fn long_about_root_string() -> String {
-    formatdoc!("
+    formatdoc!(
+        "
         Changes a hashdeep log root by removing a prefix from its filepaths.
         Any entries with filepaths that do not start with the prefix will be
         omitted from the output."
@@ -60,8 +61,8 @@ pub fn long_about_root_string() -> String {
 
 /// Gets the root function help string
 pub fn help_root_string() -> String {
-
-    formatdoc!("
+    formatdoc!(
+        "
         Notes:
             This subcommand is an easy way to recover from a hashdeep run that prepended
             unintended parent directories on all of its filepaths because of its invocation
@@ -81,7 +82,8 @@ pub fn help_root_string() -> String {
 
 /// Gets the part function's `clap` "long_about" string
 pub fn long_about_part_string() -> String {
-    formatdoc!("
+    formatdoc!(
+        "
         The real power of hashdeep-compare:
         All entries will be partitioned into sets that efficiently describe the
         similarities and differences of the two log files."
@@ -90,8 +92,8 @@ pub fn long_about_part_string() -> String {
 
 /// Gets the part function help string
 pub fn help_part_string() -> String {
-
-    formatdoc!("
+    formatdoc!(
+        "
         Notes:
             The output file base path will be used to name the output files by adding
             suffixes that describe the log entries represented within; it may include

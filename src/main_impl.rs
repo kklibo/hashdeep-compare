@@ -34,9 +34,9 @@
 //! possible: for this reason, the **integration_test_coverage** feature-based mode switch is preferred.
 
 use crate::*;
+use clap::{Parser, Subcommand};
 use std::error::Error;
 use std::io::Write;
-use clap::{Parser, Subcommand};
 
 /// Specifies program arguments and (re)direction of stdout/stderr, then runs the program
 ///
@@ -50,25 +50,21 @@ pub fn main_io_wrapper(
     mut stdout: impl Write,
     mut stderr: impl Write,
 ) -> Result<i32, Box<dyn Error>> {
-
-    let exit_code =
-    match main_impl(args, &mut stdout, &mut stderr)
-    {
+    let exit_code = match main_impl(args, &mut stdout, &mut stderr) {
         Ok(()) => 0,
         Err(err) => {
             if let Some(err) = err.downcast_ref::<clap::Error>() {
                 if err.use_stderr() {
-                    write! (stderr, "{err}")?;
+                    write!(stderr, "{err}")?;
                     // Code 2 on error matches `clap`'s behavior.
                     2
-                }
-                else {
-                    write! (stdout, "{err}")?;
+                } else {
+                    write!(stdout, "{err}")?;
                     0
                 }
-            }
-            else {
+            } else {
                 //conditionally use Display output for thiserror-based error types
+                #[rustfmt::skip]
                 if let Some(err) = err.downcast_ref::<command::RunHashdeepCommandError>() {
                     writeln! (stderr, "Error: \"{err}\"")?;
                 }
@@ -83,7 +79,7 @@ pub fn main_io_wrapper(
                 }
                 else {
                     writeln! (stderr, "Error: {err:?}")?;
-                }
+                };
 
                 1
             }
@@ -93,12 +89,11 @@ pub fn main_io_wrapper(
     Ok(exit_code)
 }
 
-
-fn print_hashdeep_log_warnings (
+fn print_hashdeep_log_warnings(
     filename: &str,
     warning_lines: Option<Vec<String>>,
-    stderr: &mut impl Write) -> Result<(), Box<dyn Error>>
-{
+    stderr: &mut impl Write,
+) -> Result<(), Box<dyn Error>> {
     if let Some(v) = warning_lines {
         writeln!(stderr, "Warnings emitted for hashdeep log at: {filename}")?;
         for line in v {
@@ -108,15 +103,20 @@ fn print_hashdeep_log_warnings (
     Ok(())
 }
 
-fn write_lines (writer: &mut impl Write, lines: Vec<String>) -> Result<(), Box<dyn Error>> {
-    lines.iter().try_for_each(|line| writeln!(writer, "{line}").map_err(Into::into))
+fn write_lines(writer: &mut impl Write, lines: Vec<String>) -> Result<(), Box<dyn Error>> {
+    lines
+        .iter()
+        .try_for_each(|line| writeln!(writer, "{line}").map_err(Into::into))
 }
 
 /// Called by main_io_wrapper: Accepts program arguments and runs the program
 ///
 /// (This was the main() function before the **integration_test_coverage** feature was added)
-fn main_impl(args: &[&str], stdout: &mut impl Write, stderr: &mut impl Write) -> Result<(), Box<dyn Error>> {
-
+fn main_impl(
+    args: &[&str],
+    stdout: &mut impl Write,
+    stderr: &mut impl Write,
+) -> Result<(), Box<dyn Error>> {
     const VERSION: &str = env!("CARGO_PKG_VERSION");
 
     #[derive(Parser, Debug)]
@@ -135,46 +135,47 @@ fn main_impl(args: &[&str], stdout: &mut impl Write, stderr: &mut impl Write) ->
         #[command(long_about = help::long_about_hash_string())]
         /// Invoke hashdeep on a target directory
         Hash {
-            #[arg(hide_long_help = true, id="path/to/target_dir")]
+            #[arg(hide_long_help = true, id = "path/to/target_dir")]
             target_directory: String,
-            #[arg(hide_long_help = true, id="path/to/output_log.txt")]
+            #[arg(hide_long_help = true, id = "path/to/output_log.txt")]
             output_path_base: String,
         },
         #[command(after_long_help = help::help_sort_string())]
         #[command(long_about = help::long_about_sort_string())]
         /// Sort a hashdeep log (by file path)
         Sort {
-            #[arg(hide_long_help = true, id="path/to/unsorted_input.txt")]
+            #[arg(hide_long_help = true, id = "path/to/unsorted_input.txt")]
             input_file: String,
-            #[arg(hide_long_help = true, id="path/to/sorted_output.txt")]
+            #[arg(hide_long_help = true, id = "path/to/sorted_output.txt")]
             output_file: String,
         },
         #[command(after_long_help = help::help_root_string())]
         #[command(long_about = help::long_about_root_string())]
         /// Change a hashdeep log root by removing a prefix from its filepaths
         Root {
-            #[arg(hide_long_help = true, id="path/to/input.txt")]
+            #[arg(hide_long_help = true, id = "path/to/input.txt")]
             input_file: String,
-            #[arg(hide_long_help = true, id="path/to/output.txt")]
+            #[arg(hide_long_help = true, id = "path/to/output.txt")]
             output_file: String,
-            #[arg(hide_long_help = true, id="filepath prefix")]
+            #[arg(hide_long_help = true, id = "filepath prefix")]
             file_path_prefix: String,
         },
         #[command(after_long_help = help::help_part_string())]
         #[command(long_about = help::long_about_part_string())]
         /// Partition contents of two hashdeep logs into category files
         Part {
-            #[arg(hide_long_help = true, id="path/to/first_log.txt")]
+            #[arg(hide_long_help = true, id = "path/to/first_log.txt")]
             input_file1: String,
-            #[arg(hide_long_help = true, id="path/to/second_log.txt")]
+            #[arg(hide_long_help = true, id = "path/to/second_log.txt")]
             input_file2: String,
-            #[arg(hide_long_help = true, id="path/to/output_file_base")]
+            #[arg(hide_long_help = true, id = "path/to/output_file_base")]
             output_file_base: String,
         },
     }
 
     let cli_args = CliArgs::try_parse_from(args)?;
 
+    #[rustfmt::skip]
     match cli_args.command {
         Commands::Hash {target_directory, output_path_base} => {
             command::run_hashdeep_command(
@@ -214,7 +215,7 @@ fn main_impl(args: &[&str], stdout: &mut impl Write, stderr: &mut impl Write) ->
         Commands::Version => {
             writeln!(stdout, "hashdeep-compare version {VERSION}")?;
         }
-    }
+    };
 
     Ok(())
 }

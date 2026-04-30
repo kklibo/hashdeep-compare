@@ -16,34 +16,36 @@ pub struct LogEntry {
 }
 
 impl LogEntry {
-
     const HASHCOUNT: usize = 3;
 
     /// Creates a LogEntry from a hashdeep log line, or returns None on failure.
     pub fn from_str(s: &str) -> Option<LogEntry> {
-
         // Note: Commas in the filename will make `sections` longer than `LogEntry::HASHCOUNT + 1`.
         let sections: Vec<&str> = s.split(',').collect();
-        if sections.len() < LogEntry::HASHCOUNT + 1 {return None;}
+        if sections.len() < LogEntry::HASHCOUNT + 1 {
+            return None;
+        }
 
         let (hashes_sections, filename_sections) = sections.split_at(LogEntry::HASHCOUNT);
-        if hashes_sections.contains(&"") {return None;}
+        if hashes_sections.contains(&"") {
+            return None;
+        }
 
         let hashes = hashes_sections.join(",");
         let filename = filename_sections.join(",");
-        if filename.is_empty() {return None;}
+        if filename.is_empty() {
+            return None;
+        }
 
-        Some(LogEntry{hashes, filename})
+        Some(LogEntry { hashes, filename })
     }
 }
 
 impl fmt::Display for LogEntry {
-
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{},{}", self.hashes, self.filename)
     }
 }
-
 
 #[cfg(test)]
 mod test {
@@ -53,8 +55,11 @@ mod test {
     fn to_string_test() {
         let hashes = "1,aaaaa,bbbbbbb".to_owned();
         let filename = "theDir/theFile.ext".to_owned();
-        let le = LogEntry{hashes, filename};
-        assert_eq!(le.to_string(), "1,aaaaa,bbbbbbb,theDir/theFile.ext".to_owned());
+        let le = LogEntry { hashes, filename };
+        assert_eq!(
+            le.to_string(),
+            "1,aaaaa,bbbbbbb,theDir/theFile.ext".to_owned()
+        );
     }
 
     #[test]
@@ -77,15 +82,30 @@ mod test {
         let hashes_str = "4,4692d489b0638e49682df4f46dacd3c3,0c47cda934d53d7ca29d822a59531dcf6d36cbd9740a4fd0b867a0343910a715";
 
         let normal_entry = "4,4692d489b0638e49682df4f46dacd3c3,0c47cda934d53d7ca29d822a59531dcf6d36cbd9740a4fd0b867a0343910a715,hashdeepComp/345.txt";
-        assert_eq!(LogEntry::from_str(normal_entry),
-                   Some(LogEntry{hashes: hashes_str.to_owned(), filename: "hashdeepComp/345.txt".to_owned()}));
+        assert_eq!(
+            LogEntry::from_str(normal_entry),
+            Some(LogEntry {
+                hashes: hashes_str.to_owned(),
+                filename: "hashdeepComp/345.txt".to_owned()
+            })
+        );
 
         let non_ascii_filename = "4,4692d489b0638e49682df4f46dacd3c3,0c47cda934d53d7ca29d822a59531dcf6d36cbd9740a4fd0b867a0343910a715,hashdeepComp/Γεια σου.txt";
-        assert_eq!(LogEntry::from_str( non_ascii_filename),
-                   Some(LogEntry{hashes: hashes_str.to_owned(), filename: "hashdeepComp/Γεια σου.txt".to_owned()}));
+        assert_eq!(
+            LogEntry::from_str(non_ascii_filename),
+            Some(LogEntry {
+                hashes: hashes_str.to_owned(),
+                filename: "hashdeepComp/Γεια σου.txt".to_owned()
+            })
+        );
 
         let commas_in_filename = "4,4692d489b0638e49682df4f46dacd3c3,0c47cda934d53d7ca29d822a59531dcf6d36cbd9740a4fd0b867a0343910a715,hashdeepComp/3,4,,5.txt,";
-        assert_eq!(LogEntry::from_str(commas_in_filename),
-                   Some(LogEntry{hashes: hashes_str.to_owned(), filename: "hashdeepComp/3,4,,5.txt,".to_owned()}));
+        assert_eq!(
+            LogEntry::from_str(commas_in_filename),
+            Some(LogEntry {
+                hashes: hashes_str.to_owned(),
+                filename: "hashdeepComp/3,4,,5.txt,".to_owned()
+            })
+        );
     }
 }
